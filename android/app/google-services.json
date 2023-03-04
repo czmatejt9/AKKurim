@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "781671209668",
+    "project_id": "akkurim-7d80b",
+    "storage_bucket": "akkurim-7d80b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:781671209668:android:0585d423caed9d17e00791",
+        "android_client_info": {
+          "package_name": "com.example.ak_kurim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "781671209668-n6t8s3rokuom21ohshagqr0obfrbsk71.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABtaUQzaxXS1cjJE4G4ZEfFjNztf4j7Xg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "781671209668-n6t8s3rokuom21ohshagqr0obfrbsk71.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "781671209668-50gqgm8lui3iurriin76ltf4ccnfq0vp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.akKurim"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
