@@ -64,6 +64,13 @@ class DatabaseService extends ChangeNotifier {
     return trainerFullName;
   }
 
+  String getGroupNameFromID(String id) {
+    final String groupName = _trainerGroups.firstWhere((group) {
+      return group.id == id;
+    }).name;
+    return groupName;
+  }
+
   Future<void> updateTrainers({required User user, bool init = false}) async {
     db.settings = const Settings(persistenceEnabled: true);
     db.collection('trainers').get().then(
@@ -112,10 +119,10 @@ class DatabaseService extends ChangeNotifier {
     db
         .collection('trainings')
         .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
-        .where('date',
-            isGreaterThan: DateTime.now()
-                .subtract(const Duration(days: 30))
-                .toIso8601String())
+        //.where('date',
+        //    isGreaterThan: DateTime.now()
+        //        .subtract(const Duration(days: 30))
+        //        .toIso8601String())
         //.where('date',
         //  isLessThan:
         //    DateTime.now().add(Duration(days: 30)).toIso8601String()) idk if this is needed to speed up the query

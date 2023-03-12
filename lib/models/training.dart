@@ -5,16 +5,16 @@ class Training {
   final String id;
   String groupID;
   String substituteTrainerID;
-  Timestamp date;
+  Timestamp timestamp;
   bool attendanceTaken;
-  Map<String, bool?> attendance = {};
+  Map<String, dynamic> attendance = {};
   String? note;
 
   Training(
       {required this.id,
       required this.groupID,
       required this.substituteTrainerID,
-      required this.date,
+      required this.timestamp,
       required this.attendanceTaken,
       required this.attendance,
       required this.note});
@@ -24,7 +24,7 @@ class Training {
         id: id,
         groupID: data['groupID'],
         substituteTrainerID: data['substituteTrainerID'],
-        date: data['date'],
+        timestamp: data['date'],
         attendanceTaken: data['attendanceTaken'],
         attendance: data['attendance'],
         note: data['note']);
@@ -40,7 +40,7 @@ class Training {
         id: Helper().generateRandomString(20),
         groupID: groupId,
         substituteTrainerID: '',
-        date: Timestamp.now(),
+        timestamp: Timestamp.now(),
         attendanceTaken: false,
         attendance: {},
         note: '');
@@ -50,7 +50,7 @@ class Training {
   Map<String, dynamic> toMap() => {
         'groupID': groupID,
         'substituteTrainerID': substituteTrainerID,
-        'date': date,
+        'date': timestamp,
         'attendance': attendance,
         'attendanceTaken': attendanceTaken,
         'note': note,

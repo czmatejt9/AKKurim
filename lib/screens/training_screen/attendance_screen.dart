@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ak_kurim/services/database.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/navigation.dart';
+import 'package:ak_kurim/services/helpers.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/models/group.dart';
 
@@ -12,12 +13,11 @@ class AttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
-
     return Consumer<NavigationService>(
         builder: (BuildContext context, NavigationService navigation, child) {
       return Container(
         color: Theme.of(context).colorScheme.background,
-        child: ListView(
+        child: Column(
           children: [
             TableCalendar(
               locale: 'cs_CZ',
@@ -45,6 +45,38 @@ class AttendanceScreen extends StatelessWidget {
               color: Colors.orange,
             ),
             // here show trainings for selected date TODO
+            Expanded(
+                child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 76),
+              itemCount: db.trainings.length,
+              itemBuilder: (context, index) {
+                if (Helper().isSameWeek(db.trainings[index].timestamp.toDate(),
+                    navigation.selectedDate)) {
+                  return Card(
+                    elevation: 10,
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12)),
+                      ),
+                      onTap: () {
+                        // TODO
+                      },
+                      title: Text(
+                          db.getGroupNameFromID(db.trainings[index].groupID)),
+                      trailing: Text(db.trainings[index].timestamp
+                          .toDate()
+                          .toString()
+                          .substring(0, 10)),
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ))
           ],
         ),
       );
