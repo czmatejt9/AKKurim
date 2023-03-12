@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
 import 'package:ak_kurim/services/auth.dart';
+import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/theme.dart';
-import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/screens/members_screen.dart';
-import 'package:ak_kurim/screens/training_screen.dart';
-import 'package:ak_kurim/services/database.dart';
-import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
+import 'package:ak_kurim/screens/training_screen/training_screen_wrapper.dart';
+import 'package:ak_kurim/screens/training_screen/attendance_screen.dart';
+import 'package:ak_kurim/screens/training_screen/groups_screen.dart';
+import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 
