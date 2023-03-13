@@ -22,7 +22,7 @@ class DatabaseService extends ChangeNotifier {
       id: '', memberID: '', firstName: '', lastName: '', email: '', phone: '');
   Trainer get currentTrainer => _trainer;
   List<Trainer> _trainers = <Trainer>[];
-  List<Trainer> get trainers => _trainers;
+  List<Trainer> get allTrainers => _trainers;
 
   List<Trainer> _filteredTrainers = <Trainer>[];
   List<Trainer> get filteredTrainers =>
@@ -31,8 +31,8 @@ class DatabaseService extends ChangeNotifier {
   List<Group> _trainerGroups = <Group>[];
   List<Group> get trainerGroups => _trainerGroups;
 
-  List<Training> _trainings = <Training>[];
-  List<Training> get trainings => _trainings;
+  List<Training> _trainerTrainings = <Training>[];
+  List<Training> get trainerTrainings => _trainerTrainings;
 
   void refresh() {
     notifyListeners();
@@ -60,15 +60,27 @@ class DatabaseService extends ChangeNotifier {
   String getTrainerfullNameFromID(String id) {
     final String trainerFullName = _trainers.firstWhere((trainer) {
       return trainer.id == id;
-    }).fullName;
+    },
+        orElse: () => Trainer(
+            id: "id",
+            memberID: "memberID",
+            firstName: "-",
+            lastName: "",
+            email: "email",
+            phone: "phone")).fullName;
     return trainerFullName;
   }
 
   String getGroupNameFromID(String id) {
-    final String groupName = _trainerGroups.firstWhere((group) {
+    final group = getGroupFromID(id);
+    return group.name;
+  }
+
+  Group getGroupFromID(String id) {
+    final Group group = _trainerGroups.firstWhere((group) {
       return group.id == id;
-    }).name;
-    return groupName;
+    });
+    return group;
   }
 
   Future<void> updateTrainers({required User user, bool init = false}) async {
@@ -129,7 +141,7 @@ class DatabaseService extends ChangeNotifier {
         .get()
         .then(
       (QuerySnapshot querySnapshot) {
-        _trainings = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
+        _trainerTrainings = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
           return Training.fromFirestore(doc);
         }).toList();
 
@@ -147,7 +159,7 @@ class DatabaseService extends ChangeNotifier {
             .get()
             .then(
           (QuerySnapshot querySnapshot) {
-            _trainings
+            _trainerTrainings
                 .addAll(querySnapshot.docs.map((QueryDocumentSnapshot doc) {
               return Training.fromFirestore(doc);
             }).toList());
@@ -248,20 +260,35 @@ class DatabaseService extends ChangeNotifier {
   // training functions - create, update, delete
   Future<void> createTraining(Training training) async {
     db.settings = const Settings(persistenceEnabled: true);
-    _trainings.add(training);
+    // prepare the attendance list
+    Group group = getGroupFromID(training.groupID);
+    // add all trainers to the attendance list
+    for (String trainerID in group.trainerIDs) {
+      training.attendance[trainerID] = false;
+    }
+    if (training.substituteTrainerID != null &&
+        training.substituteTrainerID != '') {
+      training.attendance[training.substituteTrainerID] = false;
+    }
+
+    // add all members to the attendance list
+    for (String memberID in group.memberIDs) {
+      training.attendance[memberID] = false;
+    }
+    _trainerTrainings.add(training);
     await db.collection('trainings').doc(training.id).set(training.toMap());
   }
 
   Future<void> updateTraining(Training training) async {
     db.settings = const Settings(persistenceEnabled: true);
-    _trainings[_trainings.indexWhere((element) => element.id == training.id)] =
-        training;
+    _trainerTrainings[_trainerTrainings
+        .indexWhere((element) => element.id == training.id)] = training;
     await db.collection('trainings').doc(training.id).update(training.toMap());
   }
 
   Future<void> deleteTraining(Training training) async {
     db.settings = const Settings(persistenceEnabled: true);
-    _trainings.removeWhere((element) => element.id == training.id);
+    _trainerTrainings.removeWhere((element) => element.id == training.id);
     await db.collection('trainings').doc(training.id).delete();
   }
 }

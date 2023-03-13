@@ -49,8 +49,9 @@ class GroupsScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => GroupProfile(
-                                    group: db.trainerGroups[index])),
+                              builder: (context) =>
+                                  GroupProfile(group: db.trainerGroups[index]),
+                            ),
                           );
                         },
                       ),
@@ -77,50 +78,77 @@ class GroupProfile extends StatelessWidget {
         title: create
             ? const Text('Vytvořit skupinu')
             : const Text('Upravit skupinu'),
+        leading: IconButton(
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: const Text('Opravdu chcete odejít?'),
+                      content: const Text(
+                          'Pokud odejdete, neuložené změny budou ztraceny.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Odejít'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Zůstat'),
+                        ),
+                      ],
+                    ));
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         actions: [
           IconButton(
             onPressed: () {
               showDialog(
-                  context: context,
-                  builder: ((context) => AlertDialog(
-                        title:
-                            const Text('Opravdu chcete smazat tuto skupinu?'),
-                        content: const Text('Tato akce je nevratná.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
+                context: context,
+                builder: ((context) => AlertDialog(
+                      title: const Text('Opravdu chcete smazat tuto skupinu?'),
+                      content: const Text('Tato akce je nevratná.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            if (!create) {
+                              db.deleteGroup(group);
+                            }
+                            db.refresh();
+                            showModalBottomSheet(
+                                isDismissible: false,
+                                context: context,
+                                builder: (context) {
+                                  return Container(
+                                    height: 50,
+                                    color: Colors.red[300],
+                                    child: const Center(
+                                      child: Text('Skupina smazána'),
+                                    ),
+                                  );
+                                });
+                            Future.delayed(const Duration(seconds: 1), () {
                               Navigator.pop(context);
-                            },
-                            child: const Text('Zrušit'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (!create) {
-                                db.deleteGroup(group);
-                              }
-                              db.refresh();
-                              showModalBottomSheet(
-                                  isDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return Container(
-                                      height: 50,
-                                      color: Colors.red[300],
-                                      child: const Center(
-                                        child: Text('Skupina smazána'),
-                                      ),
-                                    );
-                                  });
-                              Future.delayed(const Duration(seconds: 1), () {
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                              });
-                            },
-                            child: const Text('Smazat'),
-                          ),
-                        ],
-                      )));
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            });
+                          },
+                          child: const Text('Smazat'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Zrušit'),
+                        ),
+                      ],
+                    )),
+              );
             },
             icon: const Icon(Icons.delete),
             color: Colors.red,
@@ -134,6 +162,9 @@ class GroupProfile extends StatelessWidget {
             children: [
               TextFormField(
                 initialValue: group.name,
+                decoration: const InputDecoration(
+                  hintText: 'Název skupiny',
+                ),
                 onChanged: (value) {
                   group.name = value;
                 },
@@ -249,7 +280,7 @@ class GroupProfile extends StatelessWidget {
                   Navigator.pop(context);
                 });
               },
-              child: const Text('Uložit'),
+              child: const Text('Uložit', style: TextStyle(fontSize: 20)),
             ),
           ),
         ]),

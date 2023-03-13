@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
@@ -119,8 +120,12 @@ class HomeScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => TrainingProfile(
-                                    training:
-                                        Training.empty(db.trainerGroups[0].id),
+                                    // use selected date from navigation service and default time 17:00
+                                    training: Training.empty(
+                                        db.trainerGroups[0].id,
+                                        Timestamp.fromDate(navigation
+                                            .selectedDate
+                                            .add(const Duration(hours: 16)))),
                                     create: true),
                               ));
                         }

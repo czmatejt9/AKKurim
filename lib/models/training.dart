@@ -30,17 +30,23 @@ class Training {
         note: data['note']);
   }
 
+  get attendanceNumber => attendance.length;
+  get attendingNumber => attendance.values.where((e) => e == true).length;
+
   factory Training.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
     return Training.fromMap(data, doc.id);
   }
 
-  factory Training.empty(String groupId) {
+  factory Training.empty(
+    String groupId,
+    Timestamp timestamp,
+  ) {
     return Training(
         id: Helper().generateRandomString(20),
         groupID: groupId,
         substituteTrainerID: '',
-        timestamp: Timestamp.now(),
+        timestamp: timestamp,
         attendanceTaken: false,
         attendance: {},
         note: '');

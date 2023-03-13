@@ -9,6 +9,10 @@ class NavigationService extends ChangeNotifier {
   DateTime _focusedDay = DateTime.now();
   DateTime get focusedDay => _focusedDay;
 
+  bool _trainingForCurrenDay = false;
+  bool get trainingForCurrentDay => _trainingForCurrenDay;
+  set trainingForCurrentDay(value) => _trainingForCurrenDay = value;
+
   set currentIndex(int index) {
     _currentIndex = index;
     notifyListeners();
