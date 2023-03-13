@@ -71,6 +71,13 @@ class DatabaseService extends ChangeNotifier {
     return trainerFullName;
   }
 
+  bool isTrainer(String id) {
+    final bool isTrainer = _trainers.any((trainer) {
+      return trainer.id == id;
+    });
+    return isTrainer;
+  }
+
   String getGroupNameFromID(String id) {
     final group = getGroupFromID(id);
     return group.name;
@@ -79,7 +86,12 @@ class DatabaseService extends ChangeNotifier {
   Group getGroupFromID(String id) {
     final Group group = _trainerGroups.firstWhere((group) {
       return group.id == id;
-    });
+    },
+        orElse: () => Group(
+            id: "id",
+            name: "groupNotFound",
+            trainerIDs: <String>[],
+            memberIDs: <String>[]));
     return group;
   }
 
@@ -262,25 +274,49 @@ class DatabaseService extends ChangeNotifier {
     db.settings = const Settings(persistenceEnabled: true);
     // prepare the attendance list
     Group group = getGroupFromID(training.groupID);
+    training.attendanceKeys = []; // just to be sure to have an empty list
+    training.attendanceValues = []; // true = present, false = absent
     // add all trainers to the attendance list
     for (String trainerID in group.trainerIDs) {
-      training.attendance[trainerID] = false;
+      training.attendanceKeys.add(trainerID);
+      training.attendanceValues.add(false);
     }
-    if (training.substituteTrainerID != null &&
-        training.substituteTrainerID != '') {
-      training.attendance[training.substituteTrainerID] = false;
+    if (training.substituteTrainerID != '') {
+      training.attendanceKeys.add(training.substituteTrainerID);
+      training.attendanceValues.add(false);
     }
-
     // add all members to the attendance list
     for (String memberID in group.memberIDs) {
-      training.attendance[memberID] = false;
+      training.attendanceKeys.add(memberID);
+      training.attendanceValues.add(false);
     }
+
     _trainerTrainings.add(training);
     await db.collection('trainings').doc(training.id).set(training.toMap());
   }
 
-  Future<void> updateTraining(Training training) async {
+  Future<void> updateTraining(Training training, bool groupChange) async {
     db.settings = const Settings(persistenceEnabled: true);
+    if (groupChange) {
+      Group group = getGroupFromID(training.groupID);
+      training.attendanceKeys = [];
+      training.attendanceValues = [];
+      // add all trainers to the attendance list
+      for (String trainerID in group.trainerIDs) {
+        training.attendanceKeys.add(trainerID);
+        training.attendanceValues.add(false);
+      }
+      if (training.substituteTrainerID != '') {
+        training.attendanceKeys.add(training.substituteTrainerID);
+        training.attendanceValues.add(false);
+      }
+      // add all members to the attendance list
+      for (String memberID in group.memberIDs) {
+        training.attendanceKeys.add(memberID);
+        training.attendanceValues.add(false);
+      }
+    }
+
     _trainerTrainings[_trainerTrainings
         .indexWhere((element) => element.id == training.id)] = training;
     await db.collection('trainings').doc(training.id).update(training.toMap());

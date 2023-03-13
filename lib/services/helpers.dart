@@ -16,4 +16,12 @@ class Helper {
   String getHourMinute(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
+
+  String getDayMonth(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}. ${date.month.toString().padLeft(2, '0')}.';
+  }
+
+  DateTime midnight(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 }

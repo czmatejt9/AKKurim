@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'helpers.dart';
 
 class NavigationService extends ChangeNotifier {
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = Helper().midnight(DateTime.now());
   DateTime get selectedDate => _selectedDate;
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDay = Helper().midnight(DateTime.now());
   DateTime get focusedDay => _focusedDay;
 
   bool _trainingForCurrenDay = false;

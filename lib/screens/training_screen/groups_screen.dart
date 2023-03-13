@@ -34,9 +34,11 @@ class GroupsScreen extends StatelessWidget {
                           borderRadius:
                               const BorderRadius.all(Radius.circular(12)),
                         ),
-                        subtitle: Text(db.trainerGroups[index].trainerIDs
-                            .map((e) => db.getTrainerfullNameFromID(e))
-                            .join(', ')),
+                        subtitle: Text(
+                            db.trainerGroups[index].trainerIDs
+                                .map((e) => db.getTrainerfullNameFromID(e))
+                                .join(', '),
+                            style: const TextStyle(fontSize: 12)),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

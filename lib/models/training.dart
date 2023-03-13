@@ -7,7 +7,10 @@ class Training {
   String substituteTrainerID;
   Timestamp timestamp;
   bool attendanceTaken;
-  Map<String, dynamic> attendance = {};
+  // split the map into two lists, one for keys and one for values, because
+  // the map is not ordered and we need to keep the order of the keys
+  List<dynamic> attendanceKeys;
+  List<dynamic> attendanceValues;
   String? note;
 
   Training(
@@ -16,7 +19,8 @@ class Training {
       required this.substituteTrainerID,
       required this.timestamp,
       required this.attendanceTaken,
-      required this.attendance,
+      required this.attendanceKeys,
+      required this.attendanceValues,
       required this.note});
 
   factory Training.fromMap(Map<dynamic, dynamic> data, String id) {
@@ -26,12 +30,19 @@ class Training {
         substituteTrainerID: data['substituteTrainerID'],
         timestamp: data['date'],
         attendanceTaken: data['attendanceTaken'],
-        attendance: data['attendance'],
+        attendanceKeys: data['attendanceKeys'],
+        attendanceValues: data['attendanceValues'],
         note: data['note']);
   }
 
-  get attendanceNumber => attendance.length;
-  get attendingNumber => attendance.values.where((e) => e == true).length;
+  int get attendanceNumber => attendanceValues.length;
+  int get attendingNumber => attendanceValues
+      .where((e) => e == true)
+      .length; // == true is used because the values are bool? (nullable)
+
+  String get hourAndMinute => Helper().getHourMinute(timestamp.toDate());
+  String get dayAndMonth => Helper().getDayMonth(timestamp.toDate());
+  int get year => timestamp.toDate().year;
 
   factory Training.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -48,7 +59,8 @@ class Training {
         substituteTrainerID: '',
         timestamp: timestamp,
         attendanceTaken: false,
-        attendance: {},
+        attendanceKeys: [],
+        attendanceValues: [],
         note: '');
   }
 
@@ -57,7 +69,8 @@ class Training {
         'groupID': groupID,
         'substituteTrainerID': substituteTrainerID,
         'date': timestamp,
-        'attendance': attendance,
+        'attendanceKeys': attendanceKeys,
+        'attendanceValues': attendanceValues,
         'attendanceTaken': attendanceTaken,
         'note': note,
       };

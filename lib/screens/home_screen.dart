@@ -115,7 +115,8 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ));
                         } else if (navigation.currentIndex == 1 &&
-                            DefaultTabController.of(context).index == 0) {
+                            DefaultTabController.of(context).index == 0 &&
+                            db.trainerGroups.isNotEmpty) {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -125,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                                         db.trainerGroups[0].id,
                                         Timestamp.fromDate(navigation
                                             .selectedDate
-                                            .add(const Duration(hours: 16)))),
+                                            .add(const Duration(hours: 17)))),
                                     create: true),
                               ));
                         }

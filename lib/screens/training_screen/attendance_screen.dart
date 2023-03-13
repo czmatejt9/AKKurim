@@ -19,7 +19,7 @@ class AttendanceScreen extends StatelessWidget {
       return Container(
           color: Theme.of(context).colorScheme.background,
           child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 76),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 76),
             itemCount: db.trainerTrainings.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
@@ -59,7 +59,13 @@ class AttendanceScreen extends StatelessWidget {
                             const BorderRadius.all(Radius.circular(12)),
                       ),
                       onTap: () {
-                        // TODO
+                        // push to take attendance screen
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TakeAttendance(
+                                  training: db.trainerTrainings[index - 1]),
+                            ));
                       },
                       title: Text(
                           '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
@@ -167,6 +173,9 @@ class TrainingProfile extends StatelessWidget {
                                   Navigator.pop(context);
                                   Navigator.pop(context);
                                   Navigator.pop(context);
+                                  if (!create) {
+                                    Navigator.pop(context);
+                                  }
                                 });
                               },
                               child: const Text('Smazat'),
@@ -289,7 +298,7 @@ class TrainingProfile extends StatelessWidget {
                   if (create) {
                     db.createTraining(training);
                   } else {
-                    db.updateTraining(training);
+                    db.updateTraining(training, true);
                   }
                   db.refresh();
                   showModalBottomSheet(
@@ -300,13 +309,15 @@ class TrainingProfile extends StatelessWidget {
                           height: 50,
                           color: Colors.green[400],
                           child: Center(
-                            child: Text(create
-                                ? 'Trénink vytvořen'
-                                : 'Trénik upravenr'),
+                            child: Text(
+                                create ? 'Trénink vytvořen' : 'Trénik upraven'),
                           ),
                         );
                       });
                   Future.delayed(const Duration(seconds: 1), () {
+                    if (!create) {
+                      Navigator.pop(context);
+                    }
                     Navigator.pop(context);
                     Navigator.pop(context);
                   });
@@ -316,5 +327,141 @@ class TrainingProfile extends StatelessWidget {
             ),
           ]),
         ));
+  }
+}
+
+class TakeAttendance extends StatelessWidget {
+  final Training training;
+  const TakeAttendance({super.key, required this.training});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseService>(context);
+    final group = db.getGroupFromID(training.groupID);
+    return Scaffold(
+        appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: const Text('Opravdu chcete odejít?'),
+                          content: const Text(
+                              'Pokud odejdete, neuložené změny budou ztraceny.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Odejít'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Zůstat'),
+                            ),
+                          ],
+                        ));
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+            title: const Text('Zapsat docházku'),
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TrainingProfile(
+                                training: training, create: false)));
+                  },
+                  icon: const Icon(Icons.edit_note))
+            ]),
+        body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(children: [
+              Column(
+                children: <Widget>[
+                  ListTile(
+                    title: Text('Skupina: ${group.name}'),
+                    trailing: Text(
+                        '${training.hourAndMinute} - ${training.dayAndMonth} ${training.year}'),
+                  ),
+                  const Divider(),
+                  Expanded(
+                      child: ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 50),
+                          itemCount: training.attendanceValues.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              elevation: 10,
+                              child: CheckboxListTile(
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                ),
+                                tristate: true,
+                                value: training.attendanceValues[index],
+                                onChanged: ((value) {
+                                  training.attendanceValues[index] = value;
+                                  db.refresh();
+                                }),
+                                title:
+                                    db.isTrainer(training.attendanceKeys[index])
+                                        ? Text(
+                                            db.getTrainerfullNameFromID(
+                                                training.attendanceKeys[index]),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20))
+                                        : Text(
+                                            db.getMemberfullNameFromID(
+                                                training.attendanceKeys[index]),
+                                          ),
+                              ),
+                            );
+                          })),
+                ],
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.secondary),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  onPressed: () {
+                    training.attendanceTaken = true;
+                    db.updateTraining(training, false);
+                    db.refresh();
+                    showModalBottomSheet(
+                        isDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return Container(
+                            height: 50,
+                            color: Colors.green[400],
+                            child: const Center(
+                              child: Text('Docházka zapsána'),
+                            ),
+                          );
+                        });
+                    Future.delayed(const Duration(seconds: 1), () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    });
+                  },
+                  child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+                ),
+              ),
+            ])));
   }
 }
