@@ -34,6 +34,8 @@ class DatabaseService extends ChangeNotifier {
   List<Training> _trainerTrainings = <Training>[];
   List<Training> get trainerTrainings => _trainerTrainings;
 
+  bool isChangedTrainingGroup = false;
+
   void refresh() {
     notifyListeners();
   }

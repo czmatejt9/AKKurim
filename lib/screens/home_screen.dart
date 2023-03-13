@@ -115,20 +115,29 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ));
                         } else if (navigation.currentIndex == 1 &&
-                            DefaultTabController.of(context).index == 0 &&
-                            db.trainerGroups.isNotEmpty) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TrainingProfile(
-                                    // use selected date from navigation service and default time 17:00
-                                    training: Training.empty(
-                                        db.trainerGroups[0].id,
-                                        Timestamp.fromDate(navigation
-                                            .selectedDate
-                                            .add(const Duration(hours: 17)))),
-                                    create: true),
-                              ));
+                            DefaultTabController.of(context).index == 0) {
+                          if (db.trainerGroups.isNotEmpty) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TrainingProfile(
+                                      // use selected date from navigation service and default time 17:00
+                                      training: Training.empty(
+                                          db.trainerGroups[0].id,
+                                          Timestamp.fromDate(navigation
+                                              .selectedDate
+                                              .add(const Duration(hours: 17)))),
+                                      create: true),
+                                ));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                backgroundColor: Color(0xFFE57373),
+                                content: Center(
+                                    child: Text('Nejdříve vytvořte skupinu')),
+                              ),
+                            );
+                          }
                         }
                       },
                       backgroundColor: Theme.of(context).colorScheme.secondary,

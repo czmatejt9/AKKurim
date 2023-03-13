@@ -224,6 +224,12 @@ class TrainingProfile extends StatelessWidget {
                                     return ListTile(
                                       title: Text(db.trainerGroups[index].name),
                                       onTap: () {
+                                        if (training.groupID ==
+                                            db.trainerGroups[index].id) {
+                                          Navigator.pop(context);
+                                          return;
+                                        }
+                                        db.isChangedTrainingGroup = true;
                                         training.groupID =
                                             db.trainerGroups[index].id;
                                         training.substituteTrainerID = '';
@@ -298,7 +304,8 @@ class TrainingProfile extends StatelessWidget {
                   if (create) {
                     db.createTraining(training);
                   } else {
-                    db.updateTraining(training, true);
+                    db.updateTraining(training, db.isChangedTrainingGroup);
+                    db.isChangedTrainingGroup = false;
                   }
                   db.refresh();
                   showModalBottomSheet(
