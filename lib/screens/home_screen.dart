@@ -123,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                                   builder: (context) => TrainingProfile(
                                       // use selected date from navigation service and default time 17:00
                                       training: Training.empty(
-                                          db.trainerGroups[0].id,
+                                          '',
                                           Timestamp.fromDate(navigation
                                               .selectedDate
                                               .add(const Duration(hours: 17)))),

@@ -45,7 +45,7 @@ class DatabaseService extends ChangeNotifier {
       return member.id == id;
     },
         orElse: () => Member(
-            id: "id",
+            id: "",
             born: "born",
             gender: "gender",
             firstName: "firstName",
@@ -64,9 +64,9 @@ class DatabaseService extends ChangeNotifier {
       return trainer.id == id;
     },
         orElse: () => Trainer(
-            id: "id",
+            id: "",
             memberID: "memberID",
-            firstName: "-",
+            firstName: "Náhradní trenér",
             lastName: "",
             email: "email",
             phone: "phone")).fullName;
@@ -90,8 +90,8 @@ class DatabaseService extends ChangeNotifier {
       return group.id == id;
     },
         orElse: () => Group(
-            id: "id",
-            name: "groupNotFound",
+            id: "",
+            name: "Skupina",
             trainerIDs: <String>[],
             memberIDs: <String>[]));
     return group;

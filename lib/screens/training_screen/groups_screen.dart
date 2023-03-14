@@ -122,23 +122,17 @@ class GroupProfile extends StatelessWidget {
                               db.deleteGroup(group);
                             }
                             db.refresh();
-                            showModalBottomSheet(
-                                isDismissible: false,
-                                context: context,
-                                builder: (context) {
-                                  return Container(
-                                    height: 50,
-                                    color: Colors.red[300],
-                                    child: const Center(
-                                      child: Text('Skupina smazána'),
-                                    ),
-                                  );
-                                });
-                            Future.delayed(const Duration(seconds: 1), () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            });
+                            // show snackbar
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Skupina smazána',
+                                    textAlign: TextAlign.center),
+                                // use the same color as in attendance_screen
+                                backgroundColor: Color(0xFFE57373),
+                              ),
+                            );
                           },
                           child: const Text('Smazat'),
                         ),
@@ -263,24 +257,17 @@ class GroupProfile extends StatelessWidget {
                   db.updateGroup(group);
                 }
                 db.refresh();
-                showModalBottomSheet(
-                    isDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        height: 50,
-                        color: Colors.green[400],
-                        child: Center(
-                          child: Text(create
-                              ? 'Skupina vytvořena'
-                              : 'Skupina upravena'),
-                        ),
-                      );
-                    });
-                Future.delayed(const Duration(seconds: 1), () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                });
+                // show snackbar
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        create ? 'Skupina vytvořena' : 'Skupina upravena',
+                        textAlign: TextAlign.center),
+                    // use the same color as in attendance_screen
+                    backgroundColor: const Color(0xFF81C784),
+                  ),
+                );
               },
               child: const Text('Uložit', style: TextStyle(fontSize: 20)),
             ),

@@ -74,6 +74,7 @@ class AttendanceScreen extends StatelessWidget {
                         children: [
                           Text(
                               '${db.trainerTrainings[index - 1].attendingNumber}/${db.trainerTrainings[index - 1].attendanceNumber}'),
+                          const Icon(Icons.people),
                           db.trainerTrainings[index - 1].attendanceTaken
                               ? const Icon(Icons.check, color: Colors.green)
                               : const Icon(Icons.close, color: Colors.red)
@@ -110,7 +111,8 @@ class TrainingProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
-    final group = db.getGroupFromID(training.groupID);
+    final Group group = db.getGroupFromID(training.groupID);
+    final noteController = TextEditingController(text: training.note);
     return Scaffold(
         appBar: AppBar(
           title: Text(create ? 'Vytvořit trénink' : 'Upravit trénink'),
@@ -157,26 +159,18 @@ class TrainingProfile extends StatelessWidget {
                                   db.deleteTraining(training);
                                 }
                                 db.refresh();
-                                showModalBottomSheet(
-                                    isDismissible: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return Container(
-                                        height: 50,
-                                        color: Colors.red[300],
-                                        child: const Center(
-                                          child: Text('Trénink smazán'),
-                                        ),
-                                      );
-                                    });
-                                Future.delayed(const Duration(seconds: 1), () {
+                                // show snackbar
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                                if (!create) {
                                   Navigator.pop(context);
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                  if (!create) {
-                                    Navigator.pop(context);
-                                  }
-                                });
+                                }
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Trénink smazán',
+                                      textAlign: TextAlign.center),
+                                  backgroundColor: Color(0xFFE57373),
+                                ));
                               },
                               child: const Text('Smazat'),
                             ),
@@ -194,145 +188,210 @@ class TrainingProfile extends StatelessWidget {
             )
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Stack(children: [
-            ListView(
-              children: <Widget>[
-                ListTile(
-                  title: Text('Skupina: ${group.name}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(group.trainerIDs.length.toString()),
-                      const Icon(Icons.person),
-                      Text(group.memberIDs.length.toString()),
-                      const Icon(Icons.people),
-                    ],
-                  ),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: ((context) => AlertDialog(
-                              title: const Text('Vyberte skupinu'),
-                              content: SizedBox(
-                                height: 300,
-                                width: 300,
-                                child: ListView.builder(
-                                  itemCount: db.trainerGroups.length,
-                                  itemBuilder: (context, index) {
-                                    return ListTile(
-                                      title: Text(db.trainerGroups[index].name),
-                                      onTap: () {
-                                        if (training.groupID ==
-                                            db.trainerGroups[index].id) {
-                                          Navigator.pop(context);
-                                          return;
-                                        }
-                                        db.isChangedTrainingGroup = true;
-                                        training.groupID =
-                                            db.trainerGroups[index].id;
-                                        training.substituteTrainerID = '';
-                                        db.refresh();
-                                        Navigator.pop(context);
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            )));
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(
-                      'Náhradní trenér: ${db.getTrainerfullNameFromID(training.substituteTrainerID)}'),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: ((context) => AlertDialog(
-                              title: const Text('Vyberte náhradního trenéra'),
-                              content: SizedBox(
-                                height: 300,
-                                width: 300,
-                                child: ListView.builder(
-                                  itemCount: db.allTrainers.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index == db.allTrainers.length) {
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus(); // dismiss keyboard
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Stack(children: [
+              ListView(
+                children: <Widget>[
+                  ListTile(
+                    title: Row(
+                      children: [
+                        const Icon(Icons.groups),
+                        const SizedBox(width: 20),
+                        Text(
+                          group.name,
+                          style: TextStyle(
+                              color: group.id == ''
+                                  ? Colors.grey
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .color),
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(group.trainerIDs.length.toString()),
+                        const Icon(Icons.person),
+                        Text(group.memberIDs.length.toString()),
+                        const Icon(Icons.people),
+                      ],
+                    ),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: ((context) => AlertDialog(
+                                title: const Text('Vyberte skupinu'),
+                                content: SizedBox(
+                                  height: 300,
+                                  width: 300,
+                                  child: ListView.builder(
+                                    itemCount: db.trainerGroups.length,
+                                    itemBuilder: (context, index) {
                                       return ListTile(
-                                        title: const Text('-'),
+                                        title:
+                                            Text(db.trainerGroups[index].name),
                                         onTap: () {
+                                          if (training.groupID ==
+                                              db.trainerGroups[index].id) {
+                                            Navigator.pop(context);
+                                            return;
+                                          }
+                                          db.isChangedTrainingGroup = true;
+                                          training.groupID =
+                                              db.trainerGroups[index].id;
                                           training.substituteTrainerID = '';
                                           db.refresh();
                                           Navigator.pop(context);
                                         },
                                       );
-                                    }
-                                    if (!group.trainerIDs
-                                        .contains(db.allTrainers[index].id)) {
-                                      return ListTile(
-                                        title: Text(
-                                            db.allTrainers[index].fullName),
-                                        onTap: () {
-                                          training.substituteTrainerID =
-                                              db.allTrainers[index].id;
-                                          db.refresh();
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }
-                                    return const SizedBox();
-                                  },
+                                    },
+                                  ),
                                 ),
-                              ),
-                            )));
-                  },
-                ),
-                const Divider(),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      Theme.of(context).colorScheme.secondary),
-                  foregroundColor: MaterialStateProperty.all<Color>(
-                      Theme.of(context).colorScheme.onSecondary),
-                ),
-                onPressed: () {
-                  if (create) {
-                    db.createTraining(training);
-                  } else {
-                    db.updateTraining(training, db.isChangedTrainingGroup);
-                    db.isChangedTrainingGroup = false;
-                  }
-                  db.refresh();
-                  showModalBottomSheet(
-                      isDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        return Container(
-                          height: 50,
-                          color: Colors.green[400],
-                          child: Center(
-                            child: Text(
-                                create ? 'Trénink vytvořen' : 'Trénik upraven'),
+                              )));
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.person_add_alt_1),
+                        const SizedBox(width: 18),
+                        Text(
+                          db.getTrainerfullNameFromID(
+                              training.substituteTrainerID),
+                          style: TextStyle(
+                              color: training.substituteTrainerID == ''
+                                  ? Colors.grey
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .color),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: ((context) => AlertDialog(
+                                title: const Text('Vyberte náhradního trenéra'),
+                                content: SizedBox(
+                                  height: 300,
+                                  width: 300,
+                                  child: ListView.builder(
+                                    itemCount: db.allTrainers.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == db.allTrainers.length) {
+                                        return ListTile(
+                                          title: const Text('-'),
+                                          onTap: () {
+                                            training.substituteTrainerID = '';
+                                            db.refresh();
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      }
+                                      if (!group.trainerIDs
+                                          .contains(db.allTrainers[index].id)) {
+                                        return ListTile(
+                                          title: Text(
+                                              db.allTrainers[index].fullName),
+                                          onTap: () {
+                                            training.substituteTrainerID =
+                                                db.allTrainers[index].id;
+                                            db.refresh();
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      }
+                                      return const SizedBox();
+                                    },
+                                  ),
+                                ),
+                              )));
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.notes_rounded),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: TextField(
+                            controller: noteController,
+                            onChanged: (value) {
+                              training.note = value;
+                            },
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                                hintText: 'Poznámka',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(color: Colors.grey)),
                           ),
-                        );
-                      });
-                  Future.delayed(const Duration(seconds: 1), () {
+                        )
+                      ],
+                    ),
+                  ),
+                  const Divider(),
+                ],
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.secondary),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  onPressed: () {
+                    if (group.id == '') {
+                      // show snackbar
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Nejdříve vyberte skupinu',
+                              textAlign: TextAlign.center),
+                          backgroundColor: Color(0xFFE57373),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (create) {
+                      db.createTraining(training);
+                    } else {
+                      db.updateTraining(training, db.isChangedTrainingGroup);
+                      db.isChangedTrainingGroup = false;
+                    }
+                    db.refresh();
+                    // show snackbar
+                    Navigator.pop(context);
                     if (!create) {
                       Navigator.pop(context);
                     }
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  });
-                },
-                child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            create ? 'Trénink vytvořen' : 'Trénink upraven',
+                            textAlign: TextAlign.center),
+                        backgroundColor: const Color(0xFF81C784),
+                      ),
+                    );
+                  },
+                  child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ));
   }
 }
@@ -346,129 +405,130 @@ class TakeAttendance extends StatelessWidget {
     final db = Provider.of<DatabaseService>(context);
     final group = db.getGroupFromID(training.groupID);
     return Scaffold(
-        appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: const Text('Opravdu chcete odejít?'),
-                          content: const Text(
-                              'Pokud odejdete, neuložené změny budou ztraceny.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Odejít'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Zůstat'),
-                            ),
-                          ],
-                        ));
-              },
-              icon: const Icon(Icons.arrow_back),
-            ),
-            title: const Text('Zapsat docházku'),
-            actions: [
-              IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TrainingProfile(
-                                training: training, create: false)));
-                  },
-                  icon: const Icon(Icons.edit_note))
-            ]),
-        body: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(children: [
-              Column(
-                children: <Widget>[
-                  ListTile(
-                    title: Text('Skupina: ${group.name}'),
-                    trailing: Text(
-                        '${training.hourAndMinute} - ${training.dayAndMonth} ${training.year}'),
-                  ),
-                  const Divider(),
-                  Expanded(
-                      child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 50),
-                          itemCount: training.attendanceValues.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              elevation: 10,
-                              child: CheckboxListTile(
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                ),
-                                tristate: true,
-                                value: training.attendanceValues[index],
-                                onChanged: ((value) {
-                                  training.attendanceValues[index] = value;
-                                  db.refresh();
-                                }),
-                                title:
-                                    db.isTrainer(training.attendanceKeys[index])
-                                        ? Text(
-                                            db.getTrainerfullNameFromID(
-                                                training.attendanceKeys[index]),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20))
-                                        : Text(
-                                            db.getMemberfullNameFromID(
-                                                training.attendanceKeys[index]),
-                                          ),
-                              ),
-                            );
-                          })),
-                ],
+      appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: const Text('Opravdu chcete odejít?'),
+                        content: const Text(
+                            'Pokud odejdete, neuložené změny budou ztraceny.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Odejít'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Zůstat'),
+                          ),
+                        ],
+                      ));
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
+          title: const Text('Zapsat docházku'),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TrainingProfile(
+                              training: training, create: false)));
+                },
+                icon: const Icon(Icons.edit_note))
+          ]),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(children: [
+          Column(
+            children: <Widget>[
+              ListTile(
+                title: Text('Skupina: ${group.name}'),
+                trailing: Text(
+                    '${training.hourAndMinute} - ${training.dayAndMonth} ${training.year}'),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Theme.of(context).colorScheme.secondary),
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                        Theme.of(context).colorScheme.onSecondary),
-                  ),
-                  onPressed: () {
-                    training.attendanceTaken = true;
-                    db.updateTraining(training, false);
-                    db.refresh();
-                    showModalBottomSheet(
-                        isDismissible: false,
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            height: 50,
-                            color: Colors.green[400],
-                            child: const Center(
-                              child: Text('Docházka zapsána'),
-                            ),
-                          );
-                        });
-                    Future.delayed(const Duration(seconds: 1), () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    });
+              ListTile(
+                title: Text('Poznámka: ${training.note}'),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  itemCount: training.attendanceValues.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 10,
+                      child: CheckboxListTile(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                        ),
+                        tristate: true,
+                        value: training.attendanceValues[index],
+                        onChanged: ((value) {
+                          training.attendanceValues[index] = value;
+                          db.refresh();
+                        }),
+                        title: db.isTrainer(training.attendanceKeys[index])
+                            ? Text(
+                                db.getTrainerfullNameFromID(
+                                    training.attendanceKeys[index]),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)) // TODO: see if color works
+                            : Text(
+                                db.getMemberfullNameFromID(
+                                    training.attendanceKeys[index]),
+                              ),
+                      ),
+                    );
                   },
-                  child: const Text('Uložit', style: TextStyle(fontSize: 20)),
                 ),
               ),
-            ])));
+            ],
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).colorScheme.secondary),
+                foregroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).colorScheme.onSecondary),
+              ),
+              onPressed: () {
+                training.attendanceTaken = true;
+                db.updateTraining(training, false);
+                db.refresh();
+                // show snackbar
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('Docházka zapsána', textAlign: TextAlign.center),
+                    backgroundColor: Color(0xFF81C784),
+                  ),
+                );
+              },
+              child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+            ),
+          ),
+        ]),
+      ),
+    );
   }
 }
