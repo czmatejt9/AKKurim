@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/screens/training_screen/attendance_screen.dart';
 import 'package:ak_kurim/screens/training_screen/groups_screen.dart';
+import 'package:ak_kurim/screens/training_screen/stats_screen.dart';
 
 class TrainingScreen extends StatelessWidget {
   const TrainingScreen({super.key});
@@ -11,6 +12,7 @@ class TrainingScreen extends StatelessWidget {
       children: <Widget>[
         AttendanceScreen(),
         GroupsScreen(),
+        StatsScreen(),
       ],
     );
   }

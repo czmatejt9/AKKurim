@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
             color: Theme.of(context).colorScheme.background,
             child: const LinearProgressIndicator());
 
-    final List<String> titles = <String>['Domů', 'Tréninky', 'Členové'];
+    final List<String> titles = <String>['Domů', 'Tréninky', 'Akce', 'Členové'];
 
     if (db.currentTrainer.lastName == '' ||
         db.currentTrainer.email != user.email) {
@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
       child: Consumer<NavigationService>(
           builder: (BuildContext context, NavigationService navigation, child) {
         return DefaultTabController(
-          length: 2,
+          length: 3,
           initialIndex: 0,
           child: Builder(builder: (context) {
             return Scaffold(
@@ -145,6 +145,7 @@ class HomeScreen extends StatelessWidget {
                             Tab(
                               text: 'Skupiny',
                             ),
+                            Tab(text: 'Statistiky')
                           ],
                         )
                       : null),
@@ -154,6 +155,7 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   homeScreen,
                   const TrainingScreen(),
+                  const ActionsScreen(),
                   const MembersScreen(),
                 ],
               ),
@@ -218,6 +220,11 @@ class HomeScreen extends StatelessWidget {
                     icon: Icon(Icons.event_note_outlined),
                     selectedIcon: Icon(Icons.event_note),
                     label: 'Tréniky',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.emoji_events_outlined),
+                    selectedIcon: Icon(Icons.emoji_events),
+                    label: 'Akce',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.people_outlined),
