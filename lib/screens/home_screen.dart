@@ -1,3 +1,4 @@
+import 'package:ak_kurim/services/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
     final Widget homeScreen = (db.currentTrainer.lastName != '')
         ? Container(
             color: Theme.of(context).colorScheme.background,
-            child: Column(
+            child: ListView(
               children: [
                 Center(
                   child: Text(
@@ -65,6 +66,11 @@ class HomeScreen extends StatelessWidget {
               appBar: AppBar(
                   title: Text(titles[navigation.currentIndex]),
                   actions: <IconButton>[
+                    IconButton(
+                        onPressed: () {
+                          db.initializeData(user);
+                        },
+                        icon: const Icon(Icons.sync)),
                     IconButton(
                       icon: const Icon(
                         Icons.brightness_4_outlined,
@@ -124,8 +130,8 @@ class HomeScreen extends StatelessWidget {
                                       // use selected date from navigation service and default time 17:00
                                       training: Training.empty(
                                           '',
-                                          Timestamp.fromDate(navigation
-                                              .selectedDate
+                                          Timestamp.fromDate(Helper()
+                                              .midnight(navigation.selectedDate)
                                               .add(const Duration(hours: 17)))),
                                       create: true),
                                 ));

@@ -45,12 +45,13 @@ class AuthService {
     }
   }
 
-  // sign out TODO remove print
+  // sign out
   Future<void> signOut() async {
     try {
       return await _auth.signOut();
     } catch (e) {
-      print(e.toString());
+      //print(e.toString());
+      return Future(() => null);
     }
   }
 }

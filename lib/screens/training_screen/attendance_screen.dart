@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -48,6 +49,15 @@ class AttendanceScreen extends StatelessWidget {
                   db.trainerTrainings[index - 1].timestamp.toDate(),
                   navigation.selectedDate)) {
                 navigation.trainingForCurrentDay = true;
+                Group group =
+                    db.getGroupFromID(db.trainerTrainings[index - 1].groupID);
+                String names = group.trainerIDs.map((id) {
+                  return db.getTrainerFullNameFromID(id);
+                }).join(', ');
+                if (db.trainerTrainings[index - 1].substituteTrainerID != '') {
+                  names +=
+                      ', ${db.getTrainerFullNameFromID(db.trainerTrainings[index - 1].substituteTrainerID)}';
+                }
                 return Card(
                   elevation: 10,
                   child: ListTile(
@@ -68,7 +78,9 @@ class AttendanceScreen extends StatelessWidget {
                             ));
                       },
                       title: Text(
-                          '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
+                          '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} - ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
+                      subtitle:
+                          Text(names, style: const TextStyle(fontSize: 10)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -265,7 +277,7 @@ class TrainingProfile extends StatelessWidget {
                         const Icon(Icons.person_add_alt_1),
                         const SizedBox(width: 18),
                         Text(
-                          db.getTrainerfullNameFromID(
+                          db.getTrainerFullNameFromID(
                               training.substituteTrainerID),
                           style: TextStyle(
                               color: training.substituteTrainerID == ''
@@ -292,6 +304,7 @@ class TrainingProfile extends StatelessWidget {
                                         return ListTile(
                                           title: const Text('-'),
                                           onTap: () {
+                                            db.isChangedTrainingGroup = true;
                                             training.substituteTrainerID = '';
                                             db.refresh();
                                             Navigator.pop(context);
@@ -304,6 +317,7 @@ class TrainingProfile extends StatelessWidget {
                                           title: Text(
                                               db.allTrainers[index].fullName),
                                           onTap: () {
+                                            db.isChangedTrainingGroup = true;
                                             training.substituteTrainerID =
                                                 db.allTrainers[index].id;
                                             db.refresh();
@@ -342,6 +356,71 @@ class TrainingProfile extends StatelessWidget {
                     ),
                   ),
                   const Divider(),
+                  ListTile(
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.calendar_today),
+                        const SizedBox(width: 20),
+                        Text(
+                          Helper().getDayMonthYear(training.timestamp.toDate()),
+                          style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      showDatePicker(
+                              context: context,
+                              initialDate: training.timestamp.toDate(),
+                              firstDate: DateTime(2023, 1, 1),
+                              lastDate: DateTime(2033, 12, 31))
+                          .then((value) {
+                        if (value != null) {
+                          DateTime oldTime = training.timestamp.toDate();
+                          value = value.add(Duration(
+                              hours: oldTime.hour, minutes: oldTime.minute));
+                          training.timestamp = Timestamp.fromDate(value);
+                          db.refresh();
+                        }
+                      });
+                    },
+                  ),
+
+                  // use time picker
+                  ListTile(
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.access_time),
+                        const SizedBox(width: 20),
+                        Text(
+                          Helper().getHourMinute(training.timestamp.toDate()),
+                          style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(
+                                  training.timestamp.toDate()))
+                          .then((value) {
+                        if (value != null) {
+                          DateTime oldTime = training.timestamp.toDate();
+                          oldTime = DateTime(oldTime.year, oldTime.month,
+                              oldTime.day, 0, 0, 0, 0, 0);
+                          DateTime newTime = oldTime.add(Duration(
+                              hours: value.hour, minutes: value.minute));
+                          training.timestamp = Timestamp.fromDate(newTime);
+                          db.refresh();
+                        }
+                      });
+                    },
+                  ),
                 ],
               ),
               Align(
@@ -437,6 +516,43 @@ class TakeAttendance extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () {
+                  // show dialog asking to refresh the training and set the attendance for everyone to false
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                            title: const Text(
+                                'Opravdu chcete obnovit tento trénink?'),
+                            content: const Text(
+                                'Touto akcí se smaže veškerá docházka a obnoví se členové tréninku.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  db.updateTraining(training, true);
+                                  db.refresh(); // set attendance to false for everyone and refresh members
+                                  Navigator.pop(context);
+                                  // show snackbar with orange color
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Trénink obnoven',
+                                          textAlign: TextAlign.center),
+                                      backgroundColor: Color(0xFFFFB74D),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Obnovit'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Zrušit'),
+                              ),
+                            ],
+                          ));
+                },
+                icon: const Icon(Icons.rotate_left)),
+            IconButton(
+                onPressed: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -453,10 +569,11 @@ class TakeAttendance extends StatelessWidget {
               ListTile(
                 title: Text('Skupina: ${group.name}'),
                 trailing: Text(
-                    '${training.hourAndMinute} - ${training.dayAndMonth} ${training.year}'),
+                    '${training.dayAndMonth} ${training.year} - ${training.hourAndMinute}'),
               ),
-              ListTile(
-                title: Text('Poznámka: ${training.note}'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                child: Text('Poznámka: ${training.note}'),
               ),
               const Divider(),
               Expanded(
@@ -482,14 +599,15 @@ class TakeAttendance extends StatelessWidget {
                         }),
                         title: db.isTrainer(training.attendanceKeys[index])
                             ? Text(
-                                db.getTrainerfullNameFromID(
+                                db.getTrainerFullNameFromID(
                                     training.attendanceKeys[index]),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Theme.of(context)
                                         .colorScheme
-                                        .secondary)) // TODO: see if color works
+                                        .secondary),
+                              ) // the color should work
                             : Text(
                                 db.getMemberfullNameFromID(
                                     training.attendanceKeys[index]),

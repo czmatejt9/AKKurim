@@ -21,6 +21,10 @@ class Helper {
     return '${date.day.toString().padLeft(2, '0')}. ${date.month.toString().padLeft(2, '0')}.';
   }
 
+  String getDayMonthYear(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}. ${date.month.toString().padLeft(2, '0')}. ${date.year}';
+  }
+
   DateTime midnight(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }

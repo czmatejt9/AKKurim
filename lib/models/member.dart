@@ -12,10 +12,10 @@ class Member {
   final String firstName;
   final String lastName;
   final String birthNumber;
-  final int? EAN;
+  final int? ean;
   final String street;
   final String city;
-  final int ZIP;
+  final int zip;
   final String? email;
   final String? emailParent;
   final String? phone;
@@ -32,10 +32,10 @@ class Member {
       required this.firstName,
       required this.lastName,
       required this.birthNumber,
-      this.EAN,
+      this.ean,
       required this.street,
       required this.city,
-      required this.ZIP,
+      required this.zip,
       this.email,
       this.emailParent,
       this.phone,
@@ -46,7 +46,7 @@ class Member {
       this.note});
 
   String get fullName => '$lastName $firstName';
-  String get address => '$street\n $city, $ZIP';
+  String get address => '$street\n $city, $zip';
   String get bornYear => born.substring(0, 4);
   String get initials => '${firstName[0]} ${lastName[0]}';
 
@@ -58,10 +58,10 @@ class Member {
         firstName: data['firstName'],
         lastName: data['lastName'],
         birthNumber: data['birthNumber'] ?? "",
-        EAN: data['EAN'] ?? "",
+        ean: data['EAN'] ?? "",
         street: data['street'],
         city: data['city'],
-        ZIP: data['ZIP'],
+        zip: data['ZIP'],
         email: data['email'] ?? "",
         emailParent: data['emailParent'] ?? "",
         phone: data['phone'] ?? "",
@@ -85,10 +85,10 @@ class Member {
         'firstName': firstName,
         'lastName': lastName,
         'birthNumber': birthNumber,
-        'EAN': EAN,
+        'EAN': ean,
         'street': street,
         'city': city,
-        'ZIP': ZIP,
+        'ZIP': zip,
         'email': email,
         'emailParent': emailParent,
         'phone': phone,

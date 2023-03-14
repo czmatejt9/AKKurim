@@ -53,13 +53,13 @@ class DatabaseService extends ChangeNotifier {
             birthNumber: "birthNumber",
             street: "street",
             city: "city",
-            ZIP: 0,
+            zip: 0,
             isSignedUp: {},
             isPaid: {})).fullName;
     return memberFullName;
   }
 
-  String getTrainerfullNameFromID(String id) {
+  String getTrainerFullNameFromID(String id) {
     final String trainerFullName = _trainers.firstWhere((trainer) {
       return trainer.id == id;
     },
@@ -177,6 +177,8 @@ class DatabaseService extends ChangeNotifier {
                 .addAll(querySnapshot.docs.map((QueryDocumentSnapshot doc) {
               return Training.fromFirestore(doc);
             }).toList());
+            // sort trainings by date
+            sortTrainingsByDate();
           },
         );
       },
@@ -271,6 +273,11 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('groups').doc(group.id).delete();
   }
 
+  void sortTrainingsByDate() {
+    _trainerTrainings
+        .sort((Training a, Training b) => a.timestamp.compareTo(b.timestamp));
+  }
+
   // training functions - create, update, delete
   Future<void> createTraining(Training training) async {
     db.settings = const Settings(persistenceEnabled: true);
@@ -294,12 +301,14 @@ class DatabaseService extends ChangeNotifier {
     }
 
     _trainerTrainings.add(training);
+    sortTrainingsByDate();
     await db.collection('trainings').doc(training.id).set(training.toMap());
   }
 
   Future<void> updateTraining(Training training, bool groupChange) async {
     db.settings = const Settings(persistenceEnabled: true);
     if (groupChange) {
+      training.attendanceTaken = false;
       Group group = getGroupFromID(training.groupID);
       training.attendanceKeys = [];
       training.attendanceValues = [];
@@ -321,6 +330,7 @@ class DatabaseService extends ChangeNotifier {
 
     _trainerTrainings[_trainerTrainings
         .indexWhere((element) => element.id == training.id)] = training;
+    sortTrainingsByDate();
     await db.collection('trainings').doc(training.id).update(training.toMap());
   }
 

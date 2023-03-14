@@ -36,7 +36,7 @@ class GroupsScreen extends StatelessWidget {
                         ),
                         subtitle: Text(
                             db.trainerGroups[index].trainerIDs
-                                .map((e) => db.getTrainerfullNameFromID(e))
+                                .map((e) => db.getTrainerFullNameFromID(e))
                                 .join(', '),
                             style: const TextStyle(fontSize: 12)),
                         trailing: Row(
@@ -185,7 +185,7 @@ class GroupProfile extends StatelessWidget {
                 Card(
                   elevation: 10,
                   child: ListTile(
-                    title: Text(db.getTrainerfullNameFromID(trainerID)),
+                    title: Text(db.getTrainerFullNameFromID(trainerID)),
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                         color: Theme.of(context).colorScheme.outline,
@@ -299,8 +299,7 @@ class AddScreen extends StatelessWidget {
             TextFormField(
               initialValue: '',
               decoration: const InputDecoration(
-                hintText: 'Hledat',
-              ),
+                  hintText: 'Hledat', suffixIcon: Icon(Icons.search)),
               onChanged: (value) {
                 if (type == 'trainers') {
                   db.filterTrainers(filter: value, group: group);
