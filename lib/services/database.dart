@@ -145,10 +145,9 @@ class DatabaseService extends ChangeNotifier {
     db
         .collection('trainings')
         .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
-        //.where('date',
-        //    isGreaterThan: DateTime.now()
-        //        .subtract(const Duration(days: 30))
-        //        .toIso8601String())
+        .where('date',
+            isGreaterThan: Timestamp.fromDate(
+                DateTime.now().subtract(const Duration(days: 30))))
         //.where('date',
         //  isLessThan:
         //    DateTime.now().add(Duration(days: 30)).toIso8601String()) idk if this is needed to speed up the query
@@ -162,11 +161,10 @@ class DatabaseService extends ChangeNotifier {
         // add the trainings where the current trainer is the substitute trainer
         db
             .collection('trainings')
-            .where('substituteTrainer', isEqualTo: _trainer.id)
+            .where('substituteTrainerID', isEqualTo: _trainer.id)
             .where('date',
-                isGreaterThan: DateTime.now()
-                    .subtract(const Duration(days: 30))
-                    .toIso8601String())
+                isGreaterThan: Timestamp.fromDate(
+                    DateTime.now().subtract(const Duration(days: 30))))
             //.where('date',
             //  isLessThan:
             //    DateTime.now().add(Duration(days: 30)).toIso8601String()) idk if this is needed to speed up the query

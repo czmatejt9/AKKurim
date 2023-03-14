@@ -45,7 +45,6 @@ dependencies:
   lazy_load_indexed_stack: ^0.1.4
   table_calendar: ^3.0.8
   week_of_year: ^2.0.0
-  workmanager: ^0.5.1
 
 dev_dependencies:
   flutter_test:

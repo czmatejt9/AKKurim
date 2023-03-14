@@ -7,6 +7,7 @@ import 'package:ak_kurim/services/auth.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/theme.dart';
+import 'package:ak_kurim/screens/actions_screen.dart';
 import 'package:ak_kurim/screens/members_screen.dart';
 import 'package:ak_kurim/screens/training_screen/training_screen_wrapper.dart';
 import 'package:ak_kurim/screens/training_screen/attendance_screen.dart';
@@ -47,7 +48,8 @@ class HomeScreen extends StatelessWidget {
 
     final List<String> titles = <String>['Domů', 'Tréninky', 'Členové'];
 
-    if (db.currentTrainer.lastName == '') {
+    if (db.currentTrainer.lastName == '' ||
+        db.currentTrainer.email != user.email) {
       db.initializeData(user);
     }
     return MultiProvider(
@@ -75,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                                 return AlertDialog(
                                   title: const Text('Synchronizace dat'),
                                   content: const Text(
-                                      'Opravdu chcete synchronizovat data?'),
+                                      'Opravdu chcete synchronizovat data?\n(Data se automaticky synchronizují při spuštění aplikace.)'),
                                   actions: <Widget>[
                                     TextButton(
                                       child: const Text('Zrušit'),

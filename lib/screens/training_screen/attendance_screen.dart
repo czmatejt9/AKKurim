@@ -483,6 +483,7 @@ class TakeAttendance extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
     final group = db.getGroupFromID(training.groupID);
+    final noteController = TextEditingController(text: training.note);
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
@@ -561,91 +562,119 @@ class TakeAttendance extends StatelessWidget {
                 },
                 icon: const Icon(Icons.edit_note))
           ]),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(children: [
-          Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('Skupina: ${group.name}'),
-                trailing: Text(
-                    '${training.dayAndMonth} ${training.year} - ${training.hourAndMinute}'),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Text('Poznámka: ${training.note}'),
-              ),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 50),
-                  itemCount: training.attendanceValues.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 10,
-                      child: CheckboxListTile(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(12)),
-                        ),
-                        tristate: true,
-                        value: training.attendanceValues[index],
-                        onChanged: ((value) {
-                          training.attendanceValues[index] = value;
-                          db.refresh();
-                        }),
-                        title: db.isTrainer(training.attendanceKeys[index])
-                            ? Text(
-                                db.getTrainerFullNameFromID(
-                                    training.attendanceKeys[index]),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary),
-                              ) // the color should work
-                            : Text(
-                                db.getMemberfullNameFromID(
-                                    training.attendanceKeys[index]),
-                              ),
-                      ),
-                    );
-                  },
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(children: [
+            Column(
+              children: <Widget>[
+                ListTile(
+                  title: Text('Skupina: ${group.name}'),
+                  trailing: Text(
+                      '${training.dayAndMonth} ${training.year} - ${training.hourAndMinute}'),
                 ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Theme.of(context).colorScheme.secondary),
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    Theme.of(context).colorScheme.onSecondary),
-              ),
-              onPressed: () {
-                training.attendanceTaken = true;
-                db.updateTraining(training, false);
-                db.refresh();
-                // show snackbar
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Docházka zapsána', textAlign: TextAlign.center),
-                    backgroundColor: Color(0xFF81C784),
+                ListTile(
+                  title: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Poznámka: ',
+                      ),
+                      Expanded(
+                          child: TextField(
+                        controller: noteController,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Poznámka',
+                        ),
+                        onChanged: (value) {
+                          training.note = value;
+                        },
+                      ))
+                    ],
                   ),
-                );
-              },
-              child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+                ),
+                const Divider(),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 50),
+                    itemCount: training.attendanceValues.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 10,
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(12)),
+                          ),
+                          trailing: Checkbox(
+                            tristate: true,
+                            value: training.attendanceValues[index],
+                            activeColor:
+                                training.attendanceValues[index] == true
+                                    ? Colors.green
+                                    : Colors.yellow,
+                            onChanged: ((value) {
+                              training.attendanceValues[index] = value;
+                              db.refresh();
+                            }),
+                          ),
+                          title: db.isTrainer(training.attendanceKeys[index])
+                              ? Text(
+                                  db.getTrainerFullNameFromID(
+                                      training.attendanceKeys[index]),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary),
+                                ) // the color should work
+                              : Text(
+                                  db.getMemberfullNameFromID(
+                                      training.attendanceKeys[index]),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ]),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Theme.of(context).colorScheme.secondary),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      Theme.of(context).colorScheme.onSecondary),
+                ),
+                onPressed: () {
+                  training.attendanceTaken = true;
+                  db.updateTraining(training, false);
+                  db.refresh();
+                  // show snackbar
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Docházka zapsána', textAlign: TextAlign.center),
+                      backgroundColor: Color(0xFF81C784),
+                    ),
+                  );
+                },
+                child: const Text('Uložit', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+          ]),
+        ),
       ),
     );
   }
