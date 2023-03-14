@@ -68,7 +68,31 @@ class HomeScreen extends StatelessWidget {
                   actions: <IconButton>[
                     IconButton(
                         onPressed: () {
-                          db.initializeData(user);
+                          // alert dialog asking for confirmation if user wants to sync data
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Synchronizace dat'),
+                                  content: const Text(
+                                      'Opravdu chcete synchronizovat data?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Zrušit'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('Synchronizovat'),
+                                      onPressed: () {
+                                        db.initializeData(user);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
                         },
                         icon: const Icon(Icons.sync)),
                     IconButton(
@@ -82,7 +106,31 @@ class HomeScreen extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.logout),
                       onPressed: () {
-                        auth.signOut();
+                        // alert dialog asking for confirmation if user wants to logout
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Odhlášení'),
+                                content:
+                                    const Text('Opravdu se chcete odhlásit?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Zrušit'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Odhlásit'),
+                                    onPressed: () {
+                                      auth.signOut();
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            });
                       },
                     ),
                   ],
