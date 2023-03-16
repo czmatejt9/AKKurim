@@ -24,6 +24,7 @@ class Member {
   final Map isSignedUp;
   final Map isPaid;
   final String? note;
+  Map<String, dynamic> attendanceCount;
 
   Member(
       {required this.id,
@@ -43,7 +44,8 @@ class Member {
       this.endOfRegistration,
       required this.isSignedUp,
       required this.isPaid,
-      this.note});
+      this.note,
+      required this.attendanceCount});
 
   String get fullName => '$lastName $firstName';
   String get address => '$street\n $city, $zip';
@@ -69,7 +71,12 @@ class Member {
         endOfRegistration: data['endOfRegistration'] ?? "",
         isSignedUp: data['isSignedUp'],
         isPaid: data['isPaid'],
-        note: data['note'] ?? "");
+        note: data['note'] ?? "",
+        attendanceCount: data.containsKey('attendanceCount')
+            ? data['attendanceCount']
+            : {
+                'all': {'in': 0, 'out': 0, 'excused': 0, 'total': 0}
+              });
   }
 
   factory Member.fromFirestore(DocumentSnapshot doc) {
@@ -97,5 +104,6 @@ class Member {
         'isSignedUp': isSignedUp,
         'isPaid': isPaid,
         'note': note,
+        'attendanceCount': attendanceCount,
       };
 }

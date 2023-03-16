@@ -40,8 +40,9 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getMemberfullNameFromID(String id) {
-    final String memberFullName = _members.firstWhere((member) {
+  // member functions
+  Member getMemberFromID(String id) {
+    final Member member = _members.firstWhere((member) {
       return member.id == id;
     },
         orElse: () => Member(
@@ -55,12 +56,19 @@ class DatabaseService extends ChangeNotifier {
             city: "city",
             zip: 0,
             isSignedUp: {},
-            isPaid: {})).fullName;
-    return memberFullName;
+            isPaid: {},
+            attendanceCount: {}));
+    return member;
   }
 
-  String getTrainerFullNameFromID(String id) {
-    final String trainerFullName = _trainers.firstWhere((trainer) {
+  String getMemberfullNameFromID(String id) {
+    final Member member = getMemberFromID(id);
+    return member.fullName;
+  }
+
+  // trainer functions
+  Trainer getTrainerFromID(String id) {
+    final Trainer trainer = _trainers.firstWhere((trainer) {
       return trainer.id == id;
     },
         orElse: () => Trainer(
@@ -69,8 +77,13 @@ class DatabaseService extends ChangeNotifier {
             firstName: "Náhradní trenér",
             lastName: "",
             email: "email",
-            phone: "phone")).fullName;
-    return trainerFullName;
+            phone: "phone"));
+    return trainer;
+  }
+
+  String getTrainerFullNameFromID(String id) {
+    final Trainer trainer = getTrainerFromID(id);
+    return trainer.fullName;
   }
 
   bool isTrainer(String id) {
@@ -80,25 +93,27 @@ class DatabaseService extends ChangeNotifier {
     return isTrainer;
   }
 
-  String getGroupNameFromID(String id) {
-    final group = getGroupFromID(id);
-    return group.name;
+  // filter trainers by name and remove trainers which are already in the group
+  void filterTrainers({required String filter, required Group group}) {
+    if (filter == '') {
+      // clone the list
+      _filteredTrainers = List<Trainer>.from(_trainers);
+    } else {
+      _filteredTrainers = _trainers
+          .where((Trainer trainer) =>
+              trainer.firstName.toLowerCase().contains(filter.toLowerCase()) ||
+              trainer.lastName.toLowerCase().contains(filter.toLowerCase()))
+          .toList();
+    }
+
+    _filteredTrainers.removeWhere((Trainer trainer) {
+      return group.trainerIDs.contains(trainer.id);
+    });
+    notifyListeners();
   }
 
-  Group getGroupFromID(String id) {
-    final Group group = _trainerGroups.firstWhere((group) {
-      return group.id == id;
-    },
-        orElse: () => Group(
-            id: "",
-            name: "Skupina",
-            trainerIDs: <String>[],
-            memberIDs: <String>[]));
-    return group;
-  }
-
+  // download functions
   Future<void> updateTrainers({required User user, bool init = false}) async {
-    db.settings = const Settings(persistenceEnabled: true);
     db.collection('trainers').get().then(
       (QuerySnapshot querySnapshot) {
         _trainers = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
@@ -123,7 +138,6 @@ class DatabaseService extends ChangeNotifier {
 
   // download all groups which contain the current trainer in the trainersIDs list
   Future<void> updateGroups({bool init = false}) async {
-    db.settings = const Settings(persistenceEnabled: true);
     db.collection("groups").get().then(
       (QuerySnapshot querySnapshot) {
         _trainerGroups = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
@@ -141,7 +155,6 @@ class DatabaseService extends ChangeNotifier {
 
   // + month to the current date and -month to the current date
   Future<void> updateTrainings() async {
-    db.settings = const Settings(persistenceEnabled: true);
     db
         .collection('trainings')
         .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
@@ -184,7 +197,6 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> updateMembers({bool forceUpdate = false, bool init = false}) {
-    db.settings = const Settings(persistenceEnabled: true);
     // Get members from Firestore
     if (_isUpdating && !forceUpdate) {
       return Future<void>.value();
@@ -223,25 +235,6 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // filter trainers by name and remove trainers which are already in the group
-  void filterTrainers({required String filter, required Group group}) {
-    if (filter == '') {
-      // clone the list
-      _filteredTrainers = List<Trainer>.from(_trainers);
-    } else {
-      _filteredTrainers = _trainers
-          .where((Trainer trainer) =>
-              trainer.firstName.toLowerCase().contains(filter.toLowerCase()) ||
-              trainer.lastName.toLowerCase().contains(filter.toLowerCase()))
-          .toList();
-    }
-
-    _filteredTrainers.removeWhere((Trainer trainer) {
-      return group.trainerIDs.contains(trainer.id);
-    });
-    notifyListeners();
-  }
-
   // initial data for the app (members, trainers, groups, trainings) - only for the first time
   // use the functions above to update the data
   Future<void> initializeData(User user) async {
@@ -252,21 +245,35 @@ class DatabaseService extends ChangeNotifier {
   }
 
   // group functions - create, update, delete
+  Group getGroupFromID(String id) {
+    final Group group = _trainerGroups.firstWhere((group) {
+      return group.id == id;
+    },
+        orElse: () => Group(
+            id: "",
+            name: "Skupina",
+            trainerIDs: <String>[],
+            memberIDs: <String>[]));
+    return group;
+  }
+
+  String getGroupNameFromID(String id) {
+    final Group group = getGroupFromID(id);
+    return group.name;
+  }
+
   Future<void> createGroup(Group group) async {
-    db.settings = const Settings(persistenceEnabled: true);
     _trainerGroups.add(group);
     await db.collection('groups').doc(group.id).set(group.toMap());
   }
 
   Future<void> updateGroup(Group group) async {
-    db.settings = const Settings(persistenceEnabled: true);
-    _trainerGroups[
-        _trainerGroups.indexWhere((element) => element.id == group.id)] = group;
+    //_trainerGroups[
+    //    _trainerGroups.indexWhere((element) => element.id == group.id)] = group;
     await db.collection('groups').doc(group.id).update(group.toMap());
   }
 
   Future<void> deleteGroup(Group group) async {
-    db.settings = const Settings(persistenceEnabled: true);
     _trainerGroups.removeWhere((element) => element.id == group.id);
     await db.collection('groups').doc(group.id).delete();
   }
@@ -276,9 +283,8 @@ class DatabaseService extends ChangeNotifier {
         .sort((Training a, Training b) => a.timestamp.compareTo(b.timestamp));
   }
 
-  // training functions - create, update, delete
+  // training functions - create, update, delete etc
   Future<void> createTraining(Training training) async {
-    db.settings = const Settings(persistenceEnabled: true);
     // prepare the attendance list
     Group group = getGroupFromID(training.groupID);
     training.attendanceKeys = []; // just to be sure to have an empty list
@@ -304,7 +310,6 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> updateTraining(Training training, bool groupChange) async {
-    db.settings = const Settings(persistenceEnabled: true);
     if (groupChange) {
       training.attendanceTaken = false;
       Group group = getGroupFromID(training.groupID);
@@ -333,7 +338,6 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> deleteTraining(Training training) async {
-    db.settings = const Settings(persistenceEnabled: true);
     _trainerTrainings.removeWhere((element) => element.id == training.id);
     await db.collection('trainings').doc(training.id).delete();
   }

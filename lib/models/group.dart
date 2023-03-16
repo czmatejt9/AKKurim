@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ak_kurim/services/helpers.dart';
 
 class Group {
-  String id;
+  final String id;
   List<dynamic> trainerIDs;
   String name;
   List<dynamic> memberIDs;

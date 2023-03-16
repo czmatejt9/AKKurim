@@ -659,6 +659,8 @@ class TakeAttendance extends StatelessWidget {
                 onPressed: () {
                   training.attendanceTaken = true;
                   db.updateTraining(training, false);
+                  // write attendance data to members profile for easier access later TODO
+
                   db.refresh();
                   // show snackbar
                   Navigator.pop(context);
