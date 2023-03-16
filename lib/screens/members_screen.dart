@@ -10,75 +10,79 @@ class MembersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-      child: Column(
-        children: [
-          Container(
-            color: Theme.of(context).colorScheme.background,
-            child: TextField(
-              onChanged: (value) => db.filterMembers(filter: value),
-              decoration: const InputDecoration(
-                  hintText: 'Hledat', suffixIcon: Icon(Icons.search)),
-            ),
-          ),
-          Container(
-              width: double.infinity,
+    return Container(
+      color: Theme.of(context).colorScheme.background,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: Column(
+          children: [
+            Container(
               color: Theme.of(context).colorScheme.background,
-              child: const Text('')),
-          if (db.members.isNotEmpty && !db.isUpdating)
-            ChangeNotifierProvider(
-              create: (_) => db,
-              child: Expanded(
-                child: db.filteredMembers.isNotEmpty
-                    ? ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 76),
-                        itemCount: db.filteredMembers.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Card(
-                            elevation: 10,
-                            child: ListTile(
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MemberProfile(
-                                          member: db.filteredMembers[index])),
-                                );
-                              },
-                              title: Text(
-                                  '${db.filteredMembers[index].lastName} ${db.filteredMembers[index].firstName}'),
-                              trailing:
-                                  Text(db.filteredMembers[index].bornYear),
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(
-                        child: Text(
-                        'Nenalen žádný člen',
-                        style: TextStyle(fontSize: 20),
-                      )),
+              child: TextField(
+                onChanged: (value) => db.filterMembers(filter: value),
+                decoration: const InputDecoration(
+                    hintText: 'Hledat', suffixIcon: Icon(Icons.search)),
               ),
             ),
-          if (db.isUpdating)
-            Column(
-              children: const <Widget>[
-                // draw boxes like shimmer effect with dark background
-                SizedBox(height: 10),
-                Text('Načítám členy'),
-                SizedBox(height: 10),
-                LinearProgressIndicator(),
-              ],
-            ),
-        ],
+            Container(
+                width: double.infinity,
+                color: Theme.of(context).colorScheme.background,
+                child: const Text('')),
+            if (db.members.isNotEmpty && !db.isUpdating)
+              ChangeNotifierProvider(
+                create: (_) => db,
+                child: Expanded(
+                  child: db.filteredMembers.isNotEmpty
+                      ? ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 76),
+                          itemCount: db.filteredMembers.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              elevation: 10,
+                              child: ListTile(
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MemberProfile(
+                                            member: db.filteredMembers[index])),
+                                  );
+                                },
+                                title: Text(
+                                    '${db.filteredMembers[index].lastName} ${db.filteredMembers[index].firstName}'),
+                                trailing:
+                                    Text(db.filteredMembers[index].bornYear),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Text(
+                          'Nenalen žádný člen',
+                          style: TextStyle(fontSize: 20),
+                        )),
+                ),
+              ),
+            if (db.isUpdating)
+              Column(
+                children: const <Widget>[
+                  // draw boxes like shimmer effect with dark background
+                  SizedBox(height: 10),
+                  Text('Načítám členy'),
+                  SizedBox(height: 10),
+                  LinearProgressIndicator(),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

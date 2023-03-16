@@ -14,7 +14,7 @@ class StatsScreen extends StatelessWidget {
     final key = group == null ? 'all' : group.id;
     const double borderRad = 14.5;
     return Container(
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.background,
         child: db.statsLoaded
             ? Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -55,8 +55,13 @@ class StatsScreen extends StatelessWidget {
                               member.attendanceCount[key]['excused'];
                           final int absent =
                               member.attendanceCount[key]['absent'];
-                          return Card(
-                            elevation: 10,
+                          return Container(
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline))),
                             child: ListTile(
                               title: Text(member.fullName),
                               subtitle:
@@ -209,14 +214,16 @@ class StatsScreen extends StatelessWidget {
                                             ),
                                           ),
                                         ],
-                                      )),
+                                      ),
+                                    ),
                             ),
                           ); //
                         },
                       ),
                     ),
                   ],
-                ))
+                ),
+              )
             : const Center(child: CircularProgressIndicator()));
   }
 }

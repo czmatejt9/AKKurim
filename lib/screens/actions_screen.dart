@@ -6,7 +6,7 @@ class ActionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).primaryColor,
+      color: Theme.of(context).colorScheme.background,
       child: const Center(
         child: Text('Actions'),
       ),
