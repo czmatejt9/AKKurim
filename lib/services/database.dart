@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/models/member.dart';
@@ -5,6 +6,7 @@ import 'package:ak_kurim/models/trainer.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
+import 'package:ak_kurim/services/helpers.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -34,6 +36,13 @@ class DatabaseService extends ChangeNotifier {
   List<Training> _trainerTrainings = <Training>[];
   List<Training> get trainerTrainings => _trainerTrainings;
 
+  List<Training> _allTrainings = <Training>[];
+  List<Training> get allTrainings => _allTrainings;
+  DateTime statsLastUpdated = DateTime.now().subtract(const Duration(days: 1));
+  bool statsLoaded = false;
+  Group?
+      statsSelectedGroup; // selected group for stats if null all time stats are shown
+
   bool isChangedTrainingGroup = false;
 
   void refresh() {
@@ -57,13 +66,19 @@ class DatabaseService extends ChangeNotifier {
             zip: 0,
             isSignedUp: {},
             isPaid: {},
-            attendanceCount: {}));
+            attendanceCount: {},
+            racesCount: {}));
     return member;
   }
 
   String getMemberfullNameFromID(String id) {
     final Member member = getMemberFromID(id);
     return member.fullName;
+  }
+
+  // update member
+  Future<void> updateMember(Member member) async {
+    await db.collection('members').doc(member.id).update(member.toMap());
   }
 
   // trainer functions
@@ -113,7 +128,7 @@ class DatabaseService extends ChangeNotifier {
   }
 
   // download functions
-  Future<void> updateTrainers({required User user, bool init = false}) async {
+  Future<void> downloadTrainers({required User user, bool init = false}) async {
     db.collection('trainers').get().then(
       (QuerySnapshot querySnapshot) {
         _trainers = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
@@ -130,14 +145,14 @@ class DatabaseService extends ChangeNotifier {
                 email: '',
                 phone: ''));
         if (init) {
-          updateGroups(init: init);
+          downloadGroups(init: init);
         }
       },
     );
   }
 
   // download all groups which contain the current trainer in the trainersIDs list
-  Future<void> updateGroups({bool init = false}) async {
+  Future<void> downloadGroups({bool init = false}) async {
     db.collection("groups").get().then(
       (QuerySnapshot querySnapshot) {
         _trainerGroups = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
@@ -147,14 +162,14 @@ class DatabaseService extends ChangeNotifier {
           return group.trainerIDs.contains(_trainer.id);
         }).toList();
         if (init) {
-          updateMembers(init: init);
+          downloadMembers(init: init);
         }
       },
     );
   }
 
-  // + month to the current date and -month to the current date
-  Future<void> updateTrainings() async {
+  // download all trainings which are in the last 30 days and in the future for the current trainer
+  Future<void> downloadTrainings() async {
     db
         .collection('trainings')
         .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
@@ -196,7 +211,26 @@ class DatabaseService extends ChangeNotifier {
     );
   }
 
-  Future<void> updateMembers({bool forceUpdate = false, bool init = false}) {
+  // for statistics
+  Future<void> downloadAllPastTrainings() async {
+    await db
+        .collection('trainings')
+        .where('date',
+            isLessThan: Timestamp.fromDate(
+                DateTime.now())) // get all trainings which are in the past
+        .get()
+        .then(
+      (QuerySnapshot querySnapshot) {
+        _allTrainings = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
+          return Training.fromFirestore(doc);
+        }).toList();
+
+        // add the trainings where the current trainer is the substitute trainer
+      },
+    );
+  }
+
+  Future<void> downloadMembers({bool forceUpdate = false, bool init = false}) {
     // Get members from Firestore
     if (_isUpdating && !forceUpdate) {
       return Future<void>.value();
@@ -210,7 +244,7 @@ class DatabaseService extends ChangeNotifier {
       filterMembers(filter: '');
     });
     if (init) {
-      updateTrainings();
+      downloadTrainings();
     }
     return Future<void>.value();
   }
@@ -240,8 +274,28 @@ class DatabaseService extends ChangeNotifier {
   Future<void> initializeData(User user) async {
     _isUpdating = true;
     db.settings = const Settings(persistenceEnabled: true);
-    await updateTrainers(user: user, init: true);
+    // download everything from Firestore
+    await downloadTrainers(
+        user: user,
+        init:
+            true); // download trainers and groups and members and trainings for the current trainer (init = true)
+    // get last update of stats time from Firestore
+    await db
+        .collection('stats')
+        .doc('lastUpdate')
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        var data = documentSnapshot.data()! as Map<String, dynamic>;
+        Timestamp date = data['lastUpdate'];
+        statsLastUpdated = date.toDate();
+      }
+    });
     _isUpdating = false;
+    notifyListeners();
+    if (!statsLoaded) {
+      updateStats();
+    }
   }
 
   // group functions - create, update, delete
@@ -257,12 +311,21 @@ class DatabaseService extends ChangeNotifier {
     return group;
   }
 
+  void sortGroupMemberIDs(Group group) {
+    group.memberIDs.sort((a, b) {
+      final Member memberA = getMemberFromID(a);
+      final Member memberB = getMemberFromID(b);
+      return memberA.lastName.compareTo(memberB.lastName);
+    });
+  }
+
   String getGroupNameFromID(String id) {
     final Group group = getGroupFromID(id);
     return group.name;
   }
 
   Future<void> createGroup(Group group) async {
+    sortGroupMemberIDs(group);
     _trainerGroups.add(group);
     await db.collection('groups').doc(group.id).set(group.toMap());
   }
@@ -270,6 +333,7 @@ class DatabaseService extends ChangeNotifier {
   Future<void> updateGroup(Group group) async {
     //_trainerGroups[
     //    _trainerGroups.indexWhere((element) => element.id == group.id)] = group;
+    sortGroupMemberIDs(group);
     await db.collection('groups').doc(group.id).update(group.toMap());
   }
 
@@ -331,14 +395,85 @@ class DatabaseService extends ChangeNotifier {
       }
     }
 
-    _trainerTrainings[_trainerTrainings
-        .indexWhere((element) => element.id == training.id)] = training;
+    //_trainerTrainings[_trainerTrainings
+    //    .indexWhere((element) => element.id == training.id)] = training;
     sortTrainingsByDate();
+    await db.collection('trainings').doc(training.id).update(training.toMap());
+  }
+
+  Future<void> updateAttendance(Training training) async {
     await db.collection('trainings').doc(training.id).update(training.toMap());
   }
 
   Future<void> deleteTraining(Training training) async {
     _trainerTrainings.removeWhere((element) => element.id == training.id);
     await db.collection('trainings').doc(training.id).delete();
+  }
+
+  // update stats for each member
+  Future<void> updateStats() async {
+    DateTime now = DateTime.now();
+    if (Helper().midnight(now) == Helper().midnight(statsLastUpdated)) {
+      statsLoaded = true;
+      return;
+    }
+    notifyListeners();
+    downloadAllPastTrainings().then((value) {
+      for (Member member in _members) {
+        member.attendanceCount = {
+          'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
+        };
+      } // reset the attendance count
+      for (Training training in _allTrainings) {
+        for (var pair in IterableZip(
+            [training.attendanceKeys, training.attendanceValues])) {
+          String id = pair[0];
+          bool? present = pair[1];
+          if (isTrainer(id)) {
+            id = getTrainerFromID(id).memberID;
+          }
+          Member member = getMemberFromID(id);
+
+          if (!member.attendanceCount.containsKey(training.groupID)) {
+            member.attendanceCount[training.groupID] = {
+              'present': 0,
+              'absent': 0,
+              'excused': 0,
+              'total': 0
+            };
+          }
+          if (!member.attendanceCount.containsKey('all')) {
+            member.attendanceCount['all'] = {
+              'present': 0,
+              'absent': 0,
+              'excused': 0,
+              'total': 0
+            };
+          }
+
+          String key = '';
+          if (present == null) {
+            key = 'excused';
+          } else {
+            key = present ? 'present' : 'absent';
+          }
+          member.attendanceCount[training.groupID][key]++;
+          member.attendanceCount[training.groupID]['total']++;
+          member.attendanceCount['all'][key]++;
+          member.attendanceCount['all']['total']++;
+        }
+      }
+      for (Member member in _members) {
+        updateMember(member);
+      }
+
+      statsLoaded = true;
+      notifyListeners();
+      statsLastUpdated = now;
+      db
+          .collection('stats')
+          .doc('lastUpdate')
+          .set({'lastUpdate': Timestamp.fromDate(statsLastUpdated)});
+    });
   }
 }

@@ -196,6 +196,36 @@ class HomeScreen extends StatelessWidget {
                               ),
                             );
                           }
+                        } else if (navigation.currentIndex == 1 &&
+                            DefaultTabController.of(context).index == 2) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Aktualizovat statistiky?'),
+                                  content: const Text(
+                                      'Opravdu chcete aktualizovat statistiky?\n(Statistiky se automaticky aktualizují každý den o půlnoci.)'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Zrušit'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('Aktualizovat'),
+                                      onPressed: () {
+                                        db.statsLoaded = false;
+                                        db.statsLastUpdated = db
+                                            .statsLastUpdated
+                                            .subtract(const Duration(days: 1));
+                                        db.updateStats();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
                         }
                       },
                       backgroundColor: Theme.of(context).colorScheme.secondary,

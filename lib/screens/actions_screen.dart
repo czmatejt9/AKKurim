@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ActionsScreen extends StatelessWidget {
@@ -8,7 +7,7 @@ class ActionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).primaryColor,
-      child: Center(
+      child: const Center(
         child: Text('Actions'),
       ),
     );

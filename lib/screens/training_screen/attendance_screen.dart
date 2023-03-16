@@ -575,6 +575,12 @@ class TakeAttendance extends StatelessWidget {
                   title: Text('Skupina: ${group.name}'),
                   trailing: Text(
                       '${training.dayAndMonth} ${training.year} - ${training.hourAndMinute}'),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 ListTile(
                   title: Row(
@@ -584,16 +590,18 @@ class TakeAttendance extends StatelessWidget {
                         'Poznámka: ',
                       ),
                       Expanded(
-                          child: TextField(
-                        controller: noteController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Poznámka',
+                        child: TextField(
+                          maxLines: null,
+                          controller: noteController,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Poznámka',
+                          ),
+                          onChanged: (value) {
+                            training.note = value;
+                          },
                         ),
-                        onChanged: (value) {
-                          training.note = value;
-                        },
-                      ))
+                      )
                     ],
                   ),
                 ),
@@ -658,9 +666,7 @@ class TakeAttendance extends StatelessWidget {
                 ),
                 onPressed: () {
                   training.attendanceTaken = true;
-                  db.updateTraining(training, false);
-                  // write attendance data to members profile for easier access later TODO
-
+                  db.updateAttendance(training);
                   db.refresh();
                   // show snackbar
                   Navigator.pop(context);
