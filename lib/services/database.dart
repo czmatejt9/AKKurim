@@ -37,6 +37,8 @@ class DatabaseService extends ChangeNotifier {
 
   List<Training> _trainerTrainings = <Training>[];
   List<Training> get trainerTrainings => _trainerTrainings;
+  bool repeatTraining = false;
+  DateTime endDate = Helper().midnight(DateTime.now());
 
   List<Training> _allTrainings = <Training>[];
   List<Training> get allTrainings => _allTrainings;
@@ -486,8 +488,8 @@ class DatabaseService extends ChangeNotifier {
       }
 
       statsLoaded = true;
-      notifyListeners();
       statsLastUpdated = now;
+      notifyListeners();
       db
           .collection('stats')
           .doc('lastUpdate')

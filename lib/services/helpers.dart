@@ -28,4 +28,26 @@ class Helper {
   DateTime midnight(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
+
+  int getCountBetweenDates(DateTime date1, DateTime date2) {
+    return midnight(date2).difference(midnight(date1)).inDays.abs();
+  }
+
+  int getWeeksBetweenDates(DateTime date1, DateTime date2) {
+    return getCountBetweenDates(date1, date2) ~/ 7;
+  }
+
+  int getCountOfTrainingsBetweenDates(DateTime date1, DateTime date2) {
+    return getWeeksBetweenDates(date1, date2) + 1;
+  }
+
+  String getCzechEnding(int number) {
+    if (number == 1) {
+      return '';
+    } else if (number >= 2 && number <= 4) {
+      return 'y';
+    } else {
+      return 'ů';
+    }
+  }
 }

@@ -35,6 +35,18 @@ class Training {
         note: data['note']);
   }
 
+  factory Training.copy(Training training) {
+    return Training(
+        id: Helper().generateRandomString(20),
+        groupID: training.groupID,
+        substituteTrainerID: training.substituteTrainerID,
+        timestamp: training.timestamp,
+        attendanceTaken: training.attendanceTaken,
+        attendanceKeys: training.attendanceKeys,
+        attendanceValues: training.attendanceValues,
+        note: training.note);
+  }
+
   int get attendanceNumber => attendanceValues.length;
   int get attendingNumber => attendanceValues
       .where((e) => e == true)

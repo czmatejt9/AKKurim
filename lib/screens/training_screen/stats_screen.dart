@@ -102,14 +102,20 @@ class StatsScreen extends StatelessWidget {
                                   : db.getMemberFromID(db
                                       .getTrainerFromID(group.trainerIDs[index])
                                       .memberID);
-                          final int present =
-                              member.attendanceCount[key]['present'];
-                          final int total =
-                              member.attendanceCount[key]['total'];
-                          final int excused =
-                              member.attendanceCount[key]['excused'];
-                          final int absent =
-                              member.attendanceCount[key]['absent'];
+                          int present = 0;
+                          int total = 0;
+                          int excused = 0;
+                          int absent = 0;
+                          try {
+                            present = member.attendanceCount[key]['present'];
+                            total = member.attendanceCount[key]['total'];
+                            excused = member.attendanceCount[key]['excused'];
+                            absent = member.attendanceCount[key]['absent'];
+                          } catch (e) {
+                            // ignore error if member has no attendance data
+                            // for selected group because then all values are 0
+                            // which is already set as default above
+                          }
                           return Container(
                             decoration: BoxDecoration(
                                 border: Border(

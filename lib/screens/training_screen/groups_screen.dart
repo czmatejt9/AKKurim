@@ -251,6 +251,18 @@ class GroupProfile extends StatelessWidget {
                     Theme.of(context).colorScheme.onSecondary),
               ),
               onPressed: () {
+                if (group.name == '' || group.name == 'Skupina') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Název skupiny nesmí být prázdný',
+                          textAlign: TextAlign.center),
+                      // use the same color as in attendance_screen
+                      backgroundColor: Color(0xFFE57373),
+                    ),
+                  );
+                  return;
+                }
+
                 if (create) {
                   db.createGroup(group);
                 } else {

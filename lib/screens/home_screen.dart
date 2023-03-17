@@ -175,16 +175,21 @@ class HomeScreen extends StatelessWidget {
                         } else if (navigation.currentIndex == 1 &&
                             DefaultTabController.of(context).index == 0) {
                           if (db.trainerGroups.isNotEmpty) {
+                            db.endDate = navigation.selectedDate
+                                .add(const Duration(days: 28));
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => TrainingProfile(
                                       // use selected date from navigation service and default time 17:00
                                       training: Training.empty(
-                                          '',
-                                          Timestamp.fromDate(Helper()
+                                        '',
+                                        Timestamp.fromDate(
+                                          Helper()
                                               .midnight(navigation.selectedDate)
-                                              .add(const Duration(hours: 17)))),
+                                              .add(const Duration(hours: 17)),
+                                        ), // default time 17:00
+                                      ),
                                       create: true),
                                 ));
                           } else {
@@ -204,7 +209,7 @@ class HomeScreen extends StatelessWidget {
                                 return AlertDialog(
                                   title: const Text('Aktualizovat statistiky?'),
                                   content: const Text(
-                                      'Opravdu chcete aktualizovat statistiky?\n(Statistiky se automaticky aktualizují každý den o půlnoci.)'),
+                                      'Opravdu chcete aktualizovat statistiky?\n(Statistiky se automaticky aktualizují každý den)'),
                                   actions: <Widget>[
                                     TextButton(
                                       child: const Text('Zrušit'),
