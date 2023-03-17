@@ -78,9 +78,9 @@ class DatabaseService extends ChangeNotifier {
     return member.fullName;
   }
 
-  // update member
+  // update member (set - it will overwrite the whole document)
   Future<void> updateMember(Member member) async {
-    await db.collection('members').doc(member.id).update(member.toMap());
+    await db.collection('members').doc(member.id).set(member.toMap());
   }
 
   // trainer functions
@@ -329,6 +329,7 @@ class DatabaseService extends ChangeNotifier {
   Future<void> createGroup(Group group) async {
     sortGroupMemberIDs(group);
     _trainerGroups.add(group);
+    _allGroups.add(group);
     await db.collection('groups').doc(group.id).set(group.toMap());
   }
 
@@ -341,6 +342,7 @@ class DatabaseService extends ChangeNotifier {
 
   Future<void> deleteGroup(Group group) async {
     _trainerGroups.removeWhere((element) => element.id == group.id);
+    _allGroups.removeWhere((element) => element.id == group.id);
     await db.collection('groups').doc(group.id).delete();
   }
 
@@ -425,12 +427,26 @@ class DatabaseService extends ChangeNotifier {
         member.attendanceCount = {
           'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
         };
+        for (Group group in _allGroups) {
+          if (group.memberIDs.contains(member.id) ||
+              group.trainerIDs
+                  .map((e) => getTrainerFromID(e).memberID)
+                  .contains(member.id)) {
+            member.attendanceCount[group.id] = {
+              'present': 0,
+              'absent': 0,
+              'excused': 0,
+              'total': 0
+            };
+          }
+        }
       } // reset the attendance count
       for (Training training in _allTrainings) {
         for (var pair in IterableZip(
             [training.attendanceKeys, training.attendanceValues])) {
           String id = pair[0];
           bool? present = pair[1];
+
           if (isTrainer(id)) {
             id = getTrainerFromID(id).memberID;
           }

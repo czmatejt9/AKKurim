@@ -302,7 +302,10 @@ class TrainingProfile extends StatelessWidget {
                                     itemBuilder: (context, index) {
                                       if (index == db.allTrainers.length) {
                                         return ListTile(
-                                          title: const Text('-'),
+                                          title: const Text(
+                                            'Žádný',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
                                           onTap: () {
                                             db.isChangedTrainingGroup = true;
                                             training.substituteTrainerID = '';

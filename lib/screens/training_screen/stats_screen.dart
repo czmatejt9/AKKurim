@@ -21,9 +21,15 @@ class StatsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      title: Text(
-                        group == null ? 'Všech dob' : 'Skupina: ${group.name}',
-                        style: const TextStyle(fontSize: 20),
+                      title: Row(
+                        children: [
+                          const Icon(Icons.groups),
+                          const SizedBox(width: 10),
+                          Text(
+                            group == null ? 'Všechny skupiny' : group.name,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ],
                       ),
                       trailing: Text(
                           'Poslední aktualizace\n ${Helper().getDayMonthYear(db.statsLastUpdated)} - ${Helper().getHourMinute(db.statsLastUpdated)} ',
@@ -35,6 +41,50 @@ class StatsScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  title: const Text(
+                                    'Vyberte skupinu pro zobrazení statistik',
+                                  ),
+                                  content: SizedBox(
+                                    width: 300,
+                                    height: 300,
+                                    child: ListView.builder(
+                                        itemCount: db.allGroups.length + 1,
+                                        itemBuilder: (context, index) {
+                                          if (index == 0) {
+                                            return ListTile(
+                                              title: const Text(
+                                                'Všechny skupiny dohromady',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration: TextDecoration
+                                                        .underline),
+                                              ),
+                                              onTap: () {
+                                                db.statsSelectedGroup = null;
+                                                db.refresh();
+                                                Navigator.pop(context);
+                                              },
+                                            );
+                                          }
+                                          return ListTile(
+                                            title: Text(
+                                              db.allGroups[index - 1].name,
+                                            ),
+                                            onTap: () {
+                                              db.statsSelectedGroup =
+                                                  db.allGroups[index - 1];
+                                              db.refresh();
+                                              Navigator.pop(context);
+                                            },
+                                          );
+                                        }),
+                                  ),
+                                ));
+                      },
                     ),
                     const Divider(),
                     Expanded(
@@ -42,11 +92,16 @@ class StatsScreen extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(4, 0, 4, 76),
                         itemCount: group == null
                             ? db.members.length
-                            : group.memberIDs.length,
+                            : group.memberIDs.length + group.trainerIDs.length,
                         itemBuilder: (context, index) {
                           final member = group == null
                               ? db.members[index]
-                              : db.getMemberFromID(group.memberIDs[index]);
+                              : index >= group.trainerIDs.length
+                                  ? db.getMemberFromID(group.memberIDs[
+                                      index - group.trainerIDs.length])
+                                  : db.getMemberFromID(db
+                                      .getTrainerFromID(group.trainerIDs[index])
+                                      .memberID);
                           final int present =
                               member.attendanceCount[key]['present'];
                           final int total =
