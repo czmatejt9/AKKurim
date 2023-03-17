@@ -30,6 +30,8 @@ class DatabaseService extends ChangeNotifier {
   List<Trainer> get filteredTrainers =>
       _filteredTrainers; // List of filtered trainers
 
+  List<Group> _allGroups = <Group>[];
+  List<Group> get allGroups => _allGroups;
   List<Group> _trainerGroups = <Group>[];
   List<Group> get trainerGroups => _trainerGroups;
 
@@ -155,10 +157,10 @@ class DatabaseService extends ChangeNotifier {
   Future<void> downloadGroups({bool init = false}) async {
     db.collection("groups").get().then(
       (QuerySnapshot querySnapshot) {
-        _trainerGroups = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
+        _allGroups = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
           return Group.fromFirestore(doc);
         }).toList();
-        _trainerGroups = _trainerGroups.where((group) {
+        _trainerGroups = _allGroups.where((group) {
           return group.trainerIDs.contains(_trainer.id);
         }).toList();
         if (init) {
@@ -300,7 +302,7 @@ class DatabaseService extends ChangeNotifier {
 
   // group functions - create, update, delete
   Group getGroupFromID(String id) {
-    final Group group = _trainerGroups.firstWhere((group) {
+    final Group group = _allGroups.firstWhere((group) {
       return group.id == id;
     },
         orElse: () => Group(
