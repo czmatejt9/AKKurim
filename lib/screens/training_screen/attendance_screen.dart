@@ -492,7 +492,7 @@ class TrainingProfile extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 16),
-                            Switch(
+                            Switch.adaptive(
                               value: db.repeatTraining,
                               onChanged: (value) {
                                 db.repeatTraining = value;

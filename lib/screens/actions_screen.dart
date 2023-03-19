@@ -8,7 +8,7 @@ class ActionsScreen extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.background,
       child: const Center(
-        child: Text('Actions'),
+        child: Text('Coming Soon...'),
       ),
     );
   }

@@ -24,10 +24,6 @@ class MembersScreen extends StatelessWidget {
                     hintText: 'Hledat', suffixIcon: Icon(Icons.search)),
               ),
             ),
-            Container(
-                width: double.infinity,
-                color: Theme.of(context).colorScheme.background,
-                child: const Text('')),
             if (db.members.isNotEmpty && !db.isUpdating)
               ChangeNotifierProvider(
                 create: (_) => db,

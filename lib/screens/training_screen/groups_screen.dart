@@ -194,6 +194,18 @@ class GroupProfile extends StatelessWidget {
                     ),
                     trailing: IconButton(
                       onPressed: () {
+                        if (trainerID == db.currentTrainer.id) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Nemůžete odebrat sami sebe z této skupiny',
+                                  textAlign: TextAlign.center),
+                              // use the same color as in attendance_screen
+                              backgroundColor: Color(0xFFE57373),
+                            ),
+                          );
+                          return;
+                        }
                         group.trainerIDs.remove(trainerID);
                         db.refresh();
                       },

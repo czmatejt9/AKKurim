@@ -23,8 +23,11 @@ Future<void> main() async {
           create: (_) => ThemeService(),
         ),
         ChangeNotifierProvider<DatabaseService>(
-          create: (BuildContext context) => DatabaseService(),
-        )
+          create: (_) => DatabaseService(),
+        ),
+        Provider<AuthService>(
+          create: (_) => AuthService(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -36,34 +39,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<AuthService>(
-          create: (_) => AuthService(),
-        ),
-      ],
-      child: Consumer<ThemeService>(
-        builder: (context, theme, child) {
-          theme.loadTheme();
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            supportedLocales: const [
-              Locale('cs', 'CZ'),
-            ],
-            title: 'AK Kuřim',
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: theme.colorScheme,
-            ),
-            initialRoute: '/',
-            routes: {
-              '/': (context) => const Wrapper(),
-              '/login': (context) => const LoginScreen(),
-            },
-          );
-        },
-      ),
+    return Consumer<ThemeService>(
+      builder: (context, theme, child) {
+        theme.loadTheme();
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [
+            Locale('cs', 'CZ'),
+          ],
+          title: 'AK Kuřim',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: theme.colorScheme,
+          ),
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const Wrapper(),
+            '/login': (context) => const LoginScreen(),
+          },
+        );
+      },
     );
   }
 }

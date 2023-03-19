@@ -34,12 +34,18 @@ class HomeScreen extends StatelessWidget {
             color: Theme.of(context).colorScheme.background,
             child: ListView(
               children: [
-                Center(
-                  child: Text(
-                    'Vítejte ${db.currentTrainer.fullName}',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                ListTile(
+                  title: Text(db.currentTrainer.fullName,
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  trailing: IconButton(
+                    icon: Icon(Icons.settings,
+                        color: Theme.of(context).colorScheme.onBackground),
+                    onPressed: () {
+                      // TODO: implement settings
+                    },
                   ),
-                )
+                ),
+                const Divider(),
               ],
             ))
         : Container(
@@ -69,34 +75,35 @@ class HomeScreen extends StatelessWidget {
                   title: Text(titles[navigation.currentIndex]),
                   actions: <IconButton>[
                     IconButton(
-                        onPressed: () {
-                          // alert dialog asking for confirmation if user wants to sync data
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Synchronizace dat'),
-                                  content: const Text(
-                                      'Opravdu chcete synchronizovat data?\n(Data se automaticky synchronizují při spuštění aplikace.)'),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text('Zrušit'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: const Text('Synchronizovat'),
-                                      onPressed: () {
-                                        db.initializeData(user);
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              });
-                        },
-                        icon: const Icon(Icons.sync)),
+                      icon: const Icon(Icons.sync),
+                      onPressed: () {
+                        // alert dialog asking for confirmation if user wants to sync data
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Synchronizace dat'),
+                                content: const Text(
+                                    'Opravdu chcete stáhnout aktuální data?\n(Data se automaticky stahují při spuštění aplikace)'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Zrušit'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Synchronizovat'),
+                                    onPressed: () {
+                                      db.initializeData(user);
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            });
+                      },
+                    ),
                     IconButton(
                       icon: const Icon(
                         Icons.brightness_4_outlined,
