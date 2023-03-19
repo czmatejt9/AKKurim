@@ -15,6 +15,7 @@ import 'package:ak_kurim/screens/training_screen/groups_screen.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
+import 'package:ak_kurim/services/my_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -29,30 +30,32 @@ class HomeScreen extends StatelessWidget {
     final ThemeService theme = Provider.of<ThemeService>(context);
     final DatabaseService db = Provider.of<DatabaseService>(context);
 
+    final List<String> titles = <String>[
+      db.currentTrainer.fullName,
+      'Tréninky',
+      'Akce',
+      'Členové'
+    ];
+
     final Widget homeScreen = (db.currentTrainer.lastName != '')
         ? Container(
             color: Theme.of(context).colorScheme.background,
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Text(db.currentTrainer.fullName,
-                      style: Theme.of(context).textTheme.headlineMedium),
-                  trailing: IconButton(
-                    icon: Icon(Icons.settings,
-                        color: Theme.of(context).colorScheme.onBackground),
-                    onPressed: () {
-                      // TODO: implement settings
-                    },
-                  ),
-                ),
-                const Divider(),
-              ],
-            ))
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: <Widget>[
+                  const SizedBox(height: 10),
+                  Text('Vaše nadcházející tréninky',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 10),
+                  const NextWeekTrainings(),
+                ],
+              ),
+            ),
+          )
         : Container(
             color: Theme.of(context).colorScheme.background,
             child: const LinearProgressIndicator());
-
-    final List<String> titles = <String>['Domů', 'Tréninky', 'Akce', 'Členové'];
 
     if (db.currentTrainer.lastName == '' ||
         db.currentTrainer.email != user.email) {
@@ -74,7 +77,8 @@ class HomeScreen extends StatelessWidget {
               appBar: AppBar(
                   title: Text(titles[navigation.currentIndex]),
                   actions: <IconButton>[
-                    IconButton(
+                    // move this to settings
+                    /* IconButton(
                       icon: const Icon(Icons.sync),
                       onPressed: () {
                         // alert dialog asking for confirmation if user wants to sync data
@@ -103,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                               );
                             });
                       },
-                    ),
+                    ), */
                     IconButton(
                       icon: const Icon(
                         Icons.brightness_4_outlined,
@@ -111,6 +115,12 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         theme.changeTheme();
                       },
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // TODO SETTINGS
+                      },
+                      icon: const Icon(Icons.settings),
                     ),
                     IconButton(
                       icon: const Icon(Icons.logout),
@@ -280,5 +290,47 @@ class HomeScreen extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+class NextWeekTrainings extends StatelessWidget {
+  const NextWeekTrainings({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseService>(context);
+    return db.nextWeekTrainings.isNotEmpty
+        ? Column(children: <Widget>[
+            for (var training in db.nextWeekTrainings)
+              Column(children: <Widget>[
+                // display the below container only if the previous training is not in the same day
+                if (db.nextWeekTrainings.indexOf(training) == 0 ||
+                    !Helper().isSameDay(
+                        db
+                            .nextWeekTrainings[
+                                db.nextWeekTrainings.indexOf(training) - 1]
+                            .timestamp
+                            .toDate(),
+                        training.timestamp.toDate()))
+                  Container(
+                    padding: const EdgeInsets.only(left: 16, top: 16),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      Helper().getCzechDayAndDate(training.timestamp.toDate()),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                TrainingCard(
+                  training: training,
+                ),
+              ])
+          ])
+        : Container(
+            height: 200,
+            child: Center(
+              child: Text('Žádné tréninky v příštím týdnu',
+                  style: Theme.of(context).textTheme.headlineSmall),
+            ),
+          );
   }
 }

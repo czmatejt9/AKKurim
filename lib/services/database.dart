@@ -11,6 +11,8 @@ import 'package:ak_kurim/services/helpers.dart';
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
+  bool trainingForNextWeek = false;
+
   bool _isUpdating = false;
   bool get isUpdating => _isUpdating;
 
@@ -39,6 +41,8 @@ class DatabaseService extends ChangeNotifier {
   List<Training> get trainerTrainings => _trainerTrainings;
   bool repeatTraining = false;
   DateTime endDate = Helper().midnight(DateTime.now());
+
+  List<Training> nextWeekTrainings = <Training>[];
 
   DateTime statsLastUpdated = DateTime.now().subtract(const Duration(days: 1));
   bool statsLoaded = false;
@@ -374,6 +378,7 @@ class DatabaseService extends ChangeNotifier {
 
     _trainerTrainings.add(training);
     sortTrainingsByDate();
+    getNextWeekTrainings();
     await db.collection('trainings').doc(training.id).set(training.toMap());
   }
 
@@ -402,6 +407,7 @@ class DatabaseService extends ChangeNotifier {
     //_trainerTrainings[_trainerTrainings
     //    .indexWhere((element) => element.id == training.id)] = training;
     sortTrainingsByDate();
+    getNextWeekTrainings();
     await db.collection('trainings').doc(training.id).update(training.toMap());
   }
 
@@ -411,7 +417,17 @@ class DatabaseService extends ChangeNotifier {
 
   Future<void> deleteTraining(Training training) async {
     _trainerTrainings.removeWhere((element) => element.id == training.id);
+    getNextWeekTrainings();
     await db.collection('trainings').doc(training.id).delete();
+  }
+
+  void getNextWeekTrainings() {
+    nextWeekTrainings = [];
+    for (Training training in _trainerTrainings) {
+      if (Helper().isWithinNextWeek(training.timestamp.toDate())) {
+        nextWeekTrainings.add(training);
+      }
+    }
   }
 
   // update stats for each member

@@ -21,12 +21,15 @@ class AttendanceScreen extends StatelessWidget {
           color: Theme.of(context).colorScheme.background,
           child: ListView.builder(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 76),
-            itemCount: db.trainerTrainings.length + 1,
+            itemCount: db.trainerTrainings.isNotEmpty
+                ? db.trainerTrainings.length + 1
+                : 1,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return TableCalendar(
                   locale: 'cs_CZ',
                   calendarFormat: CalendarFormat.month,
+                  startingDayOfWeek: StartingDayOfWeek.monday,
                   calendarStyle: const CalendarStyle(
                     weekendTextStyle: TextStyle(color: Colors.red),
                   ),
@@ -61,37 +64,36 @@ class AttendanceScreen extends StatelessWidget {
                 return Card(
                   elevation: 10,
                   child: ListTile(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline,
                       ),
-                      onTap: () {
-                        // push to take attendance screen
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TakeAttendance(
-                                  training: db.trainerTrainings[index - 1]),
-                            ));
-                      },
-                      title: Text(
-                          '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} - ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
-                      subtitle:
-                          Text(names, style: const TextStyle(fontSize: 10)),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                              '${db.trainerTrainings[index - 1].attendingNumber}/${db.trainerTrainings[index - 1].attendanceNumber}'),
-                          const Icon(Icons.people),
-                          db.trainerTrainings[index - 1].attendanceTaken
-                              ? const Icon(Icons.check, color: Colors.green)
-                              : const Icon(Icons.close, color: Colors.red)
-                        ],
-                      )),
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    onTap: () {
+                      // push to take attendance screen
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TakeAttendance(
+                                training: db.trainerTrainings[index - 1]),
+                          ));
+                    },
+                    title: Text(
+                        '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} - ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
+                    subtitle: Text(names, style: const TextStyle(fontSize: 10)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                            '${db.trainerTrainings[index - 1].attendingNumber}/${db.trainerTrainings[index - 1].attendanceNumber}'),
+                        const Icon(Icons.people),
+                        db.trainerTrainings[index - 1].attendanceTaken
+                            ? const Icon(Icons.check, color: Colors.green)
+                            : const Icon(Icons.close, color: Colors.red)
+                      ],
+                    ),
+                  ),
                 );
               } else if (db.trainerTrainings.last ==
                       db.trainerTrainings[index - 1] &&
