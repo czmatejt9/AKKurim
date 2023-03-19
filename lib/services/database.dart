@@ -42,6 +42,7 @@ class DatabaseService extends ChangeNotifier {
   bool repeatTraining = false;
   DateTime endDate = Helper().midnight(DateTime.now());
 
+  bool nextWeekLoaded = false;
   List<Training> nextWeekTrainings = <Training>[];
 
   DateTime statsLastUpdated = DateTime.now().subtract(const Duration(days: 1));
@@ -176,7 +177,7 @@ class DatabaseService extends ChangeNotifier {
 
   // download all trainings which are in the last 30 days and in the future for the current trainer
   Future<void> downloadTrainings() async {
-    db
+    await db
         .collection('trainings')
         .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
         .where('date',
@@ -212,7 +213,10 @@ class DatabaseService extends ChangeNotifier {
             // sort trainings by date
             sortTrainingsByDate();
           },
-        );
+        ).then((value) {
+          getNextWeekTrainings();
+          nextWeekLoaded = true;
+        });
       },
     );
   }
@@ -297,7 +301,6 @@ class DatabaseService extends ChangeNotifier {
         statsLastUpdated = date.toDate();
       }
     });
-    getNextWeekTrainings();
     _isUpdating = false;
     notifyListeners();
     if (!statsLoaded) {
@@ -429,6 +432,7 @@ class DatabaseService extends ChangeNotifier {
         nextWeekTrainings.add(training);
       }
     }
+    notifyListeners();
   }
 
   // update stats for each member

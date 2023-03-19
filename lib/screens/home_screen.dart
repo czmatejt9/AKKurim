@@ -16,6 +16,7 @@ import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/services/my_widgets.dart';
+import 'package:ak_kurim/services/my_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -37,25 +38,26 @@ class HomeScreen extends StatelessWidget {
       'Členové'
     ];
 
-    final Widget homeScreen = (db.currentTrainer.lastName != '')
-        ? Container(
-            color: Theme.of(context).colorScheme.background,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView(
-                children: <Widget>[
-                  const SizedBox(height: 10),
-                  Text('Vaše nadcházející tréninky',
-                      style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: 10),
-                  const NextWeekTrainings(),
-                ],
-              ),
-            ),
-          )
-        : Container(
-            color: Theme.of(context).colorScheme.background,
-            child: const LinearProgressIndicator());
+    final Widget homeScreen =
+        (db.currentTrainer.lastName != '' && db.nextWeekLoaded)
+            ? Container(
+                color: Theme.of(context).colorScheme.background,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView(
+                    children: <Widget>[
+                      const SizedBox(height: 10),
+                      Text('Vaše nadcházející tréninky',
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 10),
+                      const NextWeekTrainings(),
+                    ],
+                  ),
+                ),
+              )
+            : Container(
+                color: Theme.of(context).colorScheme.background,
+                child: const Center(child: CircularProgressIndicator()));
 
     if (db.currentTrainer.lastName == '' ||
         db.currentTrainer.email != user.email) {
@@ -118,7 +120,12 @@ class HomeScreen extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () {
-                        // TODO SETTINGS
+                        // push settings screen as a new screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SettingsScreen()),
+                        );
                       },
                       icon: const Icon(Icons.settings),
                     ),
