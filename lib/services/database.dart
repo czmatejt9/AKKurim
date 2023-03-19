@@ -297,6 +297,7 @@ class DatabaseService extends ChangeNotifier {
         statsLastUpdated = date.toDate();
       }
     });
+    getNextWeekTrainings();
     _isUpdating = false;
     notifyListeners();
     if (!statsLoaded) {
