@@ -40,8 +40,6 @@ class DatabaseService extends ChangeNotifier {
   bool repeatTraining = false;
   DateTime endDate = Helper().midnight(DateTime.now());
 
-  List<Training> _allTrainings = <Training>[];
-  List<Training> get allTrainings => _allTrainings;
   DateTime statsLastUpdated = DateTime.now().subtract(const Duration(days: 1));
   bool statsLoaded = false;
   Group?
@@ -216,7 +214,8 @@ class DatabaseService extends ChangeNotifier {
   }
 
   // for statistics
-  Future<void> downloadAllPastTrainings() async {
+  Future<List<dynamic>> downloadAllPastTrainings() async {
+    List allTrainings = [];
     await db
         .collection('trainings')
         .where('date',
@@ -225,13 +224,12 @@ class DatabaseService extends ChangeNotifier {
         .get()
         .then(
       (QuerySnapshot querySnapshot) {
-        _allTrainings = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
+        allTrainings = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
           return Training.fromFirestore(doc);
         }).toList();
-
-        // add the trainings where the current trainer is the substitute trainer
       },
     );
+    return allTrainings;
   }
 
   Future<void> downloadMembers({bool forceUpdate = false, bool init = false}) {
@@ -424,7 +422,7 @@ class DatabaseService extends ChangeNotifier {
       return;
     }
     notifyListeners();
-    downloadAllPastTrainings().then((value) {
+    downloadAllPastTrainings().then((allTrainings) {
       for (Member member in _members) {
         member.attendanceCount = {
           'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
@@ -442,8 +440,9 @@ class DatabaseService extends ChangeNotifier {
             };
           }
         }
-      } // reset the attendance count
-      for (Training training in _allTrainings) {
+      } // reset the attendance count above
+      // se the attendance count
+      for (Training training in allTrainings) {
         for (var pair in IterableZip(
             [training.attendanceKeys, training.attendanceValues])) {
           String id = pair[0];

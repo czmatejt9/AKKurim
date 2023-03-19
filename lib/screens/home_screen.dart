@@ -176,7 +176,7 @@ class HomeScreen extends StatelessWidget {
                             DefaultTabController.of(context).index == 0) {
                           if (db.trainerGroups.isNotEmpty) {
                             db.endDate = navigation.selectedDate
-                                .add(const Duration(days: 28));
+                                .add(const Duration(days: 29));
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
