@@ -35,7 +35,7 @@ class Helper {
 
   bool isWithinNextWeek(DateTime date) {
     DateTime now = DateTime.now();
-    return getCountBetweenDates(now, date) <= 7 &&
+    return getCountBetweenDates(now, date) < 7 &&
         getCountBetweenDates(DateTime.now(), date) >= 0 &&
         date.isAfter(now);
   }

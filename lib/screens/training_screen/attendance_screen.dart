@@ -52,49 +52,7 @@ class AttendanceScreen extends StatelessWidget {
                   db.trainerTrainings[index - 1].timestamp.toDate(),
                   navigation.selectedDate)) {
                 navigation.trainingForCurrentDay = true;
-                Group group =
-                    db.getGroupFromID(db.trainerTrainings[index - 1].groupID);
-                String names = group.trainerIDs.map((id) {
-                  return db.getTrainerFullNameFromID(id);
-                }).join(', ');
-                if (db.trainerTrainings[index - 1].substituteTrainerID != '') {
-                  names +=
-                      ', ${db.getTrainerFullNameFromID(db.trainerTrainings[index - 1].substituteTrainerID)}';
-                }
-                return Card(
-                  elevation: 10,
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    ),
-                    onTap: () {
-                      // push to take attendance screen
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TakeAttendance(
-                                training: db.trainerTrainings[index - 1]),
-                          ));
-                    },
-                    title: Text(
-                        '${Helper().getHourMinute(db.trainerTrainings[index - 1].timestamp.toDate())} - ${db.getGroupNameFromID(db.trainerTrainings[index - 1].groupID)}'),
-                    subtitle: Text(names, style: const TextStyle(fontSize: 10)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                            '${db.trainerTrainings[index - 1].attendingNumber}/${db.trainerTrainings[index - 1].attendanceNumber}'),
-                        const Icon(Icons.people),
-                        db.trainerTrainings[index - 1].attendanceTaken
-                            ? const Icon(Icons.check, color: Colors.green)
-                            : const Icon(Icons.close, color: Colors.red)
-                      ],
-                    ),
-                  ),
-                );
+                return TrainingCard(training: db.trainerTrainings[index - 1]);
               } else if (db.trainerTrainings.last ==
                       db.trainerTrainings[index - 1] &&
                   !navigation.trainingForCurrentDay) {
@@ -898,6 +856,55 @@ class TakeAttendance extends StatelessWidget {
               ),
             ),
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+class TrainingCard extends StatelessWidget {
+  final Training training;
+  const TrainingCard({super.key, required this.training});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseService>(context);
+    Group group = db.getGroupFromID(training.groupID);
+    String names = group.trainerIDs.map((id) {
+      return db.getTrainerFullNameFromID(id);
+    }).join(', ');
+    if (training.substituteTrainerID != '') {
+      names += ', ${db.getTrainerFullNameFromID(training.substituteTrainerID)}';
+    }
+    return Card(
+      elevation: 10,
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        onTap: () {
+          // push to take attendance screen
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TakeAttendance(training: training),
+              ));
+        },
+        title: Text(
+            '${Helper().getHourMinute(training.timestamp.toDate())} - ${db.getGroupNameFromID(training.groupID)}'),
+        subtitle: Text(names, style: const TextStyle(fontSize: 10)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${training.attendingNumber}/${training.attendanceNumber}'),
+            const Icon(Icons.people),
+            training.attendanceTaken
+                ? const Icon(Icons.check, color: Colors.green)
+                : const Icon(Icons.close, color: Colors.red)
+          ],
         ),
       ),
     );

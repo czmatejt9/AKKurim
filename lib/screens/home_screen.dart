@@ -16,7 +16,6 @@ import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/services/my_widgets.dart';
-import 'package:ak_kurim/services/my_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -124,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SettingsScreen()),
+                              builder: (context) => const SettingsScreen()),
                         );
                       },
                       icon: const Icon(Icons.settings),
@@ -199,8 +198,7 @@ class HomeScreen extends StatelessWidget {
                         } else if (navigation.currentIndex == 1 &&
                             DefaultTabController.of(context).index == 0) {
                           if (db.trainerGroups.isNotEmpty) {
-                            db.endDate = navigation.selectedDate
-                                .add(const Duration(days: 29));
+                            db.endDate = navigation.selectedDate;
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
