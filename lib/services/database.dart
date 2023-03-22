@@ -179,7 +179,10 @@ class DatabaseService extends ChangeNotifier {
   Future<void> downloadTrainings() async {
     await db
         .collection('trainings')
-        .where('groupID', whereIn: _trainerGroups.map((group) => group.id))
+        .where('groupID',
+            whereIn: _trainerGroups.isNotEmpty
+                ? _trainerGroups.map((group) => group.id)
+                : [''])
         .where('date',
             isGreaterThan: Timestamp.fromDate(
                 DateTime.now().subtract(const Duration(days: 30))))
