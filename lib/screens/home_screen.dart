@@ -78,37 +78,6 @@ class HomeScreen extends StatelessWidget {
               appBar: AppBar(
                   title: Text(titles[navigation.currentIndex]),
                   actions: <IconButton>[
-                    // move this to settings
-                    /* IconButton(
-                      icon: const Icon(Icons.sync),
-                      onPressed: () {
-                        // alert dialog asking for confirmation if user wants to sync data
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Synchronizace dat'),
-                                content: const Text(
-                                    'Opravdu chcete stáhnout aktuální data?\n(Data se automaticky stahují při spuštění aplikace)'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: const Text('Zrušit'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: const Text('Synchronizovat'),
-                                    onPressed: () {
-                                      db.initializeData(user);
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            });
-                      },
-                    ), */
                     IconButton(
                       icon: const Icon(
                         Icons.brightness_4_outlined,
@@ -123,7 +92,7 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => SettingsScreen(user: user)),
                         );
                       },
                       icon: const Icon(Icons.settings),

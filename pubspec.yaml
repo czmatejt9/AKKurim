@@ -46,6 +46,7 @@ dependencies:
   table_calendar: ^3.0.8
   week_of_year: ^2.0.0
   collection: ^1.17.0
+  package_info_plus: ^3.0.3
 
 dev_dependencies:
   flutter_test:

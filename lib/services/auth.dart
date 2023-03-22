@@ -54,6 +54,34 @@ class AuthService {
       return Future(() => null);
     }
   }
+
+  // change password
+  // why tgf is the await not working here?
+  Future<String> changePassword(
+      String currentPassword, String newPassword) async {
+    String errorMessage = "Heslo bylo úspěšně změněno";
+    final auth.User? user = auth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // No user is signed in.
+      return "No user is signed in.";
+    }
+    final cred = auth.EmailAuthProvider.credential(
+        email: user.email!, password: currentPassword);
+
+    await user.reauthenticateWithCredential(cred).then((value) {
+      user.updatePassword(newPassword).then((_) {
+        errorMessage = "Heslo bylo úspěšně změněno";
+      }).catchError((error) {
+        errorMessage = "Heslo se nepodařilo změnit. (chyba: $error))";
+        return Future(() => null);
+      });
+    }).catchError((error) {
+      //print("Failed to reauthenticate.");
+      errorMessage = "Nesprávné staré heslo.";
+      return Future(() => null);
+    });
+    return errorMessage;
+  }
 }
 
 class LoginScreenManager extends ChangeNotifier {
