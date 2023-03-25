@@ -48,6 +48,15 @@ class SettingsScreen extends StatelessWidget {
                           onPressed: () {
                             db.initializeData(user);
                             Navigator.of(context).pop();
+                            // show snackbar
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Data byla úspěšně synchronizována',
+                                    textAlign: TextAlign.center),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
                           },
                         ),
                       ],
