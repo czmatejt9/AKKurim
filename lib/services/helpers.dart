@@ -37,7 +37,7 @@ class Helper {
     DateTime now = DateTime.now();
     return getCountBetweenDates(now, date) < 7 &&
         getCountBetweenDates(DateTime.now(), date) >= 0 &&
-        date.isAfter(now);
+        date.isAfter(midnight(now));
   }
 
   bool isSameDay(DateTime date1, DateTime date2) {

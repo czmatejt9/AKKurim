@@ -299,7 +299,7 @@ class NextWeekTrainings extends StatelessWidget {
                 ),
               ])
           ])
-        : Container(
+        : SizedBox(
             height: 200,
             child: Center(
               child: Text('Žádné tréninky v příštím týdnu',
