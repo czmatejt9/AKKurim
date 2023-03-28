@@ -728,6 +728,7 @@ class TakeAttendance extends StatelessWidget {
                 icon: const Icon(Icons.rotate_left)),
             IconButton(
                 onPressed: () {
+                  db.isChangedTrainingGroup = false;
                   Navigator.push(
                       context,
                       MaterialPageRoute(

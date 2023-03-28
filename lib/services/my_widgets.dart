@@ -46,17 +46,23 @@ class SettingsScreen extends StatelessWidget {
                         TextButton(
                           child: const Text('Synchronizovat'),
                           onPressed: () {
-                            db.initializeData(user);
-                            Navigator.of(context).pop();
-                            // show snackbar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Data byla úspěšně synchronizována',
-                                    textAlign: TextAlign.center),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            Future.wait(<Future<void>>[
+                              db.initializeData(user),
+                            ]).then((List<void> results) {
+                              // show snackbar
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      db.dataOnline
+                                          ? 'Data byla úspěšně synchronizována'
+                                          : 'Nepodařilo se synchronizovat data',
+                                      textAlign: TextAlign.center),
+                                  backgroundColor:
+                                      db.dataOnline ? Colors.green : Colors.red,
+                                ),
+                              );
+                            });
                           },
                         ),
                       ],

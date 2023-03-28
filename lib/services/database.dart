@@ -11,6 +11,8 @@ import 'package:ak_kurim/services/helpers.dart';
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
+  bool dataOnline = false;
+
   bool trainingForNextWeek = false;
 
   bool _isUpdating = false;
@@ -287,6 +289,7 @@ class DatabaseService extends ChangeNotifier {
   Future<void> initializeData(User user) async {
     _isUpdating = true;
     db.settings = const Settings(persistenceEnabled: true);
+    dataOnline = false;
     // download everything from Firestore
     await downloadTrainers(
         user: user,
@@ -302,6 +305,7 @@ class DatabaseService extends ChangeNotifier {
         var data = documentSnapshot.data()! as Map<String, dynamic>;
         Timestamp date = data['lastUpdate'];
         statsLastUpdated = date.toDate();
+        dataOnline = !documentSnapshot.metadata.isFromCache;
       }
     });
     _isUpdating = false;
