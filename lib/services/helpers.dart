@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:math';
 import 'package:week_of_year/week_of_year.dart';
 
@@ -11,6 +12,10 @@ class Helper {
 
   bool isSameWeek(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.weekOfYear == date2.weekOfYear;
+  }
+
+  String get monthIndex {
+    return DateTime.now().month.toString().padLeft(2, '0');
   }
 
   String getHourMinute(DateTime date) {

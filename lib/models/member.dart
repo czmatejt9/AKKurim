@@ -53,6 +53,15 @@ class Member {
   String get address => '$street\n $city, $zip';
   String get bornYear => born.substring(0, 4);
   String get initials => '${firstName[0]} ${lastName[0]}';
+  String get r2021 => racesCount.containsKey('2021')
+      ? racesCount['2021'].length.toString()
+      : '0';
+  String get r2022 => racesCount.containsKey('2022')
+      ? racesCount['2022'].length.toString()
+      : '0';
+  String get r2023 => racesCount.containsKey('2023')
+      ? racesCount['2023'].length.toString()
+      : '0';
 
   factory Member.fromMap(Map<dynamic, dynamic> data, String id) {
     return Member(

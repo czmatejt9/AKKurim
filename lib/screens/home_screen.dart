@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
     final List<String> titles = <String>[
       db.currentTrainer.fullName,
       'Tréninky',
-      'Akce',
+      'Závody',
       'Členové'
     ];
 
@@ -151,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                   const MembersScreen(),
                 ],
               ),
-              floatingActionButton: navigation.currentIndex != 0
+              floatingActionButton: navigation.currentIndex == 1
                   ? FloatingActionButton(
                       onPressed: () {
                         if (navigation.currentIndex == 1 &&
@@ -250,7 +250,7 @@ class HomeScreen extends StatelessWidget {
                   NavigationDestination(
                     icon: Icon(Icons.emoji_events_outlined),
                     selectedIcon: Icon(Icons.emoji_events),
-                    label: 'Akce',
+                    label: 'Závody',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.people_outlined),
