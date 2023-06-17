@@ -1,4 +1,3 @@
-import 'dart:html';
 import 'dart:math';
 import 'package:week_of_year/week_of_year.dart';
 
@@ -14,12 +13,12 @@ class Helper {
     return date1.year == date2.year && date1.weekOfYear == date2.weekOfYear;
   }
 
-  String get monthIndex {
-    return DateTime.now().month.toString().padLeft(2, '0');
-  }
-
   String getHourMinute(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String getYearMonth(DateTime date) {
+    return '${date.year.toString()}-${date.month.toString().padLeft(2, '0')}';
   }
 
   String getDayMonth(DateTime date) {
@@ -94,6 +93,24 @@ class Helper {
 
   String getCzechDayAndDate(DateTime date) {
     return '${getCzechDayName(date)} ${date.day}. ${getCzechMonthName(date)}';
+  }
+
+  String getCzechMonthAndYear(DateTime date) {
+    List<String> months = [
+      'leden',
+      'únor',
+      'březen',
+      'duben',
+      'květen',
+      'červen',
+      'červenc',
+      'srpen',
+      'září',
+      'říjen',
+      'listopad',
+      'prosinec'
+    ];
+    return '${months[date.month - 1]} ${date.year}';
   }
 
   String getCzechEnding(int number) {

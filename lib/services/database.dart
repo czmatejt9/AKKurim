@@ -6,7 +6,9 @@ import 'package:ak_kurim/models/trainer.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
+import 'package:ak_kurim/models/race_preview.dart';
 import 'package:ak_kurim/services/helpers.dart';
+import 'package:dio/dio.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -53,6 +55,9 @@ class DatabaseService extends ChangeNotifier {
       statsSelectedGroup; // selected group for stats if null all time stats are shown
 
   bool isChangedTrainingGroup = false;
+
+  List<RacePreview> racePreviews = <RacePreview>[];
+  bool racesLoaded = false;
 
   void refresh() {
     notifyListeners();
@@ -310,6 +315,10 @@ class DatabaseService extends ChangeNotifier {
     });
     _isUpdating = false;
     notifyListeners();
+
+    // get current races within this month from api
+    downloadCurrentRaces();
+
     if (!statsLoaded) {
       updateStats();
     }
@@ -447,9 +456,10 @@ class DatabaseService extends ChangeNotifier {
     DateTime now = DateTime.now();
     if (Helper().midnight(now) == Helper().midnight(statsLastUpdated)) {
       statsLoaded = true;
+      notifyListeners();
       return;
     }
-    notifyListeners();
+
     downloadAllPastTrainings().then((allTrainings) {
       for (Member member in _members) {
         member.attendanceCount = {
@@ -522,5 +532,43 @@ class DatabaseService extends ChangeNotifier {
           .doc('lastUpdate')
           .set({'lastUpdate': Timestamp.fromDate(statsLastUpdated)});
     });
+  }
+
+  Future<void> downloadCurrentRaces({bool manual = false}) async {
+    if (manual) {
+      racesLoaded = false;
+      notifyListeners();
+    }
+
+    String apiUrl = 'https://coral-app-nfbvh.ondigitalocean.app/api/calendar/';
+    String yearMonth = Helper().getYearMonth(DateTime.now());
+    bool error = false;
+
+    Dio dio = Dio();
+    Response response = await dio.get(apiUrl + yearMonth).catchError((e) {
+      // check if it is connection error
+      error = true;
+      return Response(
+          data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
+    });
+
+    if (!error) {
+      await db.collection('races').doc(yearMonth).set(response.data);
+    }
+
+    Map<String, dynamic> data = {};
+    try {
+      var pulled = db.collection('races').doc(yearMonth).get();
+      data = (await pulled).data() as Map<String, dynamic>;
+    } catch (e) {
+      return;
+    }
+
+    for (Map<String, dynamic> each in data["races"]) {
+      racePreviews.add(RacePreview.fromMap(each));
+    }
+
+    racesLoaded = true;
+    notifyListeners();
   }
 }
