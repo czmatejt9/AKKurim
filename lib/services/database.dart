@@ -7,11 +7,13 @@ import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/models/race_preview.dart';
+import 'package:ak_kurim/models/race_info.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:dio/dio.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
+  String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app/';
 
   bool dataOnline = false;
 
@@ -58,6 +60,7 @@ class DatabaseService extends ChangeNotifier {
 
   List<RacePreview> racePreviews = <RacePreview>[];
   bool racesLoaded = false;
+  Map<String, RaceInfo> loadedRaces = <String, RaceInfo>{};
 
   void refresh() {
     notifyListeners();
@@ -540,12 +543,12 @@ class DatabaseService extends ChangeNotifier {
       notifyListeners();
     }
 
-    String apiUrl = 'https://coral-app-nfbvh.ondigitalocean.app/api/calendar/';
     String yearMonth = Helper().getYearMonth(DateTime.now());
+    String apiUrl = '$homeUrl/api/calendar/$yearMonth';
     bool error = false;
 
     Dio dio = Dio();
-    Response response = await dio.get(apiUrl + yearMonth).catchError((e) {
+    Response response = await dio.get(apiUrl).catchError((e) {
       // check if it is connection error
       error = true;
       return Response(
@@ -570,5 +573,44 @@ class DatabaseService extends ChangeNotifier {
 
     racesLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> getRaceInfo({
+    required String id,
+    required String place,
+    String clubname = "Kuřim",
+  }) async {
+    String apiUrl = '$homeUrl/api/race/$id/$clubname';
+    bool error = false;
+
+    Dio dio = Dio();
+    Response response = await dio.get(apiUrl).catchError((e) {
+      // check if it is connection error
+      error = true;
+      return Response(
+          data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
+    });
+
+    if (!error) {
+      db.collection('raceInfo').doc(id).set(response.data);
+    }
+
+    Map<String, dynamic> data = {};
+    try {
+      db.settings = const Settings(persistenceEnabled: true);
+      var pulled = db.collection('raceInfo').doc(id).get();
+      data = (await pulled).data() as Map<String, dynamic>;
+    } catch (e) {
+      RaceInfo raceInfo = RaceInfo.empty();
+      loadedRaces[id] = raceInfo;
+      notifyListeners();
+      return;
+    }
+
+    data['place'] = place;
+    RaceInfo raceInfo = RaceInfo.fromMap(data);
+    loadedRaces[id] = raceInfo;
+    notifyListeners();
+    return;
   }
 }

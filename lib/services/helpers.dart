@@ -122,4 +122,8 @@ class Helper {
       return 'ů';
     }
   }
+
+  bool isBeforeToday(DateTime date) {
+    return midnight(date).isBefore(midnight(DateTime.now()));
+  }
 }

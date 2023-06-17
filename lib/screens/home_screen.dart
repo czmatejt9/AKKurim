@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
     final List<String> titles = <String>[
       db.currentTrainer.fullName,
       'Tréninky',
-      'Závody',
+      'Závody - ${Helper().getCzechMonthAndYear(DateTime.now())}',
       'Členové'
     ];
 
