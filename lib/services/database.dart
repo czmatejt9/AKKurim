@@ -578,14 +578,20 @@ class DatabaseService extends ChangeNotifier {
   Future<void> getRaceInfo({
     required String id,
     required String place,
-    String clubname = "Kuřim",
+    String clubname = "Kuřim", // default clubname
   }) async {
     String apiUrl = '$homeUrl/api/race/$id/$clubname';
     bool error = false;
+    String error_code = '';
 
     Dio dio = Dio();
     Response response = await dio.get(apiUrl).catchError((e) {
       // check if it is connection error
+      // check if error is code 500
+      if (e.response?.statusCode == 500) {
+        error_code = '500';
+      }
+
       error = true;
       return Response(
           data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
@@ -601,7 +607,7 @@ class DatabaseService extends ChangeNotifier {
       var pulled = db.collection('raceInfo').doc(id).get();
       data = (await pulled).data() as Map<String, dynamic>;
     } catch (e) {
-      RaceInfo raceInfo = RaceInfo.empty();
+      RaceInfo raceInfo = RaceInfo.empty(error: error_code);
       loadedRaces[id] = raceInfo;
       notifyListeners();
       return;

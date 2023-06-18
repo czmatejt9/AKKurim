@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class RaceInfo {
   final String id;
   final String name;
@@ -32,12 +34,12 @@ class RaceInfo {
     );
   }
 
-  factory RaceInfo.empty() {
+  factory RaceInfo.empty({String? error}) {
     return RaceInfo(
       id: '',
       name: '',
       place: '',
-      infoUrl: '',
+      infoUrl: error ?? '',
       racers: [],
       racersWithDisciplines: [],
       schedule: '',

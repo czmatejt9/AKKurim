@@ -139,168 +139,220 @@ class RaceProfile extends StatelessWidget {
             ? db.loadedRaces[id]!.id != ''
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Text(
-                          racePreview.name,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.8,
-                          children: List.generate(
-                              db.loadedRaces[id]!.racersWithDisciplines.length,
-                              (index) {
-                            return Center(
-                              child: Card(
-                                elevation: 10,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .outline),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary
-                                        .withOpacity(0.4),
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        await db.getRaceInfo(
+                            id: racePreview.id, place: racePreview.place);
+                      },
+                      child: ListView(
+                        children: <Widget>[
+                          Text(
+                            racePreview.name,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 1.8,
+                            children: List.generate(
+                                db.loadedRaces[id]!.racersWithDisciplines
+                                    .length, (index) {
+                              return Center(
+                                child: Card(
+                                  elevation: 10,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      color: Helper().getSecondsFromMidnight(
+                                                      DateTime.now()) >
+                                                  Helper().getSecondsFromTimeString(db
+                                                          .loadedRaces[id]!
+                                                          .racersWithDisciplines[
+                                                              index]
+                                                          .split('\n')[
+                                                              db.loadedRaces[id]!.racersWithDisciplines[index]
+                                                                      .split(
+                                                                          '\n')
+                                                                      .length -
+                                                                  1]
+                                                          .split(' ')[0]) +
+                                                      10 *
+                                                          60 // 10 minutes grace
+                                              ||
+                                              Helper()
+                                                      .midnight(racePreview.timestamp.toDate())
+                                                      .difference(Helper().midnight(DateTime.now()))
+                                                      .inDays <
+                                                  0
+                                          ? Colors.green[500]
+                                          : Colors.orange[500],
+                                    ),
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        for (var line in db.loadedRaces[id]!
+                                            .racersWithDisciplines[index]
+                                            .split('\n'))
+                                          Text(line,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold))
+                                      ],
+                                    )),
                                   ),
-                                  child: Center(
-                                      child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      for (var line in db.loadedRaces[id]!
-                                          .racersWithDisciplines[index]
-                                          .split('\n'))
-                                        Text(line,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold))
-                                    ],
-                                  )),
                                 ),
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('Časový harmonogram',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        for (var discipline
-                            in db.loadedRaces[id]!.scheduleWithRacers)
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Card(
-                                elevation: 10,
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .outline),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                    color: discipline.split('\n')[1].length > 1
-                                        ?
-                                        // use highlight color if the discipline has racers assigned,
-                                        // otherwise use the default color
-                                        Theme.of(context)
-                                            .colorScheme
-                                            .secondary
-                                            .withOpacity(0.4)
-                                        : null,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Časový harmonogram',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                          for (var discipline
+                              in db.loadedRaces[id]!.scheduleWithRacers)
+                            Card(
+                              elevation: 10,
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                  color: Helper().getSecondsFromMidnight(
+                                                  DateTime.now()) >
+                                              Helper().getSecondsFromTimeString(
+                                                      discipline
+                                                          .split('\n')[0]
+                                                          .split(' ')[0]) +
+                                                  10 * 60 // 10 minutes grace
+                                          ||
+                                          Helper()
+                                                  .midnight(racePreview
+                                                      .timestamp
+                                                      .toDate())
+                                                  .difference(Helper()
+                                                      .midnight(DateTime.now()))
+                                                  .inDays <
+                                              0
+                                      ? Colors.green[500]
+                                      : discipline.split('\n')[1].length > 1
+                                          ? Colors.orange[500]
+                                          : null,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                      child: Text(
+                                        discipline.split('\n')[0],
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    if (discipline.split('\n')[1].length > 1)
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
-                                            8, 8, 8, 8),
+                                            8, 0, 8, 8),
                                         child: Text(
-                                          discipline.split('\n')[0],
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
+                                          discipline.split('\n')[1],
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ),
-                                      if (discipline.split('\n')[1].length > 1)
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8, 0, 8, 8),
-                                          child: Text(
-                                            discipline.split('\n')[1],
-                                            style:
-                                                const TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                      ],
+                            ),
+                        ],
+                      ),
                     ),
                   )
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Text(
-                          racePreview.name,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 2,
-                            children: List.generate(racePreview.members.length,
-                                (index) {
-                              return Center(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .outline),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      racePreview.members[index],
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        await db.getRaceInfo(
+                            id: racePreview.id, place: racePreview.place);
+                      },
+                      child: ListView(
+                        children: <Widget>[
+                          Text(
+                            racePreview.name,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          GridView.count(
+                              crossAxisCount: 2,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              childAspectRatio: 2,
+                              children: List.generate(
+                                  racePreview.members.length, (index) {
+                                return Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      color: Helper()
+                                                  .midnight(racePreview
+                                                      .timestamp
+                                                      .toDate())
+                                                  .difference(Helper()
+                                                      .midnight(DateTime.now()))
+                                                  .inDays <
+                                              0
+                                          ? Colors.green[500]
+                                          : Colors.orange[500],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        racePreview.members[index],
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            })),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Časový harmonogram nenalezen :(',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
+                                );
+                              })),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Časový harmonogram nenalezen :(',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          const SizedBox(height: 16),
+                          db.loadedRaces[id]!.infoUrl != '500'
+                              ? const Text(
+                                  'Zkontrolujte připojení k internetu a zkuste to znovu.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 20),
+                                )
+                              : const Text(''),
+                        ],
+                      ),
                     ),
                   )
             : const Center(

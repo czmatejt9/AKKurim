@@ -126,4 +126,13 @@ class Helper {
   bool isBeforeToday(DateTime date) {
     return midnight(date).isBefore(midnight(DateTime.now()));
   }
+
+  int getSecondsFromMidnight(DateTime date) {
+    return date.difference(midnight(date)).inSeconds.abs();
+  }
+
+  int getSecondsFromTimeString(String timeString) {
+    List<String> time = timeString.split(':');
+    return int.parse(time[0]) * 3600 + int.parse(time[1]) * 60;
+  }
 }
