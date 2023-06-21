@@ -567,6 +567,7 @@ class DatabaseService extends ChangeNotifier {
       return;
     }
 
+    racePreviews = [];
     for (Map<String, dynamic> each in data["races"]) {
       racePreviews.add(RacePreview.fromMap(each));
     }
@@ -582,14 +583,14 @@ class DatabaseService extends ChangeNotifier {
   }) async {
     String apiUrl = '$homeUrl/api/race/$id/$clubname';
     bool error = false;
-    String error_code = '';
+    String errorCode = '';
 
     Dio dio = Dio();
     Response response = await dio.get(apiUrl).catchError((e) {
       // check if it is connection error
       // check if error is code 500
       if (e.response?.statusCode == 500) {
-        error_code = '500';
+        errorCode = '500';
       }
 
       error = true;
@@ -607,7 +608,7 @@ class DatabaseService extends ChangeNotifier {
       var pulled = db.collection('raceInfo').doc(id).get();
       data = (await pulled).data() as Map<String, dynamic>;
     } catch (e) {
-      RaceInfo raceInfo = RaceInfo.empty(error: error_code);
+      RaceInfo raceInfo = RaceInfo.empty(error: errorCode);
       loadedRaces[id] = raceInfo;
       notifyListeners();
       return;

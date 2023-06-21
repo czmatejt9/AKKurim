@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class RaceInfo {
   final String id;
   final String name;
