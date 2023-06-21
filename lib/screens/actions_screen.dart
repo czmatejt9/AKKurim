@@ -91,11 +91,11 @@ class RacePreviewCard extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),
         tileColor:
-            // use light blue color if the race is today, gray out races in the past
+            // use orange color if the race is today, gray out races in the past
             Helper().isSameDay(DateTime.now(), racePreview.timestamp.toDate())
-                ? Colors.orange[500]
+                ? Colors.orange[700]
                 : Helper().isBeforeToday(racePreview.timestamp.toDate())
-                    ? Colors.green[500]
+                    ? Colors.green[700]
                     : null,
         onTap: () {
           // push to take attendance screen
@@ -171,29 +171,28 @@ class RaceProfile extends StatelessWidget {
                                               .outline),
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(12)),
-                                      color: Helper().getSecondsFromMidnight(
-                                                      DateTime.now()) >
-                                                  Helper().getSecondsFromTimeString(db
-                                                          .loadedRaces[id]!
-                                                          .racersWithDisciplines[
-                                                              index]
-                                                          .split('\n')[
-                                                              db.loadedRaces[id]!.racersWithDisciplines[index]
-                                                                      .split(
-                                                                          '\n')
-                                                                      .length -
-                                                                  1]
-                                                          .split(' ')[0]) +
-                                                      10 *
-                                                          60 // 10 minutes grace
-                                              ||
-                                              Helper()
-                                                      .midnight(racePreview.timestamp.toDate())
-                                                      .difference(Helper().midnight(DateTime.now()))
-                                                      .inDays <
-                                                  0
-                                          ? Colors.green[500]
-                                          : Colors.orange[500],
+                                      color: (Helper().getSecondsFromMidnight(
+                                                          DateTime.now()) >
+                                                      Helper().getSecondsFromTimeString(db
+                                                              .loadedRaces[id]!
+                                                              .racersWithDisciplines[
+                                                                  index]
+                                                              .split('\n')[
+                                                                  db.loadedRaces[id]!.racersWithDisciplines[index].split('\n').length -
+                                                                      1]
+                                                              .split(' ')[0]) +
+                                                          10 *
+                                                              60 // 10 minutes grace
+                                                  &&
+                                                  Helper()
+                                                          .midnight(
+                                                              racePreview.timestamp.toDate())
+                                                          .difference(Helper().midnight(DateTime.now()))
+                                                          .inDays ==
+                                                      0) ||
+                                              Helper().midnight(racePreview.timestamp.toDate()).difference(Helper().midnight(DateTime.now())).inDays < 0
+                                          ? Colors.green[700]
+                                          : Colors.orange[700],
                                     ),
                                     child: Center(
                                         child: Column(
@@ -232,25 +231,32 @@ class RaceProfile extends StatelessWidget {
                                           .outline),
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(12)),
-                                  color: Helper().getSecondsFromMidnight(
-                                                  DateTime.now()) >
-                                              Helper().getSecondsFromTimeString(
-                                                      discipline
-                                                          .split('\n')[0]
-                                                          .split(' ')[0]) +
-                                                  10 * 60 // 10 minutes grace
-                                          ||
+                                  color: (Helper().getSecondsFromMidnight(
+                                                      DateTime.now()) >
+                                                  Helper().getSecondsFromTimeString(
+                                                          discipline
+                                                              .split('\n')[0]
+                                                              .split(' ')[0]) +
+                                                      10 *
+                                                          60 // 10 minutes grace
+                                              &&
+                                              Helper()
+                                                      .midnight(racePreview
+                                                          .timestamp
+                                                          .toDate())
+                                                      .difference(Helper().midnight(
+                                                          DateTime.now()))
+                                                      .inDays ==
+                                                  0) ||
                                           Helper()
-                                                  .midnight(racePreview
-                                                      .timestamp
-                                                      .toDate())
-                                                  .difference(Helper()
-                                                      .midnight(DateTime.now()))
+                                                  .midnight(
+                                                      racePreview.timestamp.toDate())
+                                                  .difference(Helper().midnight(DateTime.now()))
                                                   .inDays <
                                               0
-                                      ? Colors.green[500]
+                                      ? Colors.green[700]
                                       : discipline.split('\n')[1].length > 1
-                                          ? Colors.orange[500]
+                                          ? Colors.orange[700]
                                           : null,
                                 ),
                                 child: Column(
@@ -273,7 +279,9 @@ class RaceProfile extends StatelessWidget {
                                             8, 0, 8, 8),
                                         child: Text(
                                           discipline.split('\n')[1],
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                   ],
@@ -323,8 +331,8 @@ class RaceProfile extends StatelessWidget {
                                                       .midnight(DateTime.now()))
                                                   .inDays <
                                               0
-                                          ? Colors.green[500]
-                                          : Colors.orange[500],
+                                          ? Colors.green[700]
+                                          : Colors.orange[700],
                                     ),
                                     child: Center(
                                       child: Text(
