@@ -103,7 +103,7 @@ class Helper {
       'duben',
       'květen',
       'červen',
-      'červenc',
+      'červenec',
       'srpen',
       'září',
       'říjen',
