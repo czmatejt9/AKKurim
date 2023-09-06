@@ -50,7 +50,7 @@ class Member {
       required this.racesCount});
 
   String get fullName => '$lastName $firstName';
-  String get address => '$street\n $city, $zip';
+  String get address => '$street\n$city, $zip';
   String get bornYear => born.substring(0, 4);
   String get initials => '${firstName[0]} ${lastName[0]}';
   String get r2021 => racesCount.containsKey('2021')
@@ -62,6 +62,9 @@ class Member {
   String get r2023 => racesCount.containsKey('2023')
       ? racesCount['2023'].length.toString()
       : '0';
+  // the format in born is yyyy-mm-dd, I want mm. dd. yyyy
+  String get bornDate =>
+      '${born.substring(8, 10)}. ${born.substring(5, 7)}. ${born.substring(0, 4)}';
 
   factory Member.fromMap(Map<dynamic, dynamic> data, String id) {
     return Member(

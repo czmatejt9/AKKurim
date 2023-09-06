@@ -27,6 +27,9 @@ class DatabaseService extends ChangeNotifier {
 
   List<Member> _filteredMembers = <Member>[]; // List of filtered members
   List<Member> get filteredMembers => _filteredMembers;
+  String searchString = '';
+  bool filterBornYear = false;
+  bool ascendingOrder = true;
 
   Trainer _trainer = Trainer(
       id: '', memberID: '', firstName: '', lastName: '', email: '', phone: '');
@@ -272,7 +275,7 @@ class DatabaseService extends ChangeNotifier {
     return Future<void>.value();
   }
 
-  void filterMembers({required String filter, Group? group}) {
+  void filterMembers({required String filter, Group? group, bool? sort}) {
     if (filter == '') {
       // clone the list
       _filteredMembers = List<Member>.from(_members);
@@ -282,6 +285,16 @@ class DatabaseService extends ChangeNotifier {
               member.firstName.toLowerCase().contains(filter.toLowerCase()) ||
               member.lastName.toLowerCase().contains(filter.toLowerCase()))
           .toList();
+    }
+
+    if (sort == true && filterBornYear) {
+      if (ascendingOrder) {
+        _filteredMembers
+            .sort((Member a, Member b) => a.bornYear.compareTo(b.bornYear));
+      } else {
+        _filteredMembers
+            .sort((Member a, Member b) => b.bornYear.compareTo(a.bornYear));
+      }
     }
 
     if (group != null) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/models/member.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class MembersScreen extends StatelessWidget {
   const MembersScreen({super.key});
@@ -19,9 +20,85 @@ class MembersScreen extends StatelessWidget {
             Container(
               color: Theme.of(context).colorScheme.background,
               child: TextField(
-                onChanged: (value) => db.filterMembers(filter: value),
-                decoration: const InputDecoration(
-                    hintText: 'Hledat', suffixIcon: Icon(Icons.search)),
+                onChanged: (value) {
+                  db.searchString = value;
+                  db.filterMembers(filter: value, sort: true);
+                },
+                decoration: InputDecoration(
+                  hintText: 'Hledat',
+                  suffixIcon: IconButton(
+                    icon: Icon(db.filterBornYear
+                        ? Icons.filter_list
+                        : Icons.filter_list_off),
+                    onPressed: () {
+                      //TODO show filter dialog
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          bool _filterBornYear = db.filterBornYear;
+                          bool _ascendingOrder = db.ascendingOrder;
+                          return AlertDialog(
+                            title: const Text('Filtr'),
+                            content:
+                                StatefulBuilder(builder: (context, setState) {
+                              return Container(
+                                width: double.maxFinite,
+                                height: 300,
+                                child: ListView(
+                                  children: <Widget>[
+                                    CheckboxListTile(
+                                      title: const Text('Rok narození'),
+                                      value: _filterBornYear,
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          _filterBornYear = value!;
+                                          db.filterBornYear = value;
+                                        });
+                                      },
+                                    ),
+                                    if (db.filterBornYear)
+                                      RadioListTile(
+                                          title: const Text('Vzestupně'),
+                                          value: true,
+                                          groupValue: db.ascendingOrder,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _ascendingOrder = true;
+                                              db.ascendingOrder = true;
+                                            });
+                                          }),
+                                    if (db.filterBornYear)
+                                      RadioListTile(
+                                          title: const Text('Sestupně'),
+                                          value: false,
+                                          groupValue: db.ascendingOrder,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _ascendingOrder = false;
+                                              db.ascendingOrder = false;
+                                            });
+                                          }),
+                                  ],
+                                ),
+                              );
+                            }),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Zavřít'),
+                              ),
+                            ],
+                          );
+                        },
+                      ).then((value) {
+                        db.filterMembers(filter: db.searchString, sort: true);
+                        db.refresh();
+                      });
+                    },
+                  ),
+                ),
               ),
             ),
             if (db.members.isNotEmpty && !db.isUpdating)
@@ -99,13 +176,34 @@ class MemberProfile extends StatelessWidget {
       body: Center(
         child: Column(
           children: <Widget>[
-            CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.grey.shade200,
-                child: Text(member.initials)),
+            GestureDetector(
+              onTap: () {
+                //show alert dialog with member address¨
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Adresa'),
+                      content: Text(member.address,
+                          style: const TextStyle(fontSize: 18)),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Zavřít'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.grey.shade200,
+                  child: Text(member.initials)),
+            ),
             const SizedBox(height: 10),
             Text(member.fullName, style: const TextStyle(fontSize: 26)),
-            Text(member.bornYear, style: const TextStyle(fontSize: 18)),
+            Text(member.bornDate, style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 20),
             const Text('Kontakty', style: TextStyle(fontSize: 24)),
             Text('email: ${member.email}',

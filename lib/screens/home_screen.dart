@@ -233,7 +233,8 @@ class HomeScreen extends StatelessWidget {
                 onDestinationSelected: (int index) {
                   navigation.currentIndex = index;
                   if (index == 2) {
-                    db.filterMembers(filter: '');
+                    db.filterMembers(filter: '', sort: true);
+                    db.refresh();
                   }
                 },
                 destinations: const <NavigationDestination>[
