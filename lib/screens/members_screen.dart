@@ -87,7 +87,7 @@ class MembersScreen extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Zavřít'),
+                                child: const Text('Použít'),
                               ),
                             ],
                           );
