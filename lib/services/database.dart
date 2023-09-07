@@ -62,8 +62,9 @@ class DatabaseService extends ChangeNotifier {
 
   bool isChangedTrainingGroup = false;
 
-  List<RacePreview> racePreviews = <RacePreview>[];
+  Map<String, List<RacePreview>> racePreviews = <String, List<RacePreview>>{};
   bool racesLoaded = false;
+  DateTime racesMonth = DateTime.now();
   Map<String, RaceInfo> loadedRaces = <String, RaceInfo>{};
   Map<String, RaceResult> loadedRaceResults = <String, RaceResult>{};
 
@@ -552,26 +553,15 @@ class DatabaseService extends ChangeNotifier {
     });
   }
 
-  Future<void> downloadCurrentRaces({bool manual = false}) async {
+  Future<void> downloadCurrentRaces(
+      {bool manual = false, String yearMonth = ""}) async {
     if (manual) {
       racesLoaded = false;
       notifyListeners();
     }
 
-    String yearMonth = Helper().getYearMonth(DateTime.now());
-    String apiUrl = '$homeUrl/api/calendar/$yearMonth';
-    bool error = false;
-
-    Dio dio = Dio();
-    Response response = await dio.get(apiUrl).catchError((e) {
-      // check if it is connection error
-      error = true;
-      return Response(
-          data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
-    });
-
-    if (!error) {
-      await db.collection('races').doc(yearMonth).set(response.data);
+    if (yearMonth == "") {
+      yearMonth = Helper().getYearMonth(DateTime.now());
     }
 
     Map<String, dynamic> data = {};
@@ -582,13 +572,33 @@ class DatabaseService extends ChangeNotifier {
       return;
     }
 
-    racePreviews = [];
+    racePreviews[yearMonth] = [];
     for (Map<String, dynamic> each in data["races"]) {
-      racePreviews.add(RacePreview.fromMap(each));
+      racePreviews[yearMonth]!.add(RacePreview.fromMap(each));
     }
 
     racesLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> changeRaceMonth(int diff) async {
+    // if it is january 2023 and dif is -1, block it (min month is january 2023)
+    if (racesMonth.year == 2023 && racesMonth.month == 1 && diff == -1) {
+      return;
+    }
+    // max month is current month + 1 TODO implement this (beware of december)
+
+    // add diff months to the current month;
+    racesMonth = DateTime(racesMonth.year, racesMonth.month + diff, 15);
+    String yearMonth = Helper().getYearMonth(racesMonth);
+
+    if (loadedRaces.containsKey(yearMonth) &&
+        yearMonth != Helper().getYearMonth(DateTime.now())) {
+      return;
+    }
+
+    downloadCurrentRaces(yearMonth: yearMonth, manual: true);
+    return;
   }
 
   Future<void> getRaceInfo({

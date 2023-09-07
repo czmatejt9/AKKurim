@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/helpers.dart';
@@ -11,23 +12,40 @@ class ActionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
     return Container(
-      color: Theme.of(context).colorScheme.background,
-      child: db.racesLoaded
-          ? Container(
-              color: Theme.of(context).colorScheme.background,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView(
-                  children: const <Widget>[
-                    ThisMonthsRaces(),
+        color: Theme.of(context).colorScheme.background,
+        child: Container(
+          color: Theme.of(context).colorScheme.background,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    IconButton(
+                        onPressed: () {
+                          db.changeRaceMonth(-1);
+                        },
+                        icon: const Icon(Icons.arrow_left)),
+                    Text(
+                      Helper().getCzechMonthAndYear(db.racesMonth),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          db.changeRaceMonth(1);
+                        },
+                        icon: const Icon(Icons.arrow_right))
                   ],
                 ),
-              ),
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
+                db.racesLoaded
+                    ? const ThisMonthsRaces()
+                    : const Center(child: CircularProgressIndicator()),
+              ],
             ),
-    );
+          ),
+        ));
   }
 }
 
@@ -37,16 +55,20 @@ class ThisMonthsRaces extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
-    return db.racePreviews.isNotEmpty
+    final selectedMonth = Helper().getYearMonth(db.racesMonth);
+    return db.racePreviews.containsKey(selectedMonth) &&
+            db.racePreviews[selectedMonth]!.isNotEmpty
         ? Column(children: <Widget>[
-            for (var preview in db.racePreviews)
+            for (var preview in db.racePreviews[selectedMonth]!)
               Column(children: <Widget>[
                 // display the below container only if the previous training is not in the same day
-                if ((db.racePreviews.indexOf(preview) == 0 ||
+                if ((db.racePreviews[selectedMonth]!.indexOf(preview) == 0 ||
                         !Helper().isSameDay(
                             db
-                                .racePreviews[
-                                    db.racePreviews.indexOf(preview) - 1]
+                                .racePreviews[selectedMonth]![db
+                                        .racePreviews[selectedMonth]!
+                                        .indexOf(preview) -
+                                    1]
                                 .timestamp
                                 .toDate(),
                             preview.timestamp.toDate())) &&
@@ -412,6 +434,12 @@ class RaceResult extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
+                        if (db.loadedRaceResults[id]!.results.isNotEmpty)
+                          const Text(
+                            'Výsledky nenalezeny :(',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 20),
+                          ),
                         for (var result in db.loadedRaceResults[id]!.results)
                           Card(
                             elevation: 10,
