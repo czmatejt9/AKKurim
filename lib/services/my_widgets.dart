@@ -4,6 +4,7 @@ import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/services/auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:ak_kurim/services/theme.dart';
 
 class SettingsScreen extends StatelessWidget {
   final User user;
@@ -16,6 +17,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
     final auth = Provider.of<AuthService>(context);
+    final ThemeService theme = Provider.of<ThemeService>(context);
     final oldPassword = TextEditingController();
     final newPassword = TextEditingController();
     final newPassword2 = TextEditingController();
@@ -24,7 +26,14 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Nastavení'),
         actions: <IconButton>[
-          // move this to settings
+          IconButton(
+            icon: const Icon(
+              Icons.brightness_4_outlined,
+            ),
+            onPressed: () {
+              theme.changeTheme();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () {

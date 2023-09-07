@@ -6,7 +6,6 @@ import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
 import 'package:ak_kurim/services/auth.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/navigation.dart';
-import 'package:ak_kurim/services/theme.dart';
 import 'package:ak_kurim/screens/actions_screen.dart';
 import 'package:ak_kurim/screens/members_screen.dart';
 import 'package:ak_kurim/screens/training_screen/training_screen_wrapper.dart';
@@ -27,7 +26,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthService auth = Provider.of<AuthService>(context);
-    final ThemeService theme = Provider.of<ThemeService>(context);
     final DatabaseService db = Provider.of<DatabaseService>(context);
 
     final List<String> titles = <String>[
@@ -78,14 +76,6 @@ class HomeScreen extends StatelessWidget {
               appBar: AppBar(
                   title: Text(titles[navigation.currentIndex]),
                   actions: <IconButton>[
-                    IconButton(
-                      icon: const Icon(
-                        Icons.brightness_4_outlined,
-                      ),
-                      onPressed: () {
-                        theme.changeTheme();
-                      },
-                    ),
                     IconButton(
                       onPressed: () {
                         // push settings screen as a new screen
