@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/models/member.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class MembersScreen extends StatelessWidget {
   const MembersScreen({super.key});

@@ -98,12 +98,19 @@ class RacePreviewCard extends StatelessWidget {
                     ? Colors.green[700]
                     : null,
         onTap: () {
-          // push to take attendance screen
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RaceProfile(racePreview: racePreview),
-              ));
+          if (Helper().isBeforeToday(racePreview.timestamp.toDate())) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RaceResult(racePreview: racePreview),
+                ));
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RaceProfile(racePreview: racePreview),
+                ));
+          }
         },
         title: Text(racePreview.name),
         subtitle: Text(racePreview.place, style: const TextStyle(fontSize: 16)),
@@ -132,239 +139,377 @@ class RaceProfile extends StatelessWidget {
     }
 
     return Scaffold(
-        appBar: AppBar(
-            title: Text(
-                '${racePreview.place}, ${Helper().getCzechDayAndDate(racePreview.timestamp.toDate())}')),
-        body: db.loadedRaces.containsKey(id)
-            ? db.loadedRaces[id]!.id != ''
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        await db.getRaceInfo(
-                            id: racePreview.id, place: racePreview.place);
-                      },
-                      child: ListView(
-                        children: <Widget>[
-                          Text(
-                            racePreview.name,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                            textAlign: TextAlign.center,
+      appBar: AppBar(
+          title: Text(
+              '${racePreview.place}, ${Helper().getCzechDayAndDate(racePreview.timestamp.toDate())}')),
+      body: db.loadedRaces.containsKey(id)
+          ? db.loadedRaces[id]!.id != ''
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await db.getRaceInfo(
+                          id: racePreview.id, place: racePreview.place);
+                    },
+                    child: ListView(
+                      children: <Widget>[
+                        Text(
+                          racePreview.name,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          childAspectRatio: 1.8,
+                          children: List.generate(
+                              db.loadedRaces[id]!.racersWithDisciplines.length,
+                              (index) {
+                            return Center(
+                              child: Card(
+                                elevation: 10,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    color: (Helper().getSecondsFromMidnight(
+                                                        DateTime.now()) >
+                                                    Helper().getSecondsFromTimeString(db
+                                                            .loadedRaces[id]!
+                                                            .racersWithDisciplines[
+                                                                index]
+                                                            .split('\n')[db.loadedRaces[id]!.racersWithDisciplines[index]
+                                                                    .split('\n')
+                                                                    .length -
+                                                                1]
+                                                            .split(' ')[0]) +
+                                                        10 *
+                                                            60 // 10 minutes grace
+                                                &&
+                                                Helper().midnight(racePreview.timestamp.toDate()).difference(Helper().midnight(DateTime.now())).inDays ==
+                                                    0) ||
+                                            Helper()
+                                                    .midnight(racePreview.timestamp.toDate())
+                                                    .difference(Helper().midnight(DateTime.now()))
+                                                    .inDays <
+                                                0
+                                        ? Colors.green[700]
+                                        : Colors.orange[700],
+                                  ),
+                                  child: Center(
+                                      child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      for (var line in db.loadedRaces[id]!
+                                          .racersWithDisciplines[index]
+                                          .split('\n'))
+                                        Text(line,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold))
+                                    ],
+                                  )),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Časový harmonogram',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        for (var discipline
+                            in db.loadedRaces[id]!.scheduleWithRacers)
+                          Card(
+                            elevation: 10,
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                        Theme.of(context).colorScheme.outline),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(12)),
+                                color: (Helper().getSecondsFromMidnight(
+                                                    DateTime.now()) >
+                                                Helper().getSecondsFromTimeString(
+                                                        discipline
+                                                            .split('\n')[0]
+                                                            .split(' ')[0]) +
+                                                    10 * 60 // 10 minutes grace
+                                            &&
+                                            Helper()
+                                                    .midnight(racePreview
+                                                        .timestamp
+                                                        .toDate())
+                                                    .difference(Helper()
+                                                        .midnight(
+                                                            DateTime.now()))
+                                                    .inDays ==
+                                                0) ||
+                                        Helper()
+                                                .midnight(
+                                                    racePreview.timestamp.toDate())
+                                                .difference(Helper().midnight(DateTime.now()))
+                                                .inDays <
+                                            0
+                                    ? Colors.green[700]
+                                    : discipline.split('\n')[1].length > 1
+                                        ? Colors.orange[700]
+                                        : null,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                    child: Text(
+                                      discipline.split('\n')[0],
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  if (discipline.split('\n')[1].length > 1)
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                                      child: Text(
+                                        discipline.split('\n')[1],
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 16),
-                          GridView.count(
+                      ],
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await db.getRaceInfo(
+                          id: racePreview.id, place: racePreview.place);
+                    },
+                    child: ListView(
+                      children: <Widget>[
+                        Text(
+                          racePreview.name,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        GridView.count(
                             crossAxisCount: 2,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 1.8,
-                            children: List.generate(
-                                db.loadedRaces[id]!.racersWithDisciplines
-                                    .length, (index) {
+                            childAspectRatio: 2,
+                            children: List.generate(racePreview.members.length,
+                                (index) {
                               return Center(
-                                child: Card(
-                                  elevation: 10,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(12)),
-                                      color: (Helper().getSecondsFromMidnight(
-                                                          DateTime.now()) >
-                                                      Helper().getSecondsFromTimeString(db
-                                                              .loadedRaces[id]!
-                                                              .racersWithDisciplines[
-                                                                  index]
-                                                              .split('\n')[
-                                                                  db.loadedRaces[id]!.racersWithDisciplines[index].split('\n').length -
-                                                                      1]
-                                                              .split(' ')[0]) +
-                                                          10 *
-                                                              60 // 10 minutes grace
-                                                  &&
-                                                  Helper()
-                                                          .midnight(
-                                                              racePreview.timestamp.toDate())
-                                                          .difference(Helper().midnight(DateTime.now()))
-                                                          .inDays ==
-                                                      0) ||
-                                              Helper().midnight(racePreview.timestamp.toDate()).difference(Helper().midnight(DateTime.now())).inDays < 0
-                                          ? Colors.green[700]
-                                          : Colors.orange[700],
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    color: Helper()
+                                                .midnight(racePreview.timestamp
+                                                    .toDate())
+                                                .difference(Helper()
+                                                    .midnight(DateTime.now()))
+                                                .inDays <
+                                            0
+                                        ? Colors.green[700]
+                                        : Colors.orange[700],
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      racePreview.members[index],
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    child: Center(
-                                        child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        for (var line in db.loadedRaces[id]!
-                                            .racersWithDisciplines[index]
-                                            .split('\n'))
-                                          Text(line,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold))
-                                      ],
-                                    )),
                                   ),
                                 ),
                               );
-                            }),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text('Časový harmonogram',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold)),
-                          for (var discipline
-                              in db.loadedRaces[id]!.scheduleWithRacers)
-                            Card(
-                              elevation: 10,
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outline),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                  color: (Helper().getSecondsFromMidnight(
-                                                      DateTime.now()) >
-                                                  Helper().getSecondsFromTimeString(
-                                                          discipline
-                                                              .split('\n')[0]
-                                                              .split(' ')[0]) +
-                                                      10 *
-                                                          60 // 10 minutes grace
-                                              &&
-                                              Helper()
-                                                      .midnight(racePreview
-                                                          .timestamp
-                                                          .toDate())
-                                                      .difference(Helper().midnight(
-                                                          DateTime.now()))
-                                                      .inDays ==
-                                                  0) ||
-                                          Helper()
-                                                  .midnight(
-                                                      racePreview.timestamp.toDate())
-                                                  .difference(Helper().midnight(DateTime.now()))
-                                                  .inDays <
-                                              0
-                                      ? Colors.green[700]
-                                      : discipline.split('\n')[1].length > 1
-                                          ? Colors.orange[700]
-                                          : null,
+                            })),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Časový harmonogram nenalezen :(',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 16),
+                        db.loadedRaces[id]!.infoUrl != '500'
+                            ? const Text(
+                                'Zkontrolujte připojení k internetu a zkuste to znovu.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 20),
+                              )
+                            : const Text(''),
+                      ],
+                    ),
+                  ),
+                )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
+    );
+  }
+}
+
+class RaceResult extends StatelessWidget {
+  final RacePreview racePreview;
+  const RaceResult({super.key, required this.racePreview});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseService>(context);
+    final id = racePreview.id;
+    if (!db.loadedRaceResults.containsKey(id)) {
+      db.getRaceResult(id: racePreview.id, place: racePreview.place);
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+          title: Text(
+              '${racePreview.place}, ${Helper().getCzechDayAndDate(racePreview.timestamp.toDate())}')),
+      body: db.loadedRaceResults.containsKey(id)
+          ? db.loadedRaceResults[id]!.id != ''
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await db.getRaceResult(
+                          id: racePreview.id, place: racePreview.place);
+                    },
+                    child: ListView(
+                      children: <Widget>[
+                        Text(
+                          racePreview.name,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text("Výsledky závodu",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        for (var result in db.loadedRaceResults[id]!.results)
+                          Card(
+                            elevation: 10,
+                            child: ListTile(
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                      child: Text(
-                                        discipline.split('\n')[0],
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(12)),
+                              ),
+                              title: Text(result.split('\n')[0],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  for (var line
+                                      in result.split('\n').sublist(1))
+                                    Text(line,
+                                        textAlign: TextAlign.center,
                                         style: const TextStyle(
                                             fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    if (discipline.split('\n')[1].length > 1)
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            8, 0, 8, 8),
-                                        child: Text(
-                                          discipline.split('\n')[1],
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                                            fontWeight: FontWeight.bold))
+                                ],
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        await db.getRaceInfo(
-                            id: racePreview.id, place: racePreview.place);
-                      },
-                      child: ListView(
-                        children: <Widget>[
-                          Text(
-                            racePreview.name,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 16),
-                          GridView.count(
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              childAspectRatio: 2,
-                              children: List.generate(
-                                  racePreview.members.length, (index) {
-                                return Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(12)),
-                                      color: Helper()
-                                                  .midnight(racePreview
-                                                      .timestamp
-                                                      .toDate())
-                                                  .difference(Helper()
-                                                      .midnight(DateTime.now()))
-                                                  .inDays <
-                                              0
-                                          ? Colors.green[700]
-                                          : Colors.orange[700],
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        racePreview.members[index],
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await db.getRaceInfo(
+                          id: racePreview.id, place: racePreview.place);
+                    },
+                    child: ListView(
+                      children: <Widget>[
+                        Text(
+                          racePreview.name,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 2,
+                            children: List.generate(racePreview.members.length,
+                                (index) {
+                              return Center(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    color: null,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      racePreview.members[index],
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                );
-                              })),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Časový harmonogram nenalezen :(',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          const SizedBox(height: 16),
-                          db.loadedRaces[id]!.infoUrl != '500'
-                              ? const Text(
-                                  'Zkontrolujte připojení k internetu a zkuste to znovu.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 20),
-                                )
-                              : const Text(''),
-                        ],
-                      ),
+                                ),
+                              );
+                            })),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Výsledky nenalezeny :(',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 16),
+                        db.loadedRaces[id]!.infoUrl != '500'
+                            ? const Text(
+                                'Zkontrolujte připojení k internetu a zkuste to znovu.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 20),
+                              )
+                            : const Text(''),
+                      ],
                     ),
-                  )
-            : const Center(
-                child: CircularProgressIndicator(),
-              ));
+                  ),
+                )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
+    );
   }
 }

@@ -8,6 +8,7 @@ import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/models/race_preview.dart';
 import 'package:ak_kurim/models/race_info.dart';
+import 'package:ak_kurim/models/race_result.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:dio/dio.dart';
 
@@ -64,6 +65,7 @@ class DatabaseService extends ChangeNotifier {
   List<RacePreview> racePreviews = <RacePreview>[];
   bool racesLoaded = false;
   Map<String, RaceInfo> loadedRaces = <String, RaceInfo>{};
+  Map<String, RaceResult> loadedRaceResults = <String, RaceResult>{};
 
   void refresh() {
     notifyListeners();
@@ -630,6 +632,51 @@ class DatabaseService extends ChangeNotifier {
     data['place'] = place;
     RaceInfo raceInfo = RaceInfo.fromMap(data);
     loadedRaces[id] = raceInfo;
+    notifyListeners();
+    return;
+  }
+
+  Future<void> getRaceResult({
+    required String id,
+    required String place,
+    String clubname = "Kuřim", // default clubname
+  }) async {
+    String apiUrl = '$homeUrl/api/results/$id/$clubname';
+    bool error = false;
+    String errorCode = '';
+
+    Dio dio = Dio();
+    Response response = await dio.get(apiUrl).catchError((e) {
+      // check if it is connection error
+      // check if error is code 500
+      if (e.response?.statusCode == 500) {
+        errorCode = '500';
+      }
+
+      error = true;
+      return Response(
+          data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
+    });
+
+    if (!error) {
+      db.collection('raceResult').doc(id).set(response.data);
+    }
+
+    Map<String, dynamic> data = {};
+    try {
+      db.settings = const Settings(persistenceEnabled: true);
+      var pulled = db.collection('raceResult').doc(id).get();
+      data = (await pulled).data() as Map<String, dynamic>;
+    } catch (e) {
+      RaceResult raceResult = RaceResult.empty(error: errorCode);
+      loadedRaceResults[id] = raceResult;
+      notifyListeners();
+      return;
+    }
+
+    data['place'] = place;
+    RaceResult raceResult = RaceResult.fromMap(data);
+    loadedRaceResults[id] = raceResult;
     notifyListeners();
     return;
   }
