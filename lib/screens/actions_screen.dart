@@ -434,7 +434,7 @@ class RaceResult extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
-                        if (db.loadedRaceResults[id]!.results.isNotEmpty)
+                        if (db.loadedRaceResults[id]!.results.isEmpty)
                           const Text(
                             'Výsledky nenalezeny :(',
                             textAlign: TextAlign.center,

@@ -569,6 +569,7 @@ class DatabaseService extends ChangeNotifier {
       var pulled = db.collection('races').doc(yearMonth).get();
       data = (await pulled).data() as Map<String, dynamic>;
     } catch (e) {
+      // TODO handle error
       return;
     }
 
@@ -651,6 +652,8 @@ class DatabaseService extends ChangeNotifier {
     required String place,
     String clubname = "Kuřim", // default clubname
   }) async {
+    // TODO change to pull from Firestore if it is already there, if not then pull from api
+
     String apiUrl = '$homeUrl/api/results/$id/$clubname';
     bool error = false;
     String errorCode = '';
