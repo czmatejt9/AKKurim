@@ -416,60 +416,53 @@ class RaceResult extends StatelessWidget {
           ? db.loadedRaceResults[id]!.id != ''
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      await db.getRaceResult(
-                          id: racePreview.id, place: racePreview.place);
-                    },
-                    child: ListView(
-                      children: <Widget>[
-                        Text(
-                          racePreview.name,
-                          style: Theme.of(context).textTheme.headlineMedium,
+                  child: ListView(
+                    children: <Widget>[
+                      Text(
+                        racePreview.name,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text("Výsledky závodu",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      if (db.loadedRaceResults[id]!.results.isEmpty)
+                        const Text(
+                          'Výsledky nenalezeny :(',
                           textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20),
                         ),
-                        const SizedBox(height: 16),
-                        const Text("Výsledky závodu",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
-                        if (db.loadedRaceResults[id]!.results.isEmpty)
-                          const Text(
-                            'Výsledky nenalezeny :(',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        for (var result in db.loadedRaceResults[id]!.results)
-                          Card(
-                            elevation: 10,
-                            child: ListTile(
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
+                      for (var result in db.loadedRaceResults[id]!.results)
+                        Card(
+                          elevation: 10,
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Theme.of(context).colorScheme.outline,
                               ),
-                              title: Text(result.split('\n')[0],
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  for (var line
-                                      in result.split('\n').sublist(1))
-                                    Text(line,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold))
-                                ],
-                              ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(12)),
+                            ),
+                            title: Text(result.split('\n')[0],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                for (var line in result.split('\n').sublist(1))
+                                  Text(line,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold))
+                              ],
                             ),
                           ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
+                        ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 )
               : Padding(
