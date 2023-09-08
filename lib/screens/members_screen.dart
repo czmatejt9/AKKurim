@@ -30,16 +30,14 @@ class MembersScreen extends StatelessWidget {
                         ? Icons.filter_list
                         : Icons.filter_list_off),
                     onPressed: () {
-                      //TODO show filter dialog
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          bool _filterBornYear = db.filterBornYear;
-                          bool _ascendingOrder = db.ascendingOrder;
                           return AlertDialog(
                             title: const Text('Filtr'),
                             content:
                                 StatefulBuilder(builder: (context, setState) {
+                              // ignore: sized_box_for_whitespace
                               return Container(
                                 width: double.maxFinite,
                                 height: 300,
@@ -47,11 +45,10 @@ class MembersScreen extends StatelessWidget {
                                   children: <Widget>[
                                     CheckboxListTile(
                                       title: const Text('Rok narození'),
-                                      value: _filterBornYear,
+                                      value: db.filterBornYear,
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          _filterBornYear = value!;
-                                          db.filterBornYear = value;
+                                          db.filterBornYear = value!;
                                         });
                                       },
                                     ),
@@ -62,7 +59,6 @@ class MembersScreen extends StatelessWidget {
                                           groupValue: db.ascendingOrder,
                                           onChanged: (value) {
                                             setState(() {
-                                              _ascendingOrder = true;
                                               db.ascendingOrder = true;
                                             });
                                           }),
@@ -73,7 +69,6 @@ class MembersScreen extends StatelessWidget {
                                           groupValue: db.ascendingOrder,
                                           onChanged: (value) {
                                             setState(() {
-                                              _ascendingOrder = false;
                                               db.ascendingOrder = false;
                                             });
                                           }),
@@ -160,7 +155,6 @@ class MembersScreen extends StatelessWidget {
   }
 }
 
-//TODO change the screen to show the member profile
 class MemberProfile extends StatelessWidget {
   final Member member;
   const MemberProfile({super.key, required this.member});

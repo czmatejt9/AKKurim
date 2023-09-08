@@ -568,6 +568,9 @@ class DatabaseService extends ChangeNotifier {
     try {
       var pulled = db.collection('races').doc(yearMonth).get();
       data = (await pulled).data() as Map<String, dynamic>;
+      if (data.isEmpty) {
+        throw Exception();
+      }
     } catch (e) {
       // TODO handle error
       return;
@@ -587,7 +590,12 @@ class DatabaseService extends ChangeNotifier {
     if (racesMonth.year == 2023 && racesMonth.month == 1 && diff == -1) {
       return;
     }
-    // max month is current month + 1 TODO implement this (beware of december)
+    // max month is current month
+    if (racesMonth.year == DateTime.now().year &&
+        racesMonth.month == DateTime.now().month &&
+        diff == 1) {
+      return;
+    }
 
     // add diff months to the current month;
     racesMonth = DateTime(racesMonth.year, racesMonth.month + diff, 15);
@@ -652,7 +660,22 @@ class DatabaseService extends ChangeNotifier {
     required String place,
     String clubname = "Kuřim", // default clubname
   }) async {
-    // TODO change to pull from Firestore if it is already there, if not then pull from api
+    // try to pull from firestore
+    try {
+      db.settings = const Settings(persistenceEnabled: true);
+      var pulled = db.collection('raceResult').doc(id).get();
+      Map<String, dynamic> data = (await pulled).data() as Map<String, dynamic>;
+      if (data.isEmpty) {
+        throw Exception();
+      }
+      data['place'] = place;
+      RaceResult raceResult = RaceResult.fromMap(data);
+      loadedRaceResults[id] = raceResult;
+      notifyListeners();
+      return;
+    } catch (e) {
+      // do nothing, try to pull from api instead below
+    }
 
     String apiUrl = '$homeUrl/api/results/$id/$clubname';
     bool error = false;
