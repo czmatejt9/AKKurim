@@ -25,7 +25,7 @@ class ActionsScreen extends StatelessWidget {
                         onPressed: () {
                           db.changeRaceMonth(-1);
                         },
-                        icon: const Icon(Icons.arrow_left)),
+                        icon: const Icon(Icons.keyboard_arrow_left)),
                     Text(
                       Helper().getCzechMonthAndYear(db.racesMonth),
                       style: const TextStyle(
@@ -35,12 +35,23 @@ class ActionsScreen extends StatelessWidget {
                         onPressed: () {
                           db.changeRaceMonth(1);
                         },
-                        icon: const Icon(Icons.arrow_right))
+                        icon: const Icon(Icons.keyboard_arrow_right))
                   ],
                 ),
-                db.racesLoaded
+                db.racesLoaded == true
                     ? const ThisMonthsRaces()
-                    : const Center(child: CircularProgressIndicator()),
+                    : db.racesLoaded == false
+                        ? const Center(child: CircularProgressIndicator())
+                        : SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: Text(
+                                  'Zkuste zkontrolovat připojení \nk internetu a přepnout měsíc.',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                            ),
+                          ),
               ],
             ),
           ),

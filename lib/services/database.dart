@@ -63,7 +63,7 @@ class DatabaseService extends ChangeNotifier {
   bool isChangedTrainingGroup = false;
 
   Map<String, List<RacePreview>> racePreviews = <String, List<RacePreview>>{};
-  bool racesLoaded = false;
+  bool? racesLoaded = false;
   DateTime racesMonth = DateTime.now();
   Map<String, RaceInfo> loadedRaces = <String, RaceInfo>{};
   Map<String, RaceResult> loadedRaceResults = <String, RaceResult>{};
@@ -572,7 +572,8 @@ class DatabaseService extends ChangeNotifier {
         throw Exception();
       }
     } catch (e) {
-      // TODO handle error
+      racesLoaded = null;
+      notifyListeners();
       return;
     }
 
@@ -586,8 +587,8 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> changeRaceMonth(int diff) async {
-    // if it is january 2023 and dif is -1, block it (min month is january 2023)
-    if (racesMonth.year == 2023 && racesMonth.month == 1 && diff == -1) {
+    // if it is january 2022 and dif is -1, block it (min month is january 2023)
+    if (racesMonth.year == 2022 && racesMonth.month == 1 && diff == -1) {
       return;
     }
     // max month is current month
