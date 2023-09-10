@@ -124,13 +124,21 @@ class RacePreviewCard extends StatelessWidget {
         ),
         tileColor:
             // use orange color if the race is today, gray out races in the past
-            Helper().isSameDay(DateTime.now(), racePreview.timestamp.toDate())
+            Helper().isSameDay(
+                        DateTime.now(), racePreview.timestamp.toDate()) &&
+                    DateTime.now().hour < 20
                 ? Colors.orange[700]
-                : Helper().isBeforeToday(racePreview.timestamp.toDate())
+                : Helper().isBeforeToday(racePreview.timestamp.toDate()) ||
+                        (Helper().isSameDay(DateTime.now(),
+                                racePreview.timestamp.toDate()) &&
+                            DateTime.now().hour >= 20)
                     ? Colors.green[700]
                     : null,
         onTap: () {
-          if (Helper().isBeforeToday(racePreview.timestamp.toDate())) {
+          if (Helper().isBeforeToday(racePreview.timestamp.toDate()) ||
+              (Helper().isSameDay(
+                      DateTime.now(), racePreview.timestamp.toDate()) &&
+                  DateTime.now().hour >= 20)) {
             Navigator.push(
                 context,
                 MaterialPageRoute(

@@ -155,6 +155,8 @@ class MembersScreen extends StatelessWidget {
   }
 }
 
+// TODO add delete member button and create member and edit member button to member profile
+// TODO after that try to show PB and SB in member profile
 class MemberProfile extends StatelessWidget {
   final Member member;
   const MemberProfile({super.key, required this.member});
@@ -171,7 +173,7 @@ class MemberProfile extends StatelessWidget {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                //show alert dialog with member address¨
+                //show alert dialog with member address
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {

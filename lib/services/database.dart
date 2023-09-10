@@ -104,6 +104,13 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).set(member.toMap());
   }
 
+  // delete member, be careful with this function
+  Future<void> deleteMember(Member member) async {
+    _members.removeWhere((element) => element.id == member.id);
+    _filteredMembers.removeWhere((element) => element.id == member.id);
+    await db.collection('members').doc(member.id).delete();
+  }
+
   // trainer functions
   Trainer getTrainerFromID(String id) {
     final Trainer trainer = _trainers.firstWhere((trainer) {
