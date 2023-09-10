@@ -24,6 +24,7 @@ class Member {
   final Map isSignedUp;
   final Map isPaid;
   final String? note;
+  Map<String, dynamic> borrowedItems = {};
   Map<String, dynamic> attendanceCount;
   Map<String, dynamic> racesCount;
 
@@ -46,6 +47,7 @@ class Member {
       required this.isSignedUp,
       required this.isPaid,
       this.note,
+      required this.borrowedItems,
       required this.attendanceCount,
       required this.racesCount});
 
@@ -86,6 +88,9 @@ class Member {
         isSignedUp: data['isSignedUp'],
         isPaid: data['isPaid'],
         note: data['note'] ?? "",
+        borrowedItems: data.containsKey('borrowedItems')
+            ? data['borrowedItems']
+            : {'tretry': '', 'dres': ''},
         attendanceCount: data.containsKey('attendanceCount')
             ? data['attendanceCount']
             : {
@@ -120,6 +125,7 @@ class Member {
         'isSignedUp': isSignedUp,
         'isPaid': isPaid,
         'note': note,
+        'borrowedItems': borrowedItems,
         'attendanceCount': attendanceCount,
         'racesCount': racesCount,
       };

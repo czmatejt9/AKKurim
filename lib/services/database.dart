@@ -87,6 +87,7 @@ class DatabaseService extends ChangeNotifier {
             street: "street",
             city: "city",
             zip: 0,
+            borrowedItems: {'tretry': '', 'dres': ''},
             isSignedUp: {},
             isPaid: {},
             attendanceCount: {},
@@ -110,6 +111,8 @@ class DatabaseService extends ChangeNotifier {
     _filteredMembers.removeWhere((element) => element.id == member.id);
     await db.collection('members').doc(member.id).delete();
   }
+
+  // TODO load PBs from server
 
   // trainer functions
   Trainer getTrainerFromID(String id) {
