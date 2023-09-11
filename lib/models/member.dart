@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ak_kurim/services/helpers.dart';
 
 // keys = [u'born', u'gender', u'firstName', u'lastName',
 // u'birhtNumber', u'EAN', u'street', u'city', u'ZIP', u'email',
@@ -7,23 +8,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Member {
   final String id;
-  final String born;
-  final String gender;
-  final String firstName;
-  final String lastName;
-  final String birthNumber;
-  final int? ean;
-  final String street;
-  final String city;
-  final int zip;
-  final String? email;
-  final String? emailParent;
-  final String? phone;
-  final String? phoneParent;
-  final String? endOfRegistration;
-  final Map isSignedUp;
-  final Map isPaid;
-  final String? note;
+  String born;
+  String gender;
+  String firstName;
+  String lastName;
+  String birthNumber;
+  String? ean;
+  String street;
+  String city;
+  String zip;
+  String? email;
+  String? emailParent;
+  String? phone;
+  String? phoneParent;
+  String? endOfRegistration;
+  Map isSignedUp;
+  Map isPaid;
+  String? note;
+  final String pb;
   Map<String, dynamic> borrowedItems = {};
   Map<String, dynamic> attendanceCount;
   Map<String, dynamic> racesCount;
@@ -47,6 +49,7 @@ class Member {
       required this.isSignedUp,
       required this.isPaid,
       this.note,
+      required this.pb,
       required this.borrowedItems,
       required this.attendanceCount,
       required this.racesCount});
@@ -71,23 +74,24 @@ class Member {
   factory Member.fromMap(Map<dynamic, dynamic> data, String id) {
     return Member(
         id: id,
-        born: data['born'],
-        gender: data['gender'],
-        firstName: data['firstName'],
-        lastName: data['lastName'],
+        born: data['born'] ?? "",
+        gender: data['gender'] ?? "",
+        firstName: data['firstName'] ?? "",
+        lastName: data['lastName'] ?? "",
         birthNumber: data['birthNumber'] ?? "",
-        ean: data['EAN'] ?? "",
+        ean: data['EAN'].toString(),
         street: data['street'],
-        city: data['city'],
-        zip: data['ZIP'],
+        city: data['city'] ?? "",
+        zip: data['ZIP'].toString(),
         email: data['email'] ?? "",
         emailParent: data['emailParent'] ?? "",
         phone: data['phone'] ?? "",
         phoneParent: data['phoneParent'] ?? "",
         endOfRegistration: data['endOfRegistration'] ?? "",
-        isSignedUp: data['isSignedUp'],
-        isPaid: data['isPaid'],
+        isSignedUp: data['isSignedUp'] ?? {},
+        isPaid: data['isPaid'] ?? {},
         note: data['note'] ?? "",
+        pb: data['pb'] ?? "",
         borrowedItems: data.containsKey('borrowedItems')
             ? data['borrowedItems']
             : {'tretry': '', 'dres': ''},
@@ -103,6 +107,34 @@ class Member {
   factory Member.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
     return Member.fromMap(data, doc.id);
+  }
+
+  factory Member.empty() {
+    return Member(
+        id: Helper().generateRandomString(20),
+        born: "",
+        gender: "",
+        firstName: "",
+        lastName: "",
+        birthNumber: "",
+        street: "",
+        city: "",
+        ean: "",
+        zip: "",
+        isSignedUp: {},
+        isPaid: {},
+        borrowedItems: {"tretry": "", "dres": ""},
+        attendanceCount: {
+          'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
+        },
+        racesCount: {'all': 0},
+        pb: "",
+        note: "",
+        email: "",
+        emailParent: "",
+        phone: "",
+        phoneParent: "",
+        endOfRegistration: "");
   }
 
   // note the document id IS NOT included in the map
@@ -125,6 +157,7 @@ class Member {
         'isSignedUp': isSignedUp,
         'isPaid': isPaid,
         'note': note,
+        'pb': pb,
         'borrowedItems': borrowedItems,
         'attendanceCount': attendanceCount,
         'racesCount': racesCount,

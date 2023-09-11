@@ -1,3 +1,4 @@
+import 'package:ak_kurim/models/member.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class HomeScreen extends StatelessWidget {
     final List<String> titles = <String>[
       db.currentTrainer.fullName,
       'Tréninky',
+      'Měření',
       'Závody',
       'Členové'
     ];
@@ -137,11 +139,13 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   homeScreen,
                   const TrainingScreen(),
+                  const Placeholder(), // TODO: add measurements screen
                   const ActionsScreen(),
                   const MembersScreen(),
                 ],
               ),
-              floatingActionButton: navigation.currentIndex == 1
+              floatingActionButton: navigation.currentIndex == 1 ||
+                      navigation.currentIndex == 4
                   ? FloatingActionButton(
                       onPressed: () {
                         if (navigation.currentIndex == 1 &&
@@ -212,6 +216,15 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 );
                               });
+                        } else if (navigation.currentIndex == 4) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MemberEdit(
+                                  member: Member.empty(),
+                                  create: true,
+                                ),
+                              ));
                         }
                       },
                       backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -238,6 +251,10 @@ class HomeScreen extends StatelessWidget {
                     selectedIcon: Icon(Icons.event_note),
                     label: 'Tréniky',
                   ),
+                  NavigationDestination(
+                      icon: Icon(Icons.timer_outlined),
+                      selectedIcon: Icon(Icons.timer),
+                      label: 'Měření'),
                   NavigationDestination(
                     icon: Icon(Icons.emoji_events_outlined),
                     selectedIcon: Icon(Icons.emoji_events),

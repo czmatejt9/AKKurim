@@ -76,22 +76,7 @@ class DatabaseService extends ChangeNotifier {
   Member getMemberFromID(String id) {
     final Member member = _members.firstWhere((member) {
       return member.id == id;
-    },
-        orElse: () => Member(
-            id: "",
-            born: "born",
-            gender: "gender",
-            firstName: "firstName",
-            lastName: "lastName",
-            birthNumber: "birthNumber",
-            street: "street",
-            city: "city",
-            zip: 0,
-            borrowedItems: {'tretry': '', 'dres': ''},
-            isSignedUp: {},
-            isPaid: {},
-            attendanceCount: {},
-            racesCount: {}));
+    }, orElse: () => Member.empty());
     return member;
   }
 
@@ -100,9 +85,33 @@ class DatabaseService extends ChangeNotifier {
     return member.fullName;
   }
 
-  // update member (set - it will overwrite the whole document)
-  Future<void> updateMember(Member member) async {
+  Future<void> createMember(Member member) async {
+    member.gender =
+        int.parse(member.birthNumber.substring(2, 3)) >= 5 ? "F" : "M";
+
+    member.born =
+        "20${member.birthNumber.substring(0, 2)}-${member.birthNumber.substring(2, 4)}-${member.birthNumber.substring(4, 6)}";
+
+    // if in born the month is greater than 12 subtract 50 from the month
+    if (int.parse(member.born.substring(5, 7)) > 12) {
+      member.born =
+          "${member.born.substring(0, 5)}${int.parse(member.born.substring(5, 7)) - 50}${member.born.substring(7)}";
+    }
+
+    _members.add(member);
+    _filteredMembers.add(member);
+    // sort members by last name
+    _members.sort((Member a, Member b) => a.lastName.compareTo(b.lastName));
+    _filteredMembers
+        .sort((Member a, Member b) => a.lastName.compareTo(b.lastName));
+
     await db.collection('members').doc(member.id).set(member.toMap());
+    notifyListeners();
+  }
+
+  // update member
+  Future<void> updateMember(Member member) async {
+    await db.collection('members').doc(member.id).update(member.toMap());
   }
 
   // delete member, be careful with this function
@@ -112,7 +121,7 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).delete();
   }
 
-  // TODO load PBs from server
+  // TODO load PBs from server, when pulling result of race (also update race count)
 
   // trainer functions
   Trainer getTrainerFromID(String id) {
