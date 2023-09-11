@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:ak_kurim/models/race_preview.dart';
-
+// TODO add gesture detector to results screen to refresh them
 class ActionsScreen extends StatelessWidget {
   const ActionsScreen({super.key});
 
