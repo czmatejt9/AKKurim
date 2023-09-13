@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:ak_kurim/models/race_preview.dart';
-// TODO add gesture detector to results screen to refresh them
+
 class ActionsScreen extends StatelessWidget {
   const ActionsScreen({super.key});
 
@@ -399,7 +399,7 @@ class RaceProfile extends StatelessWidget {
                         const SizedBox(height: 16),
                         db.loadedRaces[id]!.infoUrl != '500'
                             ? const Text(
-                                'Zkontrolujte připojení k internetu a zkuste to znovu.',
+                                'Zkontrolujte připojení k internetu a zkuste to znovu. (Potáhněte dolů pro obnovení)',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 20),
                               )
@@ -424,7 +424,10 @@ class RaceResult extends StatelessWidget {
     final db = Provider.of<DatabaseService>(context);
     final id = racePreview.id;
     if (!db.loadedRaceResults.containsKey(id)) {
-      db.getRaceResult(id: racePreview.id, place: racePreview.place);
+      db.getRaceResult(
+          id: racePreview.id,
+          place: racePreview.place,
+          timestamp: racePreview.timestamp);
     }
 
     return Scaffold(
@@ -432,120 +435,72 @@ class RaceResult extends StatelessWidget {
           title: Text(
               '${racePreview.place}, ${Helper().getCzechDayAndDate(racePreview.timestamp.toDate())}')),
       body: db.loadedRaceResults.containsKey(id)
-          ? db.loadedRaceResults[id]!.id != ''
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView(
-                    children: <Widget>[
-                      Text(
-                        racePreview.name,
-                        style: Theme.of(context).textTheme.headlineMedium,
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await db.getRaceResult(
+                      id: racePreview.id,
+                      place: racePreview.place,
+                      timestamp: racePreview.timestamp,
+                      forceUpdate: true);
+                },
+                child: ListView(
+                  children: <Widget>[
+                    Text(
+                      racePreview.name,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Výsledky závodu",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    if (db.loadedRaceResults[id]!.results.isEmpty)
+                      const Text(
+                        'Výsledky nenalezeny :(',
                         textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20),
                       ),
-                      const SizedBox(height: 16),
-                      const Text("Výsledky závodu",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      if (db.loadedRaceResults[id]!.results.isEmpty)
-                        const Text(
-                          'Výsledky nenalezeny :(',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      for (var result in db.loadedRaceResults[id]!.results)
-                        Card(
-                          elevation: 10,
-                          child: ListTile(
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(12)),
+                    if (db.loadedRaceResults[id]!.id == 'connection')
+                      const Text(
+                        'Zkontrolujte připojení k internetu a zkuste to znovu. (Potáhněte dolů pro obnovení)',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    for (var result in db.loadedRaceResults[id]!.results)
+                      Card(
+                        elevation: 10,
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.outline,
                             ),
-                            title: Text(result.split('\n')[0],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                for (var line in result.split('\n').sublist(1))
-                                  Text(line,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold))
-                              ],
-                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(12)),
+                          ),
+                          title: Text(result.split('\n')[0],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              for (var line in result.split('\n').sublist(1))
+                                Text(line,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold))
+                            ],
                           ),
                         ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      await db.getRaceInfo(
-                          id: racePreview.id, place: racePreview.place);
-                    },
-                    child: ListView(
-                      children: <Widget>[
-                        Text(
-                          racePreview.name,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 2,
-                            children: List.generate(racePreview.members.length,
-                                (index) {
-                              return Center(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .outline),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                    color: null,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      racePreview.members[index],
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            })),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Výsledky nenalezeny :(',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(height: 16),
-                        db.loadedRaces[id]!.infoUrl != '500'
-                            ? const Text(
-                                'Zkontrolujte připojení k internetu a zkuste to znovu.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 20),
-                              )
-                            : const Text(''),
-                      ],
-                    ),
-                  ),
-                )
+                      ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            )
           : const Center(
               child: CircularProgressIndicator(),
             ),

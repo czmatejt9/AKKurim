@@ -14,7 +14,7 @@ import 'package:dio/dio.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
-  String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app/';
+  String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app';
 
   bool dataOnline = false;
 
@@ -121,7 +121,9 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).delete();
   }
 
-  // TODO load PBs from server, when pulling result of race (also update race count)
+  // TODO change the downloadCurrentRaces to the old way, so the server isnt connected to the database
+  // TODO update check from github releases (maybe use github api)
+  // TODO add update function to the app by signing the app (flutter docs)
 
   // trainer functions
   Trainer getTrainerFromID(String id) {
@@ -517,8 +519,11 @@ class DatabaseService extends ChangeNotifier {
           }
         }
       } // reset the attendance count above
-      // se the attendance count
+      // set the attendance count
       for (Training training in allTrainings) {
+        if (training.attendanceTaken == false) {
+          continue;
+        }
         for (var pair in IterableZip(
             [training.attendanceKeys, training.attendanceValues])) {
           String id = pair[0];
@@ -678,10 +683,17 @@ class DatabaseService extends ChangeNotifier {
   Future<void> getRaceResult({
     required String id,
     required String place,
-    String clubname = "Kuřim", // default clubname
+    required Timestamp timestamp,
+    String clubname = "Kuřim",
+    bool forceUpdate = false,
+    // default clubname
   }) async {
     // try to pull from firestore
     try {
+      if (forceUpdate) {
+        throw Exception();
+      }
+
       db.settings = const Settings(persistenceEnabled: true);
       var pulled = db.collection('raceResult').doc(id).get();
       Map<String, dynamic> data = (await pulled).data() as Map<String, dynamic>;
@@ -704,11 +716,13 @@ class DatabaseService extends ChangeNotifier {
     Dio dio = Dio();
     Response response = await dio.get(apiUrl).catchError((e) {
       // check if it is connection error
+      if (e.response?.statusCode == null) {
+        errorCode = 'connection';
+      }
       // check if error is code 500
       if (e.response?.statusCode == 500) {
         errorCode = '500';
       }
-
       error = true;
       return Response(
           data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
@@ -734,6 +748,61 @@ class DatabaseService extends ChangeNotifier {
     RaceResult raceResult = RaceResult.fromMap(data);
     loadedRaceResults[id] = raceResult;
     notifyListeners();
+
+    updatePbsAndRaceCounts(raceResult.names, id, timestamp);
     return;
+  }
+
+  Future<void> updatePbsAndRaceCounts(
+      List names, String id, Timestamp timestamp) async {
+    String year = timestamp.toDate().year.toString();
+    for (String name in names) {
+      String lastName = name.split(' ')[0];
+      String firstName = name.split(' ')[1];
+      if (name.split(' ').length > 2) {
+        firstName += ' ${name.split(' ')[2]}';
+      }
+
+      // get member from name
+      Member member = _members.firstWhere((element) {
+        return element.firstName == firstName && element.lastName == lastName;
+      }, orElse: () => Member.empty());
+
+      if (member.ean == '') {
+        continue;
+      }
+
+      // racesCount here
+      if (!member.racesCount.containsKey(year)) {
+        member.racesCount[year] = [];
+      }
+      int id_ = int.parse(id);
+      if (!member.racesCount[year].contains(id_)) {
+        member.racesCount[year].add(id_);
+      }
+
+      // pbs here
+      String? ean = member.ean;
+      String apiUrl = '$homeUrl/api/pb/$ean';
+
+      Dio dio = Dio();
+      Response response = await dio.get(apiUrl).catchError((e) {
+        return Response(
+            data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
+      });
+
+      Map<String, dynamic> data = {};
+      try {
+        data = response.data as Map<String, dynamic>;
+      } catch (e) {
+        continue;
+      }
+      if (data.isEmpty) {
+        continue;
+      }
+
+      member.pb = data['pb'];
+      updateMember(member);
+    }
   }
 }

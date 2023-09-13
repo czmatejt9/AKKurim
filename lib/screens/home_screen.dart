@@ -16,6 +16,7 @@ import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/services/my_widgets.dart';
+import 'package:ak_kurim/screens/measurements_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -139,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   homeScreen,
                   const TrainingScreen(),
-                  const Placeholder(), // TODO: add measurements screen
+                  const MeasurementsScreen(), // TODO: add measurements screen
                   const ActionsScreen(),
                   const MembersScreen(),
                 ],

@@ -25,7 +25,7 @@ class Member {
   Map isSignedUp;
   Map isPaid;
   String? note;
-  final String pb;
+  String pb;
   Map<String, dynamic> borrowedItems = {};
   Map<String, dynamic> attendanceCount;
   Map<String, dynamic> racesCount;
@@ -101,7 +101,7 @@ class Member {
                 'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
               },
         racesCount:
-            data.containsKey('racesCount') ? data['racesCount'] : {'all': 0});
+            data.containsKey('racesCount') ? data['racesCount'] : {'all': []});
   }
 
   factory Member.fromFirestore(DocumentSnapshot doc) {
@@ -127,7 +127,7 @@ class Member {
         attendanceCount: {
           'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
         },
-        racesCount: {'all': 0},
+        racesCount: {'all': []},
         pb: "",
         note: "",
         email: "",
