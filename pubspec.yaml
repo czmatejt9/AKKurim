@@ -50,6 +50,7 @@ dependencies:
   dio: ^5.2.1+1
   auto_reload: ^1.1.0
   firebase_crashlytics: ^3.3.5
+  firebase_performance: ^0.9.2+5
 
 dev_dependencies:
   flutter_test:

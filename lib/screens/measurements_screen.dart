@@ -13,9 +13,6 @@ class MeasurementsScreen extends StatelessWidget {
           child: Column(
             children: [
               const Text('Coming soon!'),
-              TextButton(
-                  onPressed: () => throw Exception(),
-                  child: Text('Throw test exception')),
             ],
           ),
         ),
