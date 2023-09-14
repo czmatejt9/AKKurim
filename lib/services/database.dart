@@ -121,8 +121,13 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).delete();
   }
 
+  // TODO block landscape mode for the app (flutter docs)
+
   // TODO change the downloadCurrentRaces to the old way, so the server isnt connected to the database
+
   // TODO update check from github releases (maybe use github api)
+  // https://api.github.com/repos/czmatejt9/AKKurim/releases/latest
+
   // TODO add update function to the app by signing the app (flutter docs)
 
   // trainer functions
