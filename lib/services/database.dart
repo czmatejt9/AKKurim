@@ -11,11 +11,16 @@ import 'package:ak_kurim/models/race_info.dart';
 import 'package:ak_kurim/models/race_result.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:dio/dio.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app';
+  String versionUrl =
+      'https://api.github.com/repos/czmatejt9/AKKurim/releases/latest';
+  String releasesPage = 'https://github.com/czmatejt9/AKKurim/releases';
 
+  bool isNewUpdate = false;
   bool dataOnline = false;
 
   bool trainingForNextWeek = false;
@@ -364,8 +369,27 @@ class DatabaseService extends ChangeNotifier {
     // get current races within this month from api
     downloadCurrentRaces();
 
+    checkForUpdate();
+
     if (!statsLoaded) {
       updateStats();
+    }
+  }
+
+  Future<void> checkForUpdate() async {
+    Dio dio = Dio();
+    Response response = await dio.get(versionUrl).catchError((e) {
+      return Response(
+          data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
+    });
+
+    String latestVersion = response.data['tag_name'];
+    // remove the v from the version
+    latestVersion = latestVersion.substring(1);
+    String currentVersion = (await PackageInfo.fromPlatform()).version;
+    if (currentVersion != latestVersion) {
+      isNewUpdate = true;
+      notifyListeners();
     }
   }
 

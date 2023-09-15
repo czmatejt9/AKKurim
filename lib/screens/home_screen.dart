@@ -17,6 +17,7 @@ import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
 import 'package:ak_kurim/services/my_widgets.dart';
 import 'package:ak_kurim/screens/measurements_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -38,26 +39,49 @@ class HomeScreen extends StatelessWidget {
       'Členové'
     ];
 
-    final Widget homeScreen =
-        (db.currentTrainer.lastName != '' && db.nextWeekLoaded)
-            ? Container(
-                color: Theme.of(context).colorScheme.background,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView(
-                    children: <Widget>[
-                      const SizedBox(height: 10),
-                      Text('Vaše nadcházející tréninky',
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: 10),
-                      const NextWeekTrainings(),
-                    ],
-                  ),
-                ),
-              )
-            : Container(
-                color: Theme.of(context).colorScheme.background,
-                child: const Center(child: CircularProgressIndicator()));
+    final Widget homeScreen = (db.currentTrainer.lastName != '' &&
+            db.nextWeekLoaded)
+        ? Container(
+            color: Theme.of(context).colorScheme.background,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: <Widget>[
+                  if (db.isNewUpdate)
+                    GestureDetector(
+                      onTap: () {
+                        launchUrl(Uri.parse(db.releasesPage));
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        color: Theme.of(context).colorScheme.secondary,
+                        child: Row(
+                          children: <Widget>[
+                            const Icon(Icons.info_outline),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'K dispozici je aktualizace. Klikněte pro otevření stránky s novou verzí aplikace.',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  Text('Vaše nadcházející tréninky',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 10),
+                  const NextWeekTrainings(),
+                ],
+              ),
+            ),
+          )
+        : Container(
+            color: Theme.of(context).colorScheme.background,
+            child: const Center(child: CircularProgressIndicator()));
 
     if (db.currentTrainer.lastName == '' ||
         db.currentTrainer.email != user.email) {
@@ -140,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   homeScreen,
                   const TrainingScreen(),
-                  const MeasurementsScreen(), // TODO: add measurements screen
+                  const MeasurementsScreen(),
                   const ActionsScreen(),
                   const MembersScreen(),
                 ],
