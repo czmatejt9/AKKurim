@@ -2,6 +2,7 @@ import 'package:ak_kurim/services/auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/firebase_options.dart';
 import 'package:ak_kurim/wrapper.dart';
@@ -49,6 +50,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return Consumer<ThemeService>(
       builder: (context, theme, child) {
         theme.loadTheme();

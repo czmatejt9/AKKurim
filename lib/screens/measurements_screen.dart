@@ -41,15 +41,10 @@ class _MyStopWatchState extends State<MyStopWatch> {
     timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (true) {
         setState(() {
-          String millis = (stopwatch.elapsed.inMilliseconds % 1000).toString();
-          if (millis.length == 3) {
-            millis = millis.substring(0, 2);
-          } else if (millis.length == 2) {
-            millis = '0${millis.substring(0, 1)}';
-          } else {
-            millis = '00';
-          }
-
+          String millis = (stopwatch.elapsed.inMilliseconds % 1000)
+              .toString()
+              .padLeft(3, '0')
+              .substring(0, 2);
           elapsedTime =
               '${stopwatch.elapsed.inMinutes.toString().padLeft(2, '0')}:${(stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0')}.$millis';
         });
@@ -61,6 +56,7 @@ class _MyStopWatchState extends State<MyStopWatch> {
     setState(() {
       stopwatch.stop();
       timer.cancel();
+      measurements.add(athleticRound(stopwatch));
     });
   }
 
@@ -76,8 +72,16 @@ class _MyStopWatchState extends State<MyStopWatch> {
 
   void takeMeasurement() {
     setState(() {
-      measurements.add(elapsedTime);
+      measurements.add(athleticRound(stopwatch));
     });
+  }
+
+  String athleticRound(Stopwatch stopwatch) {
+    // round to 1 decimal place because hand measurements are not that precise (by adding 100ms and then removing the last digits)
+    Duration time = stopwatch.elapsed + const Duration(milliseconds: 100);
+    String millis =
+        (time.inMilliseconds % 1000).toString().padLeft(3, '0').substring(0, 1);
+    return '${time.inMinutes.toString().padLeft(2, '0')}:${(time.inSeconds % 60).toString().padLeft(2, '0')}.$millis';
   }
 
   @override
@@ -144,7 +148,8 @@ class _MyStopWatchState extends State<MyStopWatch> {
                   child: Container(
                       decoration: BoxDecoration(
                           border: Border.all(
-                              color: Theme.of(context).colorScheme.outline)),
+                              color: Theme.of(context).colorScheme.outline),
+                          borderRadius: BorderRadius.circular(10)),
                       child: Center(child: Text(dragged['dragged1'] ?? ''))),
                 ),
               );
@@ -168,7 +173,8 @@ class _MyStopWatchState extends State<MyStopWatch> {
                   child: Container(
                       decoration: BoxDecoration(
                           border: Border.all(
-                              color: Theme.of(context).colorScheme.outline)),
+                              color: Theme.of(context).colorScheme.outline),
+                          borderRadius: BorderRadius.circular(10)),
                       child: Center(child: Text(dragged['dragged2'] ?? ''))),
                 ),
               );
