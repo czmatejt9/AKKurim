@@ -164,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   homeScreen,
                   const TrainingScreen(),
-                  const MeasurementsScreen(),
+                  const Placeholder(), // TODO: change to measurements screen when ready
                   const ActionsScreen(),
                   const MembersScreen(),
                 ],
