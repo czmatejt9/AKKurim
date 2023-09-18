@@ -12,6 +12,7 @@ import 'package:ak_kurim/models/race_result.dart';
 import 'package:ak_kurim/services/helpers.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:ak_kurim/models/measurement.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -56,6 +57,9 @@ class DatabaseService extends ChangeNotifier {
   List<Training> get trainerTrainings => _trainerTrainings;
   bool repeatTraining = false;
   DateTime endDate = Helper().midnight(DateTime.now());
+
+  List<Measurement> _measurements = <Measurement>[];
+  List<Measurement> get measurements => _measurements;
 
   bool nextWeekLoaded = false;
   List<Training> nextWeekTrainings = <Training>[];
@@ -126,14 +130,7 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).delete();
   }
 
-  // TODO block landscape mode for the app (flutter docs)
-
   // TODO change the downloadCurrentRaces to the old way, so the server isnt connected to the database
-
-  // TODO update check from github releases (maybe use github api)
-  // https://api.github.com/repos/czmatejt9/AKKurim/releases/latest
-
-  // TODO add update function to the app by signing the app (flutter docs)
 
   // trainer functions
   Trainer getTrainerFromID(String id) {
@@ -181,6 +178,31 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
   }
 
+  // measurement functions
+  Measurement getMeasurementFromID(String id) {
+    final Measurement measurement = _measurements.firstWhere((measurement) {
+      return measurement.id == id;
+    }, orElse: () => Measurement.empty());
+    return measurement;
+  }
+
+  Measurement createMeasurementFromTraining(
+      Training training, bool isRun, String name, String discipline) {
+    Measurement measurement = Measurement.empty();
+    measurement.isRun = isRun;
+    measurement.name = name;
+    measurement.discipline = discipline;
+    measurement.measurements = {};
+    for (String key in training.attendanceKeys) {
+      if (isTrainer(key)) {
+        continue;
+      }
+      measurement.measurements[key] = '';
+    }
+    _measurements.add(measurement);
+    return measurement;
+  }
+
   // download functions
   Future<void> downloadTrainers({required User user, bool init = false}) async {
     db.collection('trainers').get().then(
@@ -223,7 +245,7 @@ class DatabaseService extends ChangeNotifier {
   }
 
   // download all trainings which are in the last 30 days and in the future for the current trainer
-  Future<void> downloadTrainings() async {
+  Future<void> downloadTrainings({bool init = false}) async {
     await db
         .collection('trainings')
         .where('groupID',
@@ -269,6 +291,9 @@ class DatabaseService extends ChangeNotifier {
         });
       },
     );
+    if (init) {
+      downloadMeasurements();
+    }
   }
 
   // for statistics
@@ -290,12 +315,24 @@ class DatabaseService extends ChangeNotifier {
     return allTrainings;
   }
 
-  Future<void> downloadMembers({bool forceUpdate = false, bool init = false}) {
+  // download all measurements
+  Future<void> downloadMeasurements() async {
+    await db.collection('measurements').get().then(
+      (QuerySnapshot querySnapshot) {
+        _measurements = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
+          return Measurement.fromFirestore(doc);
+        }).toList();
+      },
+    );
+  }
+
+  Future<void> downloadMembers(
+      {bool forceUpdate = false, bool init = false}) async {
     // Get members from Firestore
     if (_isUpdating && !forceUpdate) {
       return Future<void>.value();
     }
-    db.collection('members').get().then((QuerySnapshot querySnapshot) {
+    await db.collection('members').get().then((QuerySnapshot querySnapshot) {
       _members = querySnapshot.docs.map((QueryDocumentSnapshot doc) {
         return Member.fromFirestore(doc);
       }).toList();
@@ -304,7 +341,7 @@ class DatabaseService extends ChangeNotifier {
       filterMembers(filter: '');
     });
     if (init) {
-      downloadTrainings();
+      downloadTrainings(init: init);
     }
     return Future<void>.value();
   }
