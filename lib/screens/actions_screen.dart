@@ -118,7 +118,8 @@ class RacePreviewCard extends StatelessWidget {
       child: ListTile(
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: Theme.of(context).colorScheme.outline,
+            width: 2,
+            color: Theme.of(context).colorScheme.secondary,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),
@@ -213,9 +214,10 @@ class RaceProfile extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
+                                        width: 2,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .outline),
+                                            .secondary),
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(12)),
                                     color: (Helper().getSecondsFromMidnight(
@@ -273,8 +275,10 @@ class RaceProfile extends StatelessWidget {
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
+                                    width: 2,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(12)),
                                 color: (Helper().getSecondsFromMidnight(
@@ -364,9 +368,10 @@ class RaceProfile extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
+                                        width: 2,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .outline),
+                                            .secondary),
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(12)),
                                     color: Helper()
@@ -475,7 +480,8 @@ class RaceResult extends StatelessWidget {
                         child: ListTile(
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
-                              color: Theme.of(context).colorScheme.outline,
+                              width: 2,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(12)),

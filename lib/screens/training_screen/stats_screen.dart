@@ -131,7 +131,9 @@ class StatsScreen extends StatelessWidget {
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(12)),
                                 side: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline,
+                                  width: 2,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
                                 ),
                               ),
                               trailing: total != 0

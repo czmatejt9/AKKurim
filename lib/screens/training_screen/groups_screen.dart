@@ -29,7 +29,8 @@ class GroupsScreen extends StatelessWidget {
                         title: Text(db.trainerGroups[index].name),
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
+                            width: 2,
+                            color: Theme.of(context).colorScheme.secondary,
                           ),
                           borderRadius:
                               const BorderRadius.all(Radius.circular(12)),
@@ -188,7 +189,8 @@ class GroupProfile extends StatelessWidget {
                     title: Text(db.getTrainerFullNameFromID(trainerID)),
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
+                        width: 2,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                     ),
@@ -237,7 +239,8 @@ class GroupProfile extends StatelessWidget {
                     title: Text(db.getMemberfullNameFromID(memberID)),
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
+                        width: 2,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                     ),
@@ -348,7 +351,8 @@ class AddScreen extends StatelessWidget {
                               : db.filteredMembers[index].fullName),
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
-                              color: Theme.of(context).colorScheme.outline,
+                              width: 2,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(12)),

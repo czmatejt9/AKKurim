@@ -752,7 +752,8 @@ class TakeAttendance extends StatelessWidget {
                       '${training.dayAndMonth} ${training.year} - ${training.hourAndMinute}'),
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.outline,
+                      width: 2,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -791,7 +792,8 @@ class TakeAttendance extends StatelessWidget {
                         child: ListTile(
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
-                              color: Theme.of(context).colorScheme.outline,
+                              width: 2,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(12)),
@@ -882,7 +884,8 @@ class TrainingCard extends StatelessWidget {
       child: ListTile(
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: Theme.of(context).colorScheme.outline,
+            width: 2,
+            color: Theme.of(context).colorScheme.secondary,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),

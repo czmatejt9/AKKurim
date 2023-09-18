@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:ak_kurim/models/measurement.dart';
-import 'package:ak_kurim/models/training.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -17,48 +16,193 @@ class MeasurementsScreen extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.background,
       child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: [
-              const Text('Přidat měření k tréninku',
-                  style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 20),
-              for (Training training in db.nextWeekTrainings)
-                Card(
-                    elevation: 10,
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            const Text('Přidat měření k tréninku',
+                style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+            for (int i = 0; i < db.nextWeekTrainings.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Card(
+                  elevation: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 2,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
-                      title: Text(db.getGroupNameFromID(training.groupID)),
-                      subtitle: Text(
-                          '${Helper().getCzechDayAndDate(training.timestamp.toDate())} ${training.hourAndMinute}'),
-                      trailing: IconButton(
-                        onPressed: () {
-                          // TODO ask for confirmation and other stuff
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MyStopWatch(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        Text(
+                            '${db.getGroupNameFromID(db.nextWeekTrainings[i].groupID)} - ${Helper().getCzechDayAndDate(db.nextWeekTrainings[i].timestamp.toDate())}',
+                            style: const TextStyle(fontSize: 20)),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            const Text('Název:',
+                                style: TextStyle(fontSize: 18),
+                                textAlign: TextAlign.center),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: TextEditingController(
+                                    text:
+                                        db.measurementsScreenData['name']![i]),
+                                onChanged: (value) {
+                                  db.measurementsScreenData['name']![i] = value;
+                                  //db.refresh();
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: 'Název měření',
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            const Text('Typ:',
+                                style: TextStyle(fontSize: 18),
+                                textAlign: TextAlign.center),
+                            Expanded(
+                              child: RadioListTile<bool>(
+                                title: const Text('Běh'),
+                                value: true,
+                                groupValue:
+                                    db.measurementsScreenData['isRun']![i],
+                                onChanged: (bool? value) {
+                                  db.measurementsScreenData['isRun']![i] = true;
+                                  db.refresh();
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: RadioListTile<bool>(
+                                title: const Text('Technika'),
+                                value: false,
+                                groupValue:
+                                    db.measurementsScreenData['isRun']![i],
+                                onChanged: (bool? value) {
+                                  db.measurementsScreenData['isRun']![i] =
+                                      false;
+                                  db.refresh();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            const Text('Disciplína:',
+                                style: TextStyle(fontSize: 18),
+                                textAlign: TextAlign.center),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: TextEditingController(
+                                    text: db.measurementsScreenData[
+                                        'discipline']![i]),
+                                onChanged: (value) {
+                                  db.measurementsScreenData['discipline']![i] =
+                                      value;
+                                  //db.refresh();
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: 'Název disciplíny',
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            if (db.measurementsScreenData['isRun']![i])
+                              Expanded(
+                                child: CheckboxListTile(
+                                  title: const Text('Použít stopky?'),
+                                  value: db.measurementsScreenData[
+                                      'useStopwatch']![i],
+                                  onChanged: (value) {
+                                    db.measurementsScreenData['useStopwatch']![
+                                        i] = value!;
+                                    db.refresh();
+                                  },
+                                ),
+                              ),
+                            if (!db.measurementsScreenData['isRun']![i])
+                              const Spacer(),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: Colors.black),
+                              onPressed: () {
+                                if (db.measurementsScreenData['name']![i] ==
+                                        '' ||
+                                    db.measurementsScreenData['discipline']![
+                                            i] ==
+                                        '') {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      backgroundColor: Color(0xFFE57373),
+                                      content: Text(
+                                          'Název a disciplína musí být vyplněny!'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (db.measurementsScreenData['useStopwatch']![
+                                        i] &&
+                                    db.measurementsScreenData['isRun']![i]) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MyStopWatch(
                                         measurement:
                                             db.createMeasurementFromTraining(
-                                                training,
-                                                true,
-                                                'Testovací měření',
-                                                '60 m'),
-                                      )));
-                        },
-                        icon: Icon(Icons.add,
-                            color: Theme.of(context).colorScheme.secondary),
-                      ),
-                    )),
-            ],
-          )),
+                                          db.nextWeekTrainings[i],
+                                          db.measurementsScreenData['isRun']![
+                                              i],
+                                          db.measurementsScreenData['name']![i],
+                                          db.measurementsScreenData[
+                                              'discipline']![i],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  // TODO create measurement without stopwatch for writing down the results
+                                }
+                              },
+                              child: const Text('Vytvořit měření'),
+                            ),
+                            const SizedBox(width: 10),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -77,19 +221,21 @@ class _MyStopWatchState extends State<MyStopWatch> {
   String elapsedTime = '00:00.00';
   List<String> measurements = [];
 
+  void updateTime() {
+    setState(() {
+      String millis = (stopwatch.elapsed.inMilliseconds % 1000)
+          .toString()
+          .padLeft(3, '0')
+          .substring(0, 2);
+      elapsedTime =
+          '${stopwatch.elapsed.inMinutes.toString().padLeft(2, '0')}:${(stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0')}.$millis';
+    });
+  }
+
   void startTimer() {
     stopwatch.start();
     timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      if (true) {
-        setState(() {
-          String millis = (stopwatch.elapsed.inMilliseconds % 1000)
-              .toString()
-              .padLeft(3, '0')
-              .substring(0, 2);
-          elapsedTime =
-              '${stopwatch.elapsed.inMinutes.toString().padLeft(2, '0')}:${(stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0')}.$millis';
-        });
-      }
+      updateTime();
     });
   }
 
@@ -98,6 +244,8 @@ class _MyStopWatchState extends State<MyStopWatch> {
       stopwatch.stop();
       timer.cancel();
       measurements.add(athleticRound(stopwatch));
+
+      updateTime();
     });
   }
 
@@ -218,8 +366,8 @@ class _MyStopWatchState extends State<MyStopWatch> {
                       // add border to the list tile
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                          width: 1,
-                          color: Theme.of(context).colorScheme.outline,
+                          width: 2,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                         borderRadius:
                             const BorderRadius.all(Radius.circular(12)),
@@ -247,7 +395,11 @@ class _MyStopWatchState extends State<MyStopWatch> {
                               DottedBorder(
                             borderType: BorderType.RRect,
                             radius: const Radius.circular(12),
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: widget.measurement.measurements.values
+                                        .elementAt(index) ==
+                                    ''
+                                ? Theme.of(context).colorScheme.outline
+                                : Colors.green,
                             strokeWidth: 2,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),

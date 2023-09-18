@@ -63,6 +63,13 @@ class DatabaseService extends ChangeNotifier {
 
   bool nextWeekLoaded = false;
   List<Training> nextWeekTrainings = <Training>[];
+  // for measurement screen
+  Map<String, List<dynamic>> measurementsScreenData = {
+    'isRun': [],
+    'name': [],
+    'discipline': [],
+    'useStopwatch': [],
+  };
 
   DateTime statsLastUpdated = DateTime.now().subtract(const Duration(days: 1));
   bool statsLoaded = false;
@@ -420,6 +427,10 @@ class DatabaseService extends ChangeNotifier {
           data: {}, statusCode: 0, requestOptions: RequestOptions(path: ''));
     });
 
+    if (response.statusCode != 200) {
+      return;
+    }
+
     String latestVersion = response.data['tag_name'];
     // remove the v from the version
     latestVersion = latestVersion.substring(1);
@@ -549,9 +560,19 @@ class DatabaseService extends ChangeNotifier {
 
   void getNextWeekTrainings() {
     nextWeekTrainings = [];
+    measurementsScreenData = {
+      'isRun': [],
+      'name': [],
+      'discipline': [],
+      'useStopwatch': [],
+    };
     for (Training training in _trainerTrainings) {
       if (Helper().isWithinNextWeek(training.timestamp.toDate())) {
         nextWeekTrainings.add(training);
+        measurementsScreenData['isRun']!.add(true);
+        measurementsScreenData['name']!.add('');
+        measurementsScreenData['discipline']!.add('');
+        measurementsScreenData['useStopwatch']!.add(true);
       }
     }
     notifyListeners();
