@@ -13,9 +13,11 @@ import 'package:ak_kurim/services/helpers.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ak_kurim/models/measurement.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app';
   String versionUrl =
       'https://api.github.com/repos/czmatejt9/AKKurim/releases/latest';
@@ -206,8 +208,27 @@ class DatabaseService extends ChangeNotifier {
       }
       measurement.measurements[key] = '';
     }
-    _measurements.add(measurement);
     return measurement;
+  }
+
+  Future<void> createMeasurement(Measurement measurement) async {
+    _measurements.add(measurement);
+    await db
+        .collection('measurements')
+        .doc(measurement.id)
+        .set(measurement.toMap());
+
+    // sort the measurements by date
+    _measurements.sort(
+        (Measurement b, Measurement a) => a.createdAt!.compareTo(b.createdAt!));
+    notifyListeners();
+  }
+
+  Future<void> updateMeasurement(Measurement measurement) async {
+    await db
+        .collection('measurements')
+        .doc(measurement.id)
+        .update(measurement.toMap());
   }
 
   // download functions
@@ -331,6 +352,19 @@ class DatabaseService extends ChangeNotifier {
         }).toList();
       },
     );
+
+    for (Measurement measurement in _measurements) {
+      // sort the attendance keys by last name
+      measurement.measurements = Map<String, dynamic>.fromEntries(
+          measurement.measurements.entries.toList()
+            ..sort((e1, e2) => getMemberFromID(e1.key)
+                .lastName
+                .compareTo(getMemberFromID(e2.key).lastName)));
+    }
+
+    // sort the measurements by date
+    _measurements.sort(
+        (Measurement b, Measurement a) => a.createdAt!.compareTo(b.createdAt!));
   }
 
   Future<void> downloadMembers(
@@ -418,6 +452,12 @@ class DatabaseService extends ChangeNotifier {
     if (!statsLoaded) {
       updateStats();
     }
+
+    // set default paramaters for firebase analytics
+    await analytics.setDefaultEventParameters({
+      'trainer_name': _trainer.fullName,
+      'version': (await PackageInfo.fromPlatform()).version,
+    });
   }
 
   Future<void> checkForUpdate() async {

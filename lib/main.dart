@@ -21,10 +21,14 @@ Future<void> main() async {
   );
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    FirebaseCrashlytics.instance.recordFlutterError(details);
+    if (kReleaseMode) {
+      FirebaseCrashlytics.instance.recordFlutterError(details);
+    }
   };
   PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    if (kReleaseMode) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    }
     return true;
   };
   runApp(

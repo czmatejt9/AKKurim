@@ -3,13 +3,15 @@ import 'package:ak_kurim/services/helpers.dart';
 
 class Measurement {
   final String id;
+  final Timestamp? createdAt;
   bool isRun;
   String name;
   String discipline;
-  Map<String, String> measurements = {};
+  Map<String, dynamic> measurements = {};
 
   Measurement({
     required this.id,
+    this.createdAt,
     required this.isRun,
     required this.name,
     required this.discipline,
@@ -19,6 +21,7 @@ class Measurement {
   factory Measurement.fromMap(Map<dynamic, dynamic> json) {
     return Measurement(
       id: json['id'],
+      createdAt: json['createdAt'],
       isRun: json['isRun'],
       name: json['name'],
       discipline: json['discipline'],
@@ -28,12 +31,14 @@ class Measurement {
 
   factory Measurement.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
+    data['id'] = doc.id;
     return Measurement.fromMap(data);
   }
 
   factory Measurement.empty() {
     return Measurement(
       id: Helper().generateRandomString(20),
+      createdAt: Timestamp.now(),
       isRun: false,
       name: '',
       discipline: '',
@@ -43,6 +48,7 @@ class Measurement {
 
   // id not included
   Map<String, dynamic> toMap() => {
+        'createdAt': createdAt,
         'isRun': isRun,
         'name': name,
         'discipline': discipline,
