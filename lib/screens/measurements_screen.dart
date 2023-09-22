@@ -25,7 +25,6 @@ class MeasurementsScreen extends StatelessWidget {
             children: [
               const Text('Přidat měření k tréninku',
                   style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 20),
               if (db.isUpdating)
                 const Center(child: CircularProgressIndicator())
               else if (db.nextWeekTrainings.isEmpty)
@@ -241,7 +240,8 @@ class MeasurementsScreen extends StatelessWidget {
                 ],
               ),
               const Divider(),
-              const Text('Přehled měření', style: TextStyle(fontSize: 20)),
+              const Text('Přehled proběhlých měření',
+                  style: TextStyle(fontSize: 20)),
               const SizedBox(height: 10),
               for (Measurement measurement in db.measurements)
                 Row(
@@ -468,11 +468,12 @@ class _MyStopWatchState extends State<MyStopWatch> {
               elapsedTime,
               style: const TextStyle(fontSize: 30),
             ),
-            const SizedBox(height: 20),
+            const Divider(),
             Expanded(
               flex: 1,
               child: GridView.count(
-                  crossAxisCount: 2,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  crossAxisCount: 1,
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   children: [
@@ -514,9 +515,9 @@ class _MyStopWatchState extends State<MyStopWatch> {
                         )),
                   ]),
             ),
-            const SizedBox(height: 20),
+            const Divider(),
             Expanded(
-              flex: 3,
+              flex: 6,
               child: ListView.builder(
                   padding: const EdgeInsets.all(8),
                   itemCount: widget.measurement.measurements.keys.length,
@@ -637,6 +638,8 @@ class ShowMeasurement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final DatabaseService db = Provider.of<DatabaseService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${measurement.name} - ${measurement.discipline}'),
@@ -646,6 +649,50 @@ class ShowMeasurement extends StatelessWidget {
                 // TODO edit measurement
               },
               icon: const Icon(Icons.edit)),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+                'Datum: ${Helper().getDayMonthYear(measurement.createdAt!.toDate())}',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.left),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Výkony:',
+                style: TextStyle(fontSize: 20), textAlign: TextAlign.left),
+          ),
+          const Divider(),
+          Expanded(
+            child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: measurement.measurements.keys.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                    elevation: 10,
+                    child: ListTile(
+                      // add border to the list tile
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          width: 2,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12)),
+                      ),
+                      title: Text(db.getMemberfullNameFromID(
+                          measurement.measurements.keys.elementAt(index))),
+                      trailing: Text(measurement.measurements.values
+                          .elementAt(index)
+                          .toString()),
+                    ),
+                  );
+                }),
+          ),
         ],
       ),
     );
