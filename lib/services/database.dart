@@ -221,6 +221,15 @@ class DatabaseService extends ChangeNotifier {
     // sort the measurements by date
     _measurements.sort(
         (Measurement b, Measurement a) => a.createdAt!.compareTo(b.createdAt!));
+    // set all screen data to default values
+    measurementsScreenData = {
+      'isRun': measurementsScreenData['isRun']!.map((e) => true).toList(),
+      'name': measurementsScreenData['name']!.map((e) => '').toList(),
+      'discipline':
+          measurementsScreenData['discipline']!.map((e) => '').toList(),
+      'useStopwatch':
+          measurementsScreenData['useStopwatch']!.map((e) => true).toList(),
+    };
     notifyListeners();
   }
 

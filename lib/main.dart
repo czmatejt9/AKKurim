@@ -12,6 +12,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,10 @@ Future<void> main() async {
     }
   };
   PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print(error);
+      print(stack);
+    }
     if (kReleaseMode) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     }
@@ -51,6 +56,10 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   @override
   Widget build(BuildContext context) {

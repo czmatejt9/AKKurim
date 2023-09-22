@@ -173,7 +173,9 @@ class MeasurementsScreen extends StatelessWidget {
                                       const SnackBar(
                                         backgroundColor: Color(0xFFE57373),
                                         content: Text(
-                                            'Název a disciplína musí být vyplněny!'),
+                                          'Název a disciplína musí být vyplněny!',
+                                          textAlign: TextAlign.center,
+                                        ),
                                       ),
                                     );
                                     return;
@@ -293,15 +295,15 @@ class MeasurementsScreen extends StatelessWidget {
                             const Spacer(),
                             IconButton(
                                 onPressed: () {
-                                  // TODO show measurement
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShowMeasurement(
+                                          measurement: measurement),
+                                    ),
+                                  );
                                 },
                                 icon: const Icon(Icons.remove_red_eye)),
-                            IconButton(
-                                onPressed: () {
-                                  // TODO edit measurement
-                                },
-                                icon: const Icon(Icons.edit)),
-                            const SizedBox(width: 10),
                           ],
                         ),
                       ),
@@ -625,5 +627,27 @@ class MyCustomMeasurement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
+  }
+}
+
+// TODO show measurement, maybe edit it
+class ShowMeasurement extends StatelessWidget {
+  final Measurement measurement;
+  const ShowMeasurement({super.key, required this.measurement});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${measurement.name} - ${measurement.discipline}'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                // TODO edit measurement
+              },
+              icon: const Icon(Icons.edit)),
+        ],
+      ),
+    );
   }
 }
