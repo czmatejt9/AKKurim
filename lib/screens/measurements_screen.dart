@@ -658,7 +658,7 @@ class ShowMeasurement extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
                 'Datum: ${Helper().getDayMonthYear(measurement.createdAt!.toDate())}',
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
                 textAlign: TextAlign.left),
           ),
           const Padding(

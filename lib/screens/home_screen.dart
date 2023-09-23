@@ -15,7 +15,7 @@ import 'package:ak_kurim/screens/training_screen/groups_screen.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
-import 'package:ak_kurim/services/my_widgets.dart';
+import 'package:ak_kurim/services/settings.dart';
 import 'package:ak_kurim/screens/measurements_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 

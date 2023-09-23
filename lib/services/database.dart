@@ -22,6 +22,7 @@ class DatabaseService extends ChangeNotifier {
   String versionUrl =
       'https://api.github.com/repos/czmatejt9/AKKurim/releases/latest';
   String releasesPage = 'https://github.com/czmatejt9/AKKurim/releases';
+  String bugReportPage = 'https://github.com/czmatejt9/AKKurim/issues/';
 
   bool isNewUpdate = false;
   bool dataOnline = false;

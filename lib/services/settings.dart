@@ -5,6 +5,7 @@ import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/services/auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ak_kurim/services/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatelessWidget {
   final User user;
@@ -39,25 +40,26 @@ class SettingsScreen extends StatelessWidget {
             onPressed: () {
               // alert dialog asking for confirmation if user wants to sync data
               showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Synchronizace dat'),
-                      content: const Text(
-                          'Opravdu chcete stáhnout aktuální data?\n(Data se automaticky stahují při spuštění aplikace)'),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('Zrušit'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: const Text('Synchronizovat'),
-                          onPressed: () {
-                            Future.wait(<Future<void>>[
-                              db.initializeData(user),
-                            ]).then((List<void> results) {
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Synchronizace dat'),
+                    content: const Text(
+                        'Opravdu chcete stáhnout aktuální data?\n(Data se automaticky stahují při spuštění aplikace)'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Zrušit'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Synchronizovat'),
+                        onPressed: () {
+                          Future.wait(<Future<void>>[
+                            db.initializeData(user),
+                          ]).then(
+                            (List<void> results) {
                               // show snackbar
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -71,12 +73,14 @@ class SettingsScreen extends StatelessWidget {
                                       db.dataOnline ? Colors.green : Colors.red,
                                 ),
                               );
-                            });
-                          },
-                        ),
-                      ],
-                    );
-                  });
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
         ],
@@ -91,6 +95,29 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: ListView(
               children: [
+                // create a button for bug report/feature request, launch db.bugReportPage
+                ListTile(
+                  title: ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            // use secondary color from theme,
+                            MaterialStateProperty.all<Color>(Colors.red),
+                        foregroundColor: MaterialStateProperty.all<Color>(
+                            Theme.of(context).colorScheme.onPrimary)),
+                    onPressed: () {
+                      launchUrl(Uri.parse(db.bugReportPage));
+                    },
+                    child: const Text(
+                      'Nahlásit chybu/žádost o funkci',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
                 // change password
                 Card(
                   elevation: 10,
