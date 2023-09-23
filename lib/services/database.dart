@@ -192,13 +192,13 @@ class DatabaseService extends ChangeNotifier {
   Measurement getMeasurementFromID(String id) {
     final Measurement measurement = _measurements.firstWhere((measurement) {
       return measurement.id == id;
-    }, orElse: () => Measurement.empty());
+    }, orElse: () => Measurement.empty(currentTrainer.id));
     return measurement;
   }
 
   Measurement createMeasurementFromTraining(
       Training training, bool isRun, String name, String discipline) {
-    Measurement measurement = Measurement.empty();
+    Measurement measurement = Measurement.empty(currentTrainer.id);
     measurement.isRun = isRun;
     measurement.name = name;
     measurement.discipline = discipline;
@@ -235,10 +235,17 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> updateMeasurement(Measurement measurement) async {
+    notifyListeners();
     await db
         .collection('measurements')
         .doc(measurement.id)
         .update(measurement.toMap());
+  }
+
+  Future<void> deleteMeasurement(Measurement measurement) async {
+    _measurements.removeWhere((element) => element.id == measurement.id);
+    notifyListeners();
+    await db.collection('measurements').doc(measurement.id).delete();
   }
 
   // download functions
@@ -625,6 +632,11 @@ class DatabaseService extends ChangeNotifier {
         measurementsScreenData['useStopwatch']!.add(true);
       }
     }
+    // add one more for custom measurement
+    measurementsScreenData['isRun']!.add(true);
+    measurementsScreenData['name']!.add('');
+    measurementsScreenData['discipline']!.add('');
+    measurementsScreenData['useStopwatch']!.add(true);
     notifyListeners();
   }
 
