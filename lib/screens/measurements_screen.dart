@@ -180,6 +180,8 @@ class MeasurementsScreen extends StatelessWidget {
                                     return;
                                   }
 
+                                  // dissmiss keyboard
+                                  FocusScope.of(context).unfocus();
                                   if (db.measurementsScreenData[
                                           'useStopwatch']![i] &&
                                       db.measurementsScreenData['isRun']![i]) {
@@ -380,8 +382,6 @@ class _MyStopWatchState extends State<MyStopWatch> {
         context: context,
         builder: (context) => AlertDialog(
               title: const Text('Opravdu chcete resetovat stopky?'),
-              content: const Text(
-                  'Pokud resetujete stopky, nepřiřařezené mezičasy budou ztraceny.'),
               actions: [
                 TextButton(
                     onPressed: () {

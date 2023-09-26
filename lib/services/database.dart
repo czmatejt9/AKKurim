@@ -214,11 +214,6 @@ class DatabaseService extends ChangeNotifier {
 
   Future<void> createMeasurement(Measurement measurement) async {
     _measurements.add(measurement);
-    await db
-        .collection('measurements')
-        .doc(measurement.id)
-        .set(measurement.toMap());
-
     // sort the measurements by date
     _measurements.sort(
         (Measurement b, Measurement a) => a.createdAt!.compareTo(b.createdAt!));
@@ -232,6 +227,11 @@ class DatabaseService extends ChangeNotifier {
           measurementsScreenData['useStopwatch']!.map((e) => true).toList(),
     };
     notifyListeners();
+
+    await db
+        .collection('measurements')
+        .doc(measurement.id)
+        .set(measurement.toMap());
   }
 
   Future<void> updateMeasurement(Measurement measurement) async {
