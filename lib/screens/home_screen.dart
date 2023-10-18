@@ -422,7 +422,7 @@ class NextWeekTrainings extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 16, top: 8),
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      Helper().getCzechDayAndDate(training.timestamp.toDate()),
+                      '${Helper().getCzechDayAndDate(training.timestamp.toDate())} (${Helper().getTimeCountdown(training.timestamp.toDate())})',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),

@@ -277,71 +277,7 @@ class TrainingProfile extends StatelessWidget {
                   },
                 ),
                 const Divider(),
-                ListTile(
-                  title: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.person_add_alt_1,
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        db.getTrainerFullNameFromID(
-                            training.substituteTrainerID),
-                        style: TextStyle(
-                            color: training.substituteTrainerID == ''
-                                ? Colors.grey
-                                : Theme.of(context).textTheme.bodyLarge!.color),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: ((context) => AlertDialog(
-                              title: const Text('Vyberte náhradního trenéra'),
-                              content: SizedBox(
-                                height: 300,
-                                width: 300,
-                                child: ListView.builder(
-                                  itemCount: db.allTrainers.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index == db.allTrainers.length) {
-                                      return ListTile(
-                                        title: const Text(
-                                          'Žádný',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                        onTap: () {
-                                          db.isChangedTrainingGroup = true;
-                                          training.substituteTrainerID = '';
-                                          db.refresh();
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }
-                                    if (!group.trainerIDs
-                                        .contains(db.allTrainers[index].id)) {
-                                      return ListTile(
-                                        title: Text(
-                                            db.allTrainers[index].fullName),
-                                        onTap: () {
-                                          db.isChangedTrainingGroup = true;
-                                          training.substituteTrainerID =
-                                              db.allTrainers[index].id;
-                                          db.refresh();
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }
-                                    return const SizedBox();
-                                  },
-                                ),
-                              ),
-                            )));
-                  },
-                ),
+                PickSubstituteTrainer(db: db, training: training, group: group),
                 const Divider(),
                 ListTile(
                   title: Row(
@@ -805,6 +741,7 @@ class TakeAttendance extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                PickSubstituteTrainer(db: db, training: training, group: group),
                 ListTile(
                   title: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -958,6 +895,90 @@ class TrainingCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class PickSubstituteTrainer extends StatelessWidget {
+  const PickSubstituteTrainer({
+    super.key,
+    required this.db,
+    required this.training,
+    required this.group,
+  });
+
+  final DatabaseService db;
+  final Training training;
+  final Group group;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.person_add_alt_1,
+            color: Theme.of(context).colorScheme.onBackground,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            db.getTrainerFullNameFromID(training.substituteTrainerID),
+            style: TextStyle(
+                color: training.substituteTrainerID == ''
+                    ? Colors.grey
+                    : Theme.of(context).textTheme.bodyLarge!.color),
+          ),
+        ],
+      ),
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: ((context) => AlertDialog(
+                  title: const Text('Vyberte náhradního trenéra'),
+                  content: SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: ListView.builder(
+                      itemCount: db.allTrainers.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == db.allTrainers.length) {
+                          return ListTile(
+                            title: const Text(
+                              'Žádný',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onTap: () {
+                              training.substituteTrainerID = '';
+                              db.refresh();
+                              db.isChangedTrainingGroup = true;
+                              db.updateTraining(
+                                  training, db.isChangedTrainingGroup);
+                              Navigator.pop(context);
+                            },
+                          );
+                        }
+                        if (!group.trainerIDs
+                            .contains(db.allTrainers[index].id)) {
+                          return ListTile(
+                            title: Text(db.allTrainers[index].fullName),
+                            onTap: () {
+                              training.substituteTrainerID =
+                                  db.allTrainers[index].id;
+                              db.refresh();
+                              db.isChangedTrainingGroup = true;
+                              db.updateTraining(
+                                  training, db.isChangedTrainingGroup);
+                              Navigator.pop(context);
+                            },
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
+                )));
+      },
     );
   }
 }

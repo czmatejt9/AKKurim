@@ -420,7 +420,7 @@ class _MyStopWatchState extends State<MyStopWatch> {
   @override
   Widget build(BuildContext context) {
     final DatabaseService db = Provider.of<DatabaseService>(context);
-
+    final ScrollController scrollOne = ScrollController();
     return WillPopScope(
       onWillPop: () async {
         showDialog(
@@ -490,50 +490,63 @@ class _MyStopWatchState extends State<MyStopWatch> {
             Expanded(
               flex: 1,
               child: Scrollbar(
-                child: GridView.count(
-                    // TODO change to listview (only one row)
-                    padding: const EdgeInsets.only(bottom: 16),
-                    crossAxisCount: 1,
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    controller: ScrollController(keepScrollOffset: false),
-                    children: [
-                      ...measurements.map((measurement) => GestureDetector(
-                            onDoubleTap: () {
-                              setState(() {
-                                measurements.remove(measurement);
-                              });
-                            },
-                            child: Draggable<String>(
-                              data: measurement,
-                              feedback: Card(
-                                elevation: 10,
-                                color: widget.measurement.measurements.values
-                                        .contains(measurement)
-                                    ? Colors.grey
-                                    : Colors.green,
-                                child: Center(
-                                    child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(measurement),
-                                )),
-                              ),
-                              childWhenDragging: Card(
-                                elevation: 10,
-                                color: Colors.orange,
-                                child: Center(child: Text(measurement)),
-                              ),
-                              child: Card(
-                                elevation: 10,
-                                color: !widget.measurement.measurements.values
-                                        .contains(measurement)
-                                    ? Colors.green
-                                    : Colors.grey,
-                                child: Center(child: Text(measurement)),
-                              ),
-                            ),
+                thumbVisibility: true,
+                thickness: 5,
+                controller: scrollOne,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  controller: scrollOne,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: 24),
+                  itemCount: measurements.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onDoubleTap: () {
+                        setState(() {
+                          measurements.remove(measurements[index]);
+                        });
+                      },
+                      child: Draggable<String>(
+                        data: measurements[index],
+                        feedback: Card(
+                          elevation: 10,
+                          color: widget.measurement.measurements.values
+                                  .contains(measurements[index])
+                              ? Colors.grey
+                              : Colors.green,
+                          child: Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(measurements[index]),
                           )),
-                    ]),
+                        ),
+                        childWhenDragging: Card(
+                          elevation: 10,
+                          color: Colors.orange,
+                          child: Center(
+                              child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 0),
+                            child: Text(measurements[index]),
+                          )),
+                        ),
+                        child: Card(
+                          elevation: 10,
+                          color: !widget.measurement.measurements.values
+                                  .contains(measurements[index])
+                              ? Colors.green
+                              : Colors.grey,
+                          child: Center(
+                              child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 0),
+                            child: Text(measurements[index]),
+                          )),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             const Divider(),

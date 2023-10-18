@@ -37,6 +37,21 @@ class Helper {
     return midnight(date2).difference(midnight(date1)).inDays.abs();
   }
 
+  String getTimeCountdown(DateTime date) {
+    int days = Helper().getCountBetweenDates(DateTime.now(), date);
+    if (days == 0) {
+      return 'dnes';
+    } else if (days == 1) {
+      return 'zítra';
+    } else if (days == 2) {
+      return 'pozítří';
+    } else if (days < 5) {
+      return 'za $days dny';
+    } else {
+      return 'za $days dní';
+    }
+  }
+
   bool isWithinNextWeek(DateTime date) {
     DateTime now = DateTime.now();
     return getCountBetweenDates(now, date) < 7 &&
