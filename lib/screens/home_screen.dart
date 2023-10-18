@@ -15,9 +15,11 @@ import 'package:ak_kurim/screens/training_screen/groups_screen.dart';
 import 'package:ak_kurim/models/user.dart';
 import 'package:ak_kurim/models/group.dart';
 import 'package:ak_kurim/models/training.dart';
+import 'package:ak_kurim/models/race_preview.dart';
 import 'package:ak_kurim/services/settings.dart';
 import 'package:ak_kurim/screens/measurements_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -32,7 +34,7 @@ class HomeScreen extends StatelessWidget {
     final DatabaseService db = Provider.of<DatabaseService>(context);
 
     final List<String> titles = <String>[
-      db.currentTrainer.fullName,
+      'Vítejte, ${db.currentTrainer.salutation}! ',
       'Tréninky',
       'Měření',
       'Závody',
@@ -70,10 +72,107 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 10),
-                  Text('Vaše nadcházející tréninky',
+                  Text('Dnes je ${Helper().getCzechDayAndDate(DateTime.now())}',
                       style: Theme.of(context).textTheme.headlineSmall),
                   const SizedBox(height: 10),
+                  TableCalendar(
+                    eventLoader: (day) {
+                      List<dynamic> events = [];
+                      for (Training training in db.trainerTrainings) {
+                        if (Helper()
+                            .isSameDay(training.timestamp.toDate(), day)) {
+                          events.add(training);
+                        }
+                      }
+                      for (RacePreview racePreview in db.racePreviews[
+                              Helper().getYearMonth(DateTime.now())] ??
+                          []) {
+                        if (Helper()
+                            .isSameDay(racePreview.timestamp.toDate(), day)) {
+                          events.add(racePreview);
+                        }
+                      }
+                      for (RacePreview racePreview in db.racePreviews[Helper()
+                              .getYearMonth(DateTime.now()
+                                  .add(const Duration(days: 30)))] ??
+                          []) {
+                        if (Helper()
+                            .isSameDay(racePreview.timestamp.toDate(), day)) {
+                          events.add(racePreview);
+                        }
+                      }
+                      for (RacePreview racePreview in db.racePreviews[Helper()
+                              .getYearMonth(DateTime.now()
+                                  .subtract(const Duration(days: 30)))] ??
+                          []) {
+                        if (Helper()
+                            .isSameDay(racePreview.timestamp.toDate(), day)) {
+                          events.add(racePreview);
+                        }
+                      }
+
+                      return events;
+                    },
+                    headerVisible: false,
+                    locale: 'cs_CZ',
+                    calendarFormat: CalendarFormat.twoWeeks,
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    calendarStyle: const CalendarStyle(
+                      weekendTextStyle: TextStyle(color: Colors.red),
+                    ),
+                    headerStyle: const HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                    ),
+                    firstDay: DateTime.utc(2023, 1, 1),
+                    lastDay: DateTime.utc(2032, 12, 31),
+                    focusedDay: DateTime.now(),
+                    availableGestures: AvailableGestures.none,
+                    calendarBuilders: CalendarBuilders(
+                        markerBuilder: (context, day, List<dynamic> events) {
+                      if (events.isEmpty) {
+                        return const SizedBox();
+                      }
+                      if (events[0] is RacePreview) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Helper().isSameDay(
+                                    events[0].timestamp.toDate(),
+                                    DateTime.now())
+                                ? Colors.orange
+                                : Helper().isBeforeToday(
+                                        events[0].timestamp.toDate())
+                                    ? Colors.green
+                                    : Colors.grey,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.emoji_events_outlined,
+                              color: Colors.white),
+                        );
+                      }
+                      if (events[0] is Training) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Helper().isSameDay(
+                                    events[0].timestamp.toDate(),
+                                    DateTime.now())
+                                ? Colors.orange
+                                : Helper().isBeforeToday(
+                                        events[0].timestamp.toDate())
+                                    ? Colors.green
+                                    : Colors.grey,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.run_circle_outlined,
+                              color: Colors.white),
+                        );
+                      }
+                      return const SizedBox();
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+                  Text('Vaše nadcházející tréninky',
+                      style: Theme.of(context).textTheme.headlineSmall),
                   const NextWeekTrainings(),
                 ],
               ),
@@ -320,7 +419,7 @@ class NextWeekTrainings extends StatelessWidget {
                             .toDate(),
                         training.timestamp.toDate()))
                   Container(
-                    padding: const EdgeInsets.only(left: 16, top: 16),
+                    padding: const EdgeInsets.only(left: 16, top: 8),
                     alignment: Alignment.centerLeft,
                     child: Text(
                       Helper().getCzechDayAndDate(training.timestamp.toDate()),

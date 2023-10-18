@@ -41,8 +41,7 @@ class DatabaseService extends ChangeNotifier {
   bool filterBornYear = false;
   bool ascendingOrder = true;
 
-  Trainer _trainer = Trainer(
-      id: '', memberID: '', firstName: '', lastName: '', email: '', phone: '');
+  Trainer _trainer = Trainer.empty();
   Trainer get currentTrainer => _trainer;
   List<Trainer> _trainers = <Trainer>[];
   List<Trainer> get allTrainers => _trainers;
@@ -144,14 +143,7 @@ class DatabaseService extends ChangeNotifier {
   Trainer getTrainerFromID(String id) {
     final Trainer trainer = _trainers.firstWhere((trainer) {
       return trainer.id == id;
-    },
-        orElse: () => Trainer(
-            id: "",
-            memberID: "memberID",
-            firstName: "Náhradní trenér",
-            lastName: "",
-            email: "email",
-            phone: "phone"));
+    }, orElse: () => Trainer.empty()); // return empty trainer if not found
     return trainer;
   }
 
@@ -255,14 +247,7 @@ class DatabaseService extends ChangeNotifier {
         }).toList();
         _trainer = _trainers.firstWhere((trainer) {
           return trainer.email == user.email;
-        },
-            orElse: () => Trainer(
-                id: '',
-                memberID: '',
-                firstName: '',
-                lastName: '',
-                email: '',
-                phone: ''));
+        }, orElse: () => Trainer.empty()); // return empty trainer if not found
         if (init) {
           downloadGroups(init: init);
         }
@@ -459,10 +444,16 @@ class DatabaseService extends ChangeNotifier {
     _isUpdating = false;
     notifyListeners();
 
-    // get current races within this month from api
-    downloadCurrentRaces();
-
     checkForUpdate();
+
+    // get current races within this month from api, also download previous and next month
+    downloadCurrentRaces();
+    downloadCurrentRaces(
+        yearMonth: Helper()
+            .getYearMonth(DateTime.now().add(const Duration(days: 30))));
+    downloadCurrentRaces(
+        yearMonth: Helper()
+            .getYearMonth(DateTime.now().subtract(const Duration(days: 30))));
 
     if (!statsLoaded) {
       updateStats();
@@ -762,9 +753,10 @@ class DatabaseService extends ChangeNotifier {
     if (racesMonth.year == 2022 && racesMonth.month == 1 && diff == -1) {
       return;
     }
-    // max month is current month
-    if (racesMonth.year == DateTime.now().year &&
-        racesMonth.month == DateTime.now().month &&
+    // max month is current month + 1
+    DateTime shiftedNow = DateTime.now().add(const Duration(days: 30));
+    if (racesMonth.year == shiftedNow.year &&
+        racesMonth.month == shiftedNow.month + 1 &&
         diff == 1) {
       return;
     }
