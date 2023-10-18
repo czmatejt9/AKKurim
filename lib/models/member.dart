@@ -80,7 +80,7 @@ class Member {
         lastName: data['lastName'] ?? "",
         birthNumber: data['birthNumber'] ?? "",
         ean: data['EAN'].toString(),
-        street: data['street'],
+        street: data['street'] ?? "",
         city: data['city'] ?? "",
         zip: data['ZIP'].toString(),
         email: data['email'] ?? "",

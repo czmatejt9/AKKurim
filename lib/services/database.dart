@@ -140,8 +140,6 @@ class DatabaseService extends ChangeNotifier {
     await db.collection('members').doc(member.id).delete();
   }
 
-  // TODO change the downloadCurrentRaces to the old way, so the server isnt connected to the database
-
   // trainer functions
   Trainer getTrainerFromID(String id) {
     final Trainer trainer = _trainers.firstWhere((trainer) {
@@ -447,13 +445,13 @@ class DatabaseService extends ChangeNotifier {
             true); // download trainers and groups and members and trainings for the current trainer (init = true)
     // get last update of stats time from Firestore
     await db
-        .collection('stats')
-        .doc('lastUpdate')
+        .collection('lastUpdate')
+        .doc('stats')
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
         var data = documentSnapshot.data()! as Map<String, dynamic>;
-        Timestamp date = data['lastUpdate'];
+        Timestamp date = data['timestamp'];
         statsLastUpdated = date.toDate();
         dataOnline = !documentSnapshot.metadata.isFromCache;
       }
@@ -720,9 +718,9 @@ class DatabaseService extends ChangeNotifier {
       statsLastUpdated = now;
       notifyListeners();
       db
-          .collection('stats')
-          .doc('lastUpdate')
-          .set({'lastUpdate': Timestamp.fromDate(statsLastUpdated)});
+          .collection('lastUpdate')
+          .doc('stats')
+          .set({'timestamp': Timestamp.fromDate(statsLastUpdated)});
     });
   }
 

@@ -489,52 +489,56 @@ class _MyStopWatchState extends State<MyStopWatch> {
             const Divider(),
             Expanded(
               flex: 1,
-              child: GridView.count(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  crossAxisCount: 1,
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  children: [
-                    ...measurements.map((measurement) => GestureDetector(
-                          onDoubleTap: () {
-                            setState(() {
-                              measurements.remove(measurement);
-                            });
-                          },
-                          child: Draggable<String>(
-                            data: measurement,
-                            feedback: Card(
-                              elevation: 10,
-                              color: widget.measurement.measurements.values
-                                      .contains(measurement)
-                                  ? Colors.grey
-                                  : Colors.green,
-                              child: Center(
-                                  child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(measurement),
-                              )),
+              child: Scrollbar(
+                child: GridView.count(
+                    // TODO change to listview (only one row)
+                    padding: const EdgeInsets.only(bottom: 16),
+                    crossAxisCount: 1,
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    controller: ScrollController(keepScrollOffset: false),
+                    children: [
+                      ...measurements.map((measurement) => GestureDetector(
+                            onDoubleTap: () {
+                              setState(() {
+                                measurements.remove(measurement);
+                              });
+                            },
+                            child: Draggable<String>(
+                              data: measurement,
+                              feedback: Card(
+                                elevation: 10,
+                                color: widget.measurement.measurements.values
+                                        .contains(measurement)
+                                    ? Colors.grey
+                                    : Colors.green,
+                                child: Center(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Text(measurement),
+                                )),
+                              ),
+                              childWhenDragging: Card(
+                                elevation: 10,
+                                color: Colors.orange,
+                                child: Center(child: Text(measurement)),
+                              ),
+                              child: Card(
+                                elevation: 10,
+                                color: !widget.measurement.measurements.values
+                                        .contains(measurement)
+                                    ? Colors.green
+                                    : Colors.grey,
+                                child: Center(child: Text(measurement)),
+                              ),
                             ),
-                            childWhenDragging: Card(
-                              elevation: 10,
-                              color: Colors.orange,
-                              child: Center(child: Text(measurement)),
-                            ),
-                            child: Card(
-                              elevation: 10,
-                              color: !widget.measurement.measurements.values
-                                      .contains(measurement)
-                                  ? Colors.green
-                                  : Colors.grey,
-                              child: Center(child: Text(measurement)),
-                            ),
-                          ),
-                        )),
-                  ]),
+                          )),
+                    ]),
+              ),
             ),
             const Divider(),
             Expanded(
-              flex: 6,
+              flex: 5,
               child: ListView.builder(
                   padding: const EdgeInsets.all(8),
                   itemCount: widget.measurement.measurements.keys.length,
@@ -773,7 +777,7 @@ class MyCustomMeasurement extends StatelessWidget {
         ),
         body: const Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text("Bude k dispozici v budoucnu ve verzi 1.6.1"),
+          child: Text("Bude k dispozici v budoucnu ve verzi 1.6.2"),
         ));
   }
 }

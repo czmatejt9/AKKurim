@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ak_kurim/services/helpers.dart';
 
-// TODO add author id (trainer id)
 class Measurement {
   final String id;
   final String authorId;

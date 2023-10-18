@@ -27,6 +27,12 @@ class AttendanceScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return TableCalendar(
+                  eventLoader: (day) {
+                    return db.trainerTrainings
+                        .where((element) =>
+                            isSameDay(element.timestamp.toDate(), day))
+                        .toList();
+                  },
                   locale: 'cs_CZ',
                   calendarFormat: CalendarFormat.month,
                   startingDayOfWeek: StartingDayOfWeek.monday,
@@ -47,6 +53,47 @@ class AttendanceScreen extends StatelessWidget {
                     navigation.selectedDate = selectedDay;
                     navigation.focusedDay = focusedDay;
                   },
+                  calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, day, List<Training> events) {
+                    if (events.isEmpty) {
+                      return const SizedBox();
+                    }
+                    if (events[0].attendanceTaken) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.check, color: Colors.white),
+                      );
+                    }
+                    if (Helper().isSameDay(
+                        events[0].timestamp.toDate(), DateTime.now())) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.orange,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white),
+                      );
+                    }
+                    if (Helper().isBeforeToday(events[0].timestamp.toDate())) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white),
+                      );
+                    }
+                    return Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white),
+                    );
+                  }),
                 );
               } else if (isSameDay(
                   db.trainerTrainings[index - 1].timestamp.toDate(),

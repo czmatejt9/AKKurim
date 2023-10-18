@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
       'Tréninky',
       'Měření',
       'Závody',
-      'Členové'
+      'Členové (${db.members.length})',
     ];
 
     final Widget homeScreen = (db.currentTrainer.lastName != '' &&
