@@ -1,8 +1,8 @@
 # ak_kurim
 
-Aplikace pro atletický klub AK Kuřim.
+App for my athletic club made in flutter.
 
-## Stažení
+## Download
 
-Pro stažení nebo updatování verze běžte do releases, stáhněte a nainstalujte si přiložený .apk soubor.
+Go to latest release, download and install the .apk file
 
