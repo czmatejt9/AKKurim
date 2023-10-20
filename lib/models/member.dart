@@ -29,30 +29,37 @@ class Member {
   Map<String, dynamic> borrowedItems = {};
   Map<String, dynamic> attendanceCount;
   Map<String, dynamic> racesCount;
+  bool active;
+  bool confirmed;
+  bool inCAS;
 
-  Member(
-      {required this.id,
-      required this.born,
-      required this.gender,
-      required this.firstName,
-      required this.lastName,
-      required this.birthNumber,
-      this.ean,
-      required this.street,
-      required this.city,
-      required this.zip,
-      this.email,
-      this.emailParent,
-      this.phone,
-      this.phoneParent,
-      this.endOfRegistration,
-      required this.isSignedUp,
-      required this.isPaid,
-      this.note,
-      required this.pb,
-      required this.borrowedItems,
-      required this.attendanceCount,
-      required this.racesCount});
+  Member({
+    required this.id,
+    required this.born,
+    required this.gender,
+    required this.firstName,
+    required this.lastName,
+    required this.birthNumber,
+    this.ean,
+    required this.street,
+    required this.city,
+    required this.zip,
+    this.email,
+    this.emailParent,
+    this.phone,
+    this.phoneParent,
+    this.endOfRegistration,
+    required this.isSignedUp,
+    required this.isPaid,
+    this.note,
+    required this.pb,
+    required this.borrowedItems,
+    required this.attendanceCount,
+    required this.racesCount,
+    required this.active,
+    required this.confirmed,
+    required this.inCAS,
+  });
 
   String get fullName => '$lastName $firstName';
   String get address => '$street\n$city, $zip';
@@ -73,35 +80,39 @@ class Member {
 
   factory Member.fromMap(Map<dynamic, dynamic> data, String id) {
     return Member(
-        id: id,
-        born: data['born'] ?? "",
-        gender: data['gender'] ?? "",
-        firstName: data['firstName'] ?? "",
-        lastName: data['lastName'] ?? "",
-        birthNumber: data['birthNumber'] ?? "",
-        ean: data['EAN'].toString(),
-        street: data['street'] ?? "",
-        city: data['city'] ?? "",
-        zip: data['ZIP'].toString(),
-        email: data['email'] ?? "",
-        emailParent: data['emailParent'] ?? "",
-        phone: data['phone'] ?? "",
-        phoneParent: data['phoneParent'] ?? "",
-        endOfRegistration: data['endOfRegistration'] ?? "",
-        isSignedUp: data['isSignedUp'] ?? {},
-        isPaid: data['isPaid'] ?? {},
-        note: data['note'] ?? "",
-        pb: data['pb'] ?? "",
-        borrowedItems: data.containsKey('borrowedItems')
-            ? data['borrowedItems']
-            : {'tretry': '', 'dres': ''},
-        attendanceCount: data.containsKey('attendanceCount')
-            ? data['attendanceCount']
-            : {
-                'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
-              },
-        racesCount:
-            data.containsKey('racesCount') ? data['racesCount'] : {'all': []});
+      id: id,
+      born: data['born'] ?? "",
+      gender: data['gender'] ?? "",
+      firstName: data['firstName'] ?? "",
+      lastName: data['lastName'] ?? "",
+      birthNumber: data['birthNumber'] ?? "",
+      ean: data['EAN'].toString(),
+      street: data['street'] ?? "",
+      city: data['city'] ?? "",
+      zip: data['ZIP'].toString(),
+      email: data['email'] ?? "",
+      emailParent: data['emailParent'] ?? "",
+      phone: data['phone'] ?? "",
+      phoneParent: data['phoneParent'] ?? "",
+      endOfRegistration: data['endOfRegistration'] ?? "",
+      isSignedUp: data['isSignedUp'] ?? {},
+      isPaid: data['isPaid'] ?? {},
+      note: data['note'] ?? "",
+      pb: data['pb'] ?? "",
+      borrowedItems: data.containsKey('borrowedItems')
+          ? data['borrowedItems']
+          : {'tretry': '', 'dres': ''},
+      attendanceCount: data.containsKey('attendanceCount')
+          ? data['attendanceCount']
+          : {
+              'all': {'present': 0, 'absent': 0, 'excused': 0, 'total': 0}
+            },
+      racesCount:
+          data.containsKey('racesCount') ? data['racesCount'] : {'all': []},
+      active: data.containsKey('active') ? data['active'] : true,
+      confirmed: data.containsKey('confirmed') ? data['confirmed'] : false,
+      inCAS: data.containsKey('inCAS') ? data['inCAS'] : false,
+    );
   }
 
   factory Member.fromFirestore(DocumentSnapshot doc) {
@@ -134,7 +145,10 @@ class Member {
         emailParent: "",
         phone: "",
         phoneParent: "",
-        endOfRegistration: "");
+        endOfRegistration: "",
+        active: true,
+        confirmed: false,
+        inCAS: false);
   }
 
   // note the document id IS NOT included in the map
@@ -161,5 +175,8 @@ class Member {
         'borrowedItems': borrowedItems,
         'attendanceCount': attendanceCount,
         'racesCount': racesCount,
+        'active': active,
+        'confirmed': confirmed,
+        'inCAS': inCAS,
       };
 }
