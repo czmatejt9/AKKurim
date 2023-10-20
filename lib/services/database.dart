@@ -18,7 +18,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 class DatabaseService extends ChangeNotifier {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  String homeUrl = 'https://coral-app-nfbvh.ondigitalocean.app';
+  String homeUrl = 'https://akkurim.onrender.com';
   String versionUrl =
       'https://api.github.com/repos/czmatejt9/AKKurim/releases/latest';
   String releasesPage = 'https://github.com/czmatejt9/AKKurim/releases';
