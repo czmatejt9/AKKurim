@@ -790,7 +790,7 @@ class MyCustomMeasurement extends StatelessWidget {
         ),
         body: const Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text("Bude k dispozici v budoucnu ve verzi 1.6.2"),
+          child: Text("Bude k dispozici v budoucnu ve verzi 2.0.0"),
         ));
   }
 }
