@@ -1,16 +1,22 @@
 import 'package:ak_kurim/services/auth.dart';
-import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/theme.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as spb;
+import 'package:ak_kurim/screens/login_screen.dart';
+import 'package:ak_kurim/screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  await spb.Supabase.initialize(
+    url: const String.fromEnvironment("supabase_url"),
+    anonKey: const String.fromEnvironment("supabase_anon_key"),
+  );
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (kReleaseMode) {
@@ -33,10 +39,10 @@ Future<void> main() async {
         ChangeNotifierProvider<ThemeService>(
           create: (_) => ThemeService(),
         ),
-        ChangeNotifierProvider<DatabaseService>(
-          create: (_) => DatabaseService(),
-        ),
-        Provider<AuthService>(
+        //ChangeNotifierProvider<DatabaseService>(
+        //  create: (_) => DatabaseService(),
+        //),
+        ChangeNotifierProvider<AuthService>(
           create: (_) => AuthService(),
         ),
       ],
@@ -58,7 +64,7 @@ class MyApp extends StatelessWidget {
       builder: (context, theme, child) {
         theme.loadTheme();
         return MaterialApp(
-          debugShowCheckedModeBanner: false,
+          debugShowCheckedModeBanner: true,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: const [
             Locale('cs', 'CZ'),
@@ -76,5 +82,18 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class Wrapper extends StatelessWidget {
+  const Wrapper({super.key});
+
+  // ADD listener to supabase.auth changes
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Provider.of<AuthService>(context);
+    final spb.User? user = auth.user;
+    return user != null ? HomeScreen() : const LoginScreen();
   }
 }
