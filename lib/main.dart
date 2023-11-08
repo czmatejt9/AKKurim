@@ -9,6 +9,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as spb;
 import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:ak_kurim/screens/home_screen.dart';
+import 'package:ak_kurim/services/navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,9 @@ Future<void> main() async {
         //),
         ChangeNotifierProvider<AuthService>(
           create: (_) => AuthService(),
+        ),
+        ChangeNotifierProvider<NavigationService>(
+          create: (_) => NavigationService(),
         ),
       ],
       child: const MyApp(),

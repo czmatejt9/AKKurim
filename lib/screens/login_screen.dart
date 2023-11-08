@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
                   child: TextField(
                     controller: emailController,
                     onChanged: (value) {
-                      auth.password = value;
+                      auth.email = value;
                     },
                     decoration: const InputDecoration(
                       hintText: 'Email',

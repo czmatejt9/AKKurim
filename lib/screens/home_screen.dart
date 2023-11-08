@@ -11,15 +11,45 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context);
-    final supabase = spb.Supabase.instance.client;
+    final navigation = Provider.of<NavigationService>(context);
 
     return Scaffold(
-        appBar: AppBar(
-      title: Text(supabase.auth.currentUser!.email!),
-      actions: [
-        IconButton(
-            onPressed: () => auth.logout(), icon: const Icon(Icons.logout))
-      ],
-    ));
+      appBar: AppBar(
+        title: Text("name here"),
+        actions: [
+          IconButton(
+              onPressed: () => auth.logout(), icon: const Icon(Icons.logout))
+        ],
+      ),
+      body: Placeholder(),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigation.currentIndex,
+        onDestinationSelected: (int index) {
+          navigation.currentIndex = index;
+        },
+        destinations: const <NavigationDestination>[
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Domů',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_note_outlined),
+            selectedIcon: Icon(Icons.event_note),
+            label: 'Tréniky',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.emoji_events_outlined),
+            selectedIcon: Icon(Icons.emoji_events),
+            label: 'Akce',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.people_outlined),
+            selectedIcon: Icon(Icons.people),
+            label: 'Členové',
+          ),
+        ],
+      ),
+    );
   }
 }

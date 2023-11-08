@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ak_kurim/main.dart';
 
 class AuthService extends ChangeNotifier {
   final supabase = Supabase.instance.client;
@@ -37,9 +36,9 @@ class AuthService extends ChangeNotifier {
 
     user = res.user;
     spinner = false;
-    notifyListeners();
-    email = '';
     password = '';
+    email = '';
+    notifyListeners();
   }
 
   Future<void> logout() async {
