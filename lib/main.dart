@@ -1,29 +1,20 @@
 import 'package:ak_kurim/services/auth.dart';
+import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:ak_kurim/firebase_options.dart';
-import 'package:ak_kurim/wrapper.dart';
-import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:ak_kurim/services/theme.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ak_kurim/services/database.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (kReleaseMode) {
-      FirebaseCrashlytics.instance.recordFlutterError(details);
+      // TODO change here
     }
   };
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -32,7 +23,7 @@ Future<void> main() async {
       print(stack);
     }
     if (kReleaseMode) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      // TODO change here
     }
     return true;
   };
@@ -56,10 +47,6 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  static FirebaseAnalyticsObserver observer =
-      FirebaseAnalyticsObserver(analytics: analytics);
 
   @override
   Widget build(BuildContext context) {
