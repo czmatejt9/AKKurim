@@ -8,6 +8,7 @@ class AuthService extends ChangeNotifier {
   bool spinner = false;
   bool failed = false;
   bool showPassword = false;
+
   String? email;
   String? password;
 
@@ -26,7 +27,6 @@ class AuthService extends ChangeNotifier {
     try {
       res = await supabase.auth
           .signInWithPassword(email: email, password: password);
-      // TODO handle bad pw
     } catch (e) {
       failed = true;
       spinner = false;

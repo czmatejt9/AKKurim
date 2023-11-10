@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:ak_kurim/services/theme.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as spb;
 import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:ak_kurim/screens/home_screen.dart';
 import 'package:ak_kurim/services/navigation.dart';
+import 'package:ak_kurim/services/database.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,12 +37,9 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<ThemeService>(
-          create: (_) => ThemeService(),
+        ChangeNotifierProvider<DatabaseService>(
+          create: (_) => DatabaseService(),
         ),
-        //ChangeNotifierProvider<DatabaseService>(
-        //  create: (_) => DatabaseService(),
-        //),
         ChangeNotifierProvider<AuthService>(
           create: (_) => AuthService(),
         ),
@@ -64,30 +61,29 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return Consumer<ThemeService>(
-      builder: (context, theme, child) {
-        theme.loadTheme();
-        return MaterialApp(
-          debugShowCheckedModeBanner: true,
-          localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          supportedLocales: const [
-            Locale('cs', 'CZ'),
-          ],
-          title: 'AK Kuřim',
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: theme.colorScheme,
-          ),
-          initialRoute: '/',
-          routes: {
-            '/': (context) => const Wrapper(),
-            '/login': (context) => const LoginScreen(),
-          },
-        );
+    return MaterialApp(
+      debugShowCheckedModeBanner: true,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [
+        Locale('cs', 'CZ'),
+      ],
+      title: 'AK Kuřim',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blueGrey,
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const Wrapper(),
+        '/login': (context) => const LoginScreen(),
       },
     );
   }
 }
+
+final supabase = spb.Supabase.instance.client;
 
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
@@ -97,7 +93,7 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context);
-    final spb.User? user = auth.user;
+    final spb.User? user = supabase.auth.currentUser;
     return user != null ? HomeScreen() : const LoginScreen();
   }
 }

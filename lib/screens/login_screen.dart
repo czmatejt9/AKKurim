@@ -3,6 +3,8 @@ import 'package:ak_kurim/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+// TODO revamp this screen
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
