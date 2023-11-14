@@ -1,3 +1,4 @@
+import 'package:ak_kurim/models/member_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/auth.dart';
@@ -19,10 +20,8 @@ class HomeScreen extends StatelessWidget {
       db.initialize();
     }
 
-    return const Scaffold(
-      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-      // TODO make this a drawer and create app bar
-      appBar: MyAppBar(title: 'Domů'),
+    return Scaffold(
+      appBar: const MyAppBar(title: 'Domů'),
       body: Placeholder(), // TODO,
       drawer: const MyDrawer(),
     );

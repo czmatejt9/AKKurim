@@ -1,6 +1,6 @@
 class Trainer {
   final String memberID;
-  final int id;
+  final String id;
   final String email;
   final int salary;
   String qualification;
@@ -18,8 +18,8 @@ class Trainer {
       memberID: json['member_id'],
       id: json['id'],
       email: json['email'],
-      salary: json['salary'],
-      qualification: json['qualification'],
+      salary: json['salary'] ?? 0,
+      qualification: json['qualification'] ?? '',
     );
   }
 

@@ -67,9 +67,8 @@ class MyApp extends StatelessWidget {
       title: 'AK Kuřim',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.blueGrey,
-        ),
+        colorSchemeSeed: Colors.blueGrey[200],
+        brightness: Brightness.dark,
       ),
       initialRoute: '/',
       routes: {
@@ -82,12 +81,9 @@ class MyApp extends StatelessWidget {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
-
-  // ADD listener to supabase.auth changes
-
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context);
+    final auth = Provider.of<AuthService>(context); // used for refreshing
     return isLoggedIn() ? HomeScreen() : const LoginScreen();
   }
 }

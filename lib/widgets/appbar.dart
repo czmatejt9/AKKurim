@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ak_kurim/services/database.dart';
+import 'package:provider/provider.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -6,6 +8,8 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final db = Provider.of<DatabaseService>(context);
+
     return AppBar(
       elevation: 0.1,
       backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
@@ -18,7 +22,20 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
+          icon: db.hasInternet == true
+              ? const Icon(
+                  Icons.cloud_done,
+                  color: Colors.green,
+                )
+              : db.hasInternet == false
+                  ? const Icon(
+                      Icons.cloud_off,
+                      color: Colors.red,
+                    )
+                  : const Icon(
+                      Icons.question_mark,
+                      color: Colors.white,
+                    ),
           onPressed: () {
             // TODO
           },

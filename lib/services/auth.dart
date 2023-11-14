@@ -42,7 +42,7 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> logout() async {
+  Future<void> logout_() async {
     await logout();
   }
 }
