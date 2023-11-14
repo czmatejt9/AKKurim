@@ -5,19 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as spb;
 import 'package:ak_kurim/screens/login_screen.dart';
 import 'package:ak_kurim/screens/home_screen.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/database.dart';
+import 'package:ak_kurim/services/powersync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  await spb.Supabase.initialize(
-    url: const String.fromEnvironment("supabase_url"),
-    anonKey: const String.fromEnvironment("supabase_anon_key"),
-  );
+  await openDatabase();
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (kReleaseMode) {
@@ -83,8 +80,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final supabase = spb.Supabase.instance.client;
-
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
 
@@ -93,7 +88,6 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context);
-    final spb.User? user = supabase.auth.currentUser;
-    return user != null ? HomeScreen() : const LoginScreen();
+    return isLoggedIn() ? HomeScreen() : const LoginScreen();
   }
 }

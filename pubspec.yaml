@@ -56,6 +56,11 @@ dependencies:
   firebase_analytics: ^10.5.0
   flutter_file_downloader: ^1.1.4
   supabase_flutter: ^1.10.25
+  shimmer: ^3.0.0
+  powersync: ^0.4.0-preview.6
+  logging: ^1.2.0
+  path: ^1.8.2
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

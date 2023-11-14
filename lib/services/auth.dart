@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ak_kurim/services/powersync.dart';
 
 class AuthService extends ChangeNotifier {
   final supabase = Supabase.instance.client;
@@ -42,8 +43,6 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await supabase.auth.signOut();
-    user = null;
-    notifyListeners();
+    await logout();
   }
 }
