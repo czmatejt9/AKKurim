@@ -1,10 +1,10 @@
 // This file performs setup of the PowerSync database
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:powersync/powersync.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:ak_kurim/models/schema.dart';
 
 final log = Logger('powersync-supabase');
@@ -94,7 +94,6 @@ class SupabaseConnector extends PowerSyncBackendConnector {
       // or edge functions to process the entire transaction in a single call.
       for (var op in transaction.crud) {
         lastOp = op;
-
         final table = rest.from(op.table);
         if (op.op == UpdateType.put) {
           var data = Map<String, dynamic>.of(op.opData!);
@@ -119,8 +118,10 @@ class SupabaseConnector extends PowerSyncBackendConnector {
         /// If protecting against data loss is important, save the failing records
         /// elsewhere instead of discarding, and/or notify the user.
         log.severe('Data upload error - discarding $lastOp', e);
+        print('Data upload error - discarding $lastOp');
         await transaction.complete();
       } else {
+        print('Data upload error - retrying $lastOp');
         // Error may be retryable - e.g. network error or temporary server error.
         // Throwing an error here causes this call to be retried after a delay.
         rethrow;

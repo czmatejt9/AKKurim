@@ -61,7 +61,9 @@ dependencies:
   logging: ^1.2.0
   path: ^1.8.2
   path_provider: ^2.1.1
-  connectivity_plus: ^2.3.9
+  font_awesome_flutter: ^10.4.0
+  uuid: ^3.0.7
+  badges: ^3.1.1
 
 dev_dependencies:
   flutter_test:

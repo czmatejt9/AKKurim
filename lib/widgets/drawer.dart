@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/navigation.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({Key? key}) : super(key: key);
@@ -34,13 +35,16 @@ class MyDrawer extends StatelessWidget {
               ),
               onTap: () {
                 Navigator.pop(context);
+                nav.currentIndex = 0;
               },
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
               child: Text('Tréninky', style: TextStyle(color: darkGrey)),
             ),
             ListTile(
+              tileColor:
+                  nav.currentIndex == 1 ? Colors.blueGrey.shade800 : null,
               leading: Icon(
                 Icons.calendar_today_outlined,
                 color: lightGrey,
@@ -48,9 +52,12 @@ class MyDrawer extends StatelessWidget {
               title: Text('Docházka', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
+                nav.currentIndex = 1;
               },
             ),
             ListTile(
+              tileColor:
+                  nav.currentIndex == 2 ? Colors.blueGrey.shade800 : null,
               leading: Icon(
                 Icons.people_alt_outlined,
                 color: lightGrey,
@@ -58,6 +65,37 @@ class MyDrawer extends StatelessWidget {
               title: Text('Skupiny', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
+                nav.currentIndex = 2;
+              },
+            ),
+            ListTile(
+              tileColor:
+                  nav.currentIndex == 3 ? Colors.blueGrey.shade800 : null,
+              leading: Icon(
+                Icons.query_stats,
+                color: lightGrey,
+              ),
+              title: Text('Statistiky', style: TextStyle(color: lightGrey)),
+              onTap: () {
+                Navigator.pop(context);
+                nav.currentIndex = 3;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+              child: Text('Správa', style: TextStyle(color: darkGrey)),
+            ),
+            ListTile(
+              tileColor:
+                  nav.currentIndex == 4 ? Colors.blueGrey.shade800 : null,
+              leading: FaIcon(
+                FontAwesomeIcons.shirt,
+                color: lightGrey,
+              ),
+              title: Text('Oblečení', style: TextStyle(color: lightGrey)),
+              onTap: () {
+                Navigator.pop(context);
+                nav.currentIndex = 4;
               },
             ),
           ]),

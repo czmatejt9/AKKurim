@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:ak_kurim/services/database.dart';
 import 'package:provider/provider.dart';
 
@@ -22,22 +23,100 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: <Widget>[
         IconButton(
-          icon: db.hasInternet == true
-              ? const Icon(
-                  Icons.cloud_done,
-                  color: Colors.green,
-                )
-              : db.hasInternet == false
+          icon: db.count == null
+              ? const Icon(Icons.question_mark, color: Colors.white)
+              : db.hasInternet == true && db.count == 0
                   ? const Icon(
-                      Icons.cloud_off,
-                      color: Colors.red,
+                      Icons.cloud_done,
+                      color: Colors.green,
                     )
-                  : const Icon(
-                      Icons.question_mark,
-                      color: Colors.white,
-                    ),
+                  : db.hasInternet == true && db.count! > 0
+                      ? badges.Badge(
+                          badgeAnimation: const badges.BadgeAnimation.scale(
+                              toAnimate: false),
+                          badgeStyle:
+                              const badges.BadgeStyle(badgeColor: Colors.blue),
+                          badgeContent: Text(db.count.toString(),
+                              style: const TextStyle(color: Colors.white)),
+                          child: const Icon(
+                            Icons.cloud_upload,
+                            color: Colors.yellow,
+                          ),
+                        )
+                      : badges.Badge(
+                          showBadge: db.count! > 0,
+                          badgeAnimation: const badges.BadgeAnimation.scale(
+                              toAnimate: false),
+                          badgeStyle:
+                              const badges.BadgeStyle(badgeColor: Colors.blue),
+                          badgeContent: Text(db.count.toString(),
+                              style: const TextStyle(color: Colors.white)),
+                          child: const Icon(
+                            Icons.cloud_off,
+                            color: Colors.red,
+                          ),
+                        ),
           onPressed: () {
-            // TODO
+            // show alert dialog with info about internet connection
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Sync status'),
+                  content: Container(
+                    height: 300,
+                    width: double.maxFinite,
+                    child: ListView(
+                      children: <Widget>[
+                        const ListTile(
+                          leading: Icon(Icons.cloud_done, color: Colors.green),
+                          title: Text('Data synchronizována'),
+                        ),
+                        const ListTile(
+                          leading: badges.Badge(
+                            badgeAnimation:
+                                badges.BadgeAnimation.scale(toAnimate: false),
+                            badgeStyle:
+                                badges.BadgeStyle(badgeColor: Colors.blue),
+                            badgeContent: Text(
+                              "1",
+                            ),
+                            child:
+                                Icon(Icons.cloud_upload, color: Colors.yellow),
+                          ),
+                          title: Text('Probíhající synchronizace'),
+                        ),
+                        ListTile(
+                          leading: badges.Badge(
+                              showBadge: db.count! > 0,
+                              badgeAnimation: const badges.BadgeAnimation.scale(
+                                  toAnimate: false),
+                              badgeStyle: const badges.BadgeStyle(
+                                  badgeColor: Colors.blue),
+                              badgeContent: Text(
+                                db.count.toString(),
+                              ),
+                              child: const Icon(Icons.cloud_off,
+                                  color: Colors.red)),
+                          title: const Text('Žádné připojení k internetu'),
+                        ),
+                        const Divider(),
+                        const Text(
+                            'Data se synchronizují automaticky při připojení k internetu.\nČíslo v kolečku označuje počet změn, které se ještě nesynchronizovaly.')
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
           },
         )
       ],

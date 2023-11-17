@@ -14,8 +14,6 @@ class NavigationService extends ChangeNotifier {
   bool get trainingForCurrentDay => _trainingForCurrenDay;
   set trainingForCurrentDay(value) => _trainingForCurrenDay = value;
 
-  bool trainingForNextWeek = false;
-
   set currentIndex(int index) {
     _currentIndex = index;
     notifyListeners();
