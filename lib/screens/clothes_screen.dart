@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ak_kurim/services/database.dart';
@@ -8,7 +7,7 @@ import 'package:ak_kurim/widgets/drawer.dart';
 import 'package:ak_kurim/models/cloth.dart';
 import 'package:ak_kurim/models/cloth_type.dart';
 import 'package:ak_kurim/models/piece_of_cloth.dart';
-import 'package:ak_kurim/services/powersync.dart' as powersync;
+import 'package:ak_kurim/widgets/clothes_list.dart';
 
 class ClothesScreen extends StatelessWidget {
   const ClothesScreen({super.key});
@@ -23,22 +22,7 @@ class ClothesScreen extends StatelessWidget {
         title: "Oblečení",
       ),
       drawer: const MyDrawer(),
-      body: ListView.builder(
-        itemCount: db.piecesOfCloth.length,
-        itemBuilder: (context, index) {
-          Cloth cloth = db.getCloth(clothID: db.piecesOfCloth[index].clothID);
-          return ListTile(
-            title: Text(
-                '${db.getClothType(clothTypeID: cloth.clothTypeID).name} ${cloth.size}'),
-            trailing: db.piecesOfCloth[index].memberID == null
-                ? const Text('sklad')
-                : Text(db
-                    .getMemberPreview(
-                        memberID: db.piecesOfCloth[index].memberID!)
-                    .fullName),
-          );
-        },
-      ),
+      body: const ClothesList(),
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.push(

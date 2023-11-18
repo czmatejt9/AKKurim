@@ -26,8 +26,12 @@ const schema = Schema([
     Column.text('salary')
   ]),
   Table('cloth', [Column.text('size'), Column.text('cloth_type_id')]),
-  Table('cloth_type',
-      [Column.text('name'), Column.text('image_src'), Column.text('gender')]),
+  Table('cloth_type', [
+    Column.text('name'),
+    Column.text('image_src'),
+    Column.text('gender'),
+    Column.text('is_borrowable')
+  ]),
   Table('discipline', [
     Column.text('czech_name'),
     Column.text('is_run'),
