@@ -101,5 +101,6 @@ const schema = Schema([
     Column.text('training_id'),
     Column.text('discipline_id'),
     Column.text('member_id')
-  ])
+  ]),
+  Table.localOnly("cred", [Column.text("cred")]),
 ]);

@@ -1,13 +1,13 @@
 class ClothType {
   final String id;
   final String name;
-  final String imagePath;
+  final String? imagePath;
   final String gender;
 
   ClothType({
     required this.id,
     required this.name,
-    required this.imagePath,
+    this.imagePath,
     required this.gender,
   });
 
@@ -21,5 +21,13 @@ class ClothType {
 
   Map<String, dynamic> toJson() {
     return {'id': id, 'name': name, 'image_src': imagePath, 'gender': gender};
+  }
+
+  String toSQLVariables() {
+    return "(id, name, image_src, gender) VALUES (?, ?, ?, ?)";
+  }
+
+  List toSQLValues() {
+    return [id, name, imagePath, gender];
   }
 }

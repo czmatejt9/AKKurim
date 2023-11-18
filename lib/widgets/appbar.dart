@@ -23,39 +23,41 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: <Widget>[
         IconButton(
-          icon: db.count == null
-              ? const Icon(Icons.question_mark, color: Colors.white)
-              : db.hasInternet == true && db.count == 0
-                  ? const Icon(
-                      Icons.cloud_done,
-                      color: Colors.green,
-                    )
-                  : db.hasInternet == true && db.count! > 0
-                      ? badges.Badge(
-                          badgeAnimation: const badges.BadgeAnimation.scale(
-                              toAnimate: false),
-                          badgeStyle:
-                              const badges.BadgeStyle(badgeColor: Colors.blue),
-                          badgeContent: Text(db.count.toString(),
-                              style: const TextStyle(color: Colors.white)),
-                          child: const Icon(
-                            Icons.cloud_upload,
-                            color: Colors.yellow,
-                          ),
+          icon: db.isInitialized == false && db.isLoading == true
+              ? const Icon(Icons.cloud_download, color: Colors.white)
+              : db.count == null
+                  ? const Icon(Icons.question_mark, color: Colors.white)
+                  : db.hasInternet == true && db.count == 0
+                      ? const Icon(
+                          Icons.cloud_done,
+                          color: Colors.green,
                         )
-                      : badges.Badge(
-                          showBadge: db.count! > 0,
-                          badgeAnimation: const badges.BadgeAnimation.scale(
-                              toAnimate: false),
-                          badgeStyle:
-                              const badges.BadgeStyle(badgeColor: Colors.blue),
-                          badgeContent: Text(db.count.toString(),
-                              style: const TextStyle(color: Colors.white)),
-                          child: const Icon(
-                            Icons.cloud_off,
-                            color: Colors.red,
-                          ),
-                        ),
+                      : db.hasInternet == true && db.count! > 0
+                          ? badges.Badge(
+                              badgeAnimation: const badges.BadgeAnimation.scale(
+                                  toAnimate: false),
+                              badgeStyle: const badges.BadgeStyle(
+                                  badgeColor: Colors.blue),
+                              badgeContent: Text(db.count.toString(),
+                                  style: const TextStyle(color: Colors.white)),
+                              child: const Icon(
+                                Icons.cloud_upload,
+                                color: Colors.yellow,
+                              ),
+                            )
+                          : badges.Badge(
+                              showBadge: db.count! > 0,
+                              badgeAnimation: const badges.BadgeAnimation.scale(
+                                  toAnimate: false),
+                              badgeStyle: const badges.BadgeStyle(
+                                  badgeColor: Colors.blue),
+                              badgeContent: Text(db.count.toString(),
+                                  style: const TextStyle(color: Colors.white)),
+                              child: const Icon(
+                                Icons.cloud_off,
+                                color: Colors.red,
+                              ),
+                            ),
           onPressed: () {
             // show alert dialog with info about internet connection
             showDialog(
@@ -64,10 +66,15 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
                 return AlertDialog(
                   title: const Text('Sync status'),
                   content: Container(
-                    height: 300,
+                    height: 400,
                     width: double.maxFinite,
                     child: ListView(
                       children: <Widget>[
+                        const ListTile(
+                          leading:
+                              Icon(Icons.cloud_download, color: Colors.white),
+                          title: Text('Data se stahují'),
+                        ),
                         const ListTile(
                           leading: Icon(Icons.cloud_done, color: Colors.green),
                           title: Text('Data synchronizována'),
@@ -88,18 +95,18 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                         ListTile(
                           leading: badges.Badge(
-                              showBadge: db.count! > 0,
                               badgeAnimation: const badges.BadgeAnimation.scale(
                                   toAnimate: false),
                               badgeStyle: const badges.BadgeStyle(
                                   badgeColor: Colors.blue),
                               badgeContent: Text(
-                                db.count.toString(),
+                                db.count == 0 ? "1" : db.count.toString(),
                               ),
                               child: const Icon(Icons.cloud_off,
                                   color: Colors.red)),
                           title: const Text('Žádné připojení k internetu'),
                         ),
+                        Text('Poslední synchronizace: ${db.lastSynced}'),
                         const Divider(),
                         const Text(
                             'Data se synchronizují automaticky při připojení k internetu.\nČíslo v kolečku označuje počet změn, které se ještě nesynchronizovaly.')

@@ -3,6 +3,7 @@ import 'package:ak_kurim/services/database.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:ak_kurim/services/auth.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({Key? key}) : super(key: key);
@@ -19,9 +20,21 @@ class MyDrawer extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              child: Text(
-                  db.getTrainerFullName(memberID: db.currentTrainer!.memberID)),
-            ),
+                child: Row(
+              children: [
+                Text(db.currentTrainer != null
+                    ? db.getTrainerFullName(
+                        memberID: db.currentTrainer!.memberID)
+                    : 'Načítání'),
+                const Spacer(),
+                IconButton(
+                    onPressed: () {
+                      Provider.of<AuthService>(context, listen: false)
+                          .logout_();
+                    },
+                    icon: const Icon(Icons.logout))
+              ],
+            )),
             ListTile(
               tileColor:
                   nav.currentIndex == 0 ? Colors.blueGrey.shade800 : null,

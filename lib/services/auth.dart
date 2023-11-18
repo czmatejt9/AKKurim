@@ -35,6 +35,10 @@ class AuthService extends ChangeNotifier {
       return;
     }
 
+    await db.execute('DELETE FROM cred');
+    await db.execute('INSERT into cred (id, cred) values (?, ?)',
+        ['0', res.session!.refreshToken!]);
+
     user = res.user;
     spinner = false;
     password = '';
@@ -44,5 +48,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logout_() async {
     await logout();
+    user = null;
+    notifyListeners();
   }
 }

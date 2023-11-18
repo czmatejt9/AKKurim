@@ -12,6 +12,9 @@ class DatabaseService extends ChangeNotifier {
       true; // used for loading indicator, during fetching data, mainly for the first time
   bool isInitialized =
       false; // used for loading indicator, during fetching data
+  bool areStreamsInitialized =
+      false; // used for loading indicator, during fetching data
+  String lastSynced = 'Nikdy'; // last time data was synced
 
   bool hasInternet = db.currentStatus
       .connected; // used for loading indicator, during fetching data
@@ -26,10 +29,14 @@ class DatabaseService extends ChangeNotifier {
   List<PieceOfCloth> piecesOfCloth = <PieceOfCloth>[];
 
   Future<void> initialize() async {
-    initializeStreams();
+    if (!areStreamsInitialized) {
+      await initializeStreams();
+      areStreamsInitialized = true;
+    }
 
     members.clear();
     trainers.clear();
+    currentTrainer = null;
     await getMemberPreviews();
     await getTrainers();
 
@@ -52,8 +59,13 @@ class DatabaseService extends ChangeNotifier {
 
     var myStream2 = db.statusStream;
     myStream2.listen((event) {
+      // refresh data if internet connection is restored
       if (event.connected) {
         hasInternet = true;
+        isLoading = true;
+        isInitialized = false;
+        initialize();
+        lastSynced = DateTime.now().toString();
       } else {
         hasInternet = false;
       }
@@ -62,12 +74,16 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> getMemberPreviews() async {
+    members.clear();
+
     var data = await db.database.getAll(
         'Select id, first_name, last_name, birth_number from member where is_active = 1 order by last_name');
     members = data.map((e) => MemberPreview.fromJson(e)).toList();
   }
 
   Future<void> getTrainers() async {
+    trainers.clear();
+
     var data = await db.database.getAll('Select * from trainer');
     trainers = data.map((e) => Trainer.fromJson(e)).toList();
 
@@ -93,6 +109,11 @@ class DatabaseService extends ChangeNotifier {
   }
 
   Future<void> downloadClothes() async {
+    // clear all lists
+    clothTypes.clear();
+    clothes.clear();
+    piecesOfCloth.clear();
+
     var data = await db.database.getAll('Select * from cloth_type');
     clothTypes = data.map((e) => ClothType.fromJson(e)).toList();
 

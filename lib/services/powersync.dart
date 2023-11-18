@@ -133,7 +133,14 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 /// Global reference to the database
 late final PowerSyncDatabase db;
 
-bool isLoggedIn() {
+bool isLoggedIn({required String refreshToken}) {
+  if (Supabase.instance.client.auth.currentSession?.accessToken != null) {
+    return true;
+  }
+  if (refreshToken.isEmpty) {
+    return false;
+  }
+  Supabase.instance.client.auth.setSession(refreshToken);
   return Supabase.instance.client.auth.currentSession?.accessToken != null;
 }
 
@@ -159,11 +166,15 @@ Future<void> openDatabase() async {
 
   SupabaseConnector? currentConnector;
 
-  if (isLoggedIn()) {
-    // If the user is already logged in, connect immediately.
-    // Otherwise, connect once logged in.
-    currentConnector = SupabaseConnector(db);
-    db.connect(connector: currentConnector);
+  var data = await db.getAll('SELECT cred FROM cred');
+  if (data.isNotEmpty) {
+    final refreshToken = data[0]['cred'];
+    if (isLoggedIn(refreshToken: refreshToken)) {
+      // If the user is already logged in, connect immediately.
+      // Otherwise, connect once logged in.
+      currentConnector = SupabaseConnector(db);
+      db.connect(connector: currentConnector);
+    }
   }
 
   Supabase.instance.client.auth.onAuthStateChange.listen((data) async {

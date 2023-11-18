@@ -24,4 +24,12 @@ class Cloth {
       'cloth_type_id': clothTypeID,
     };
   }
+
+  String toSQLVariables() {
+    return "(id, size, cloth_type_id) VALUES (?, ?, ?)";
+  }
+
+  List toSQLValues() {
+    return [id, size, clothTypeID];
+  }
 }

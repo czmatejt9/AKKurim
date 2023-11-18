@@ -10,11 +10,17 @@ import 'package:ak_kurim/screens/home_screen.dart';
 import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/powersync.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as spb;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await openDatabase();
+  var data = await db.getAll('SELECT cred FROM cred');
+  if (data.isNotEmpty) {
+    cred = data[0]['cred'];
+  }
+
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (kReleaseMode) {
@@ -79,11 +85,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
+String cred = '';
+
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context); // used for refreshing
-    return isLoggedIn() ? HomeScreen() : const LoginScreen();
+    spb.User? user = auth.user;
+    return isLoggedIn(refreshToken: cred) ? HomeScreen() : const LoginScreen();
   }
 }
