@@ -106,5 +106,6 @@ const schema = Schema([
     Column.text('discipline_id'),
     Column.text('member_id')
   ]),
-  Table.localOnly("cred", [Column.text("cred")]),
+  Table.localOnly(
+      "cred", [Column.text("cred")]), // local only table TODO edit this
 ]);

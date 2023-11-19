@@ -3,9 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ak_kurim/services/powersync.dart';
 
 class AuthService extends ChangeNotifier {
-  final supabase = Supabase.instance.client;
-  User? user;
-
   bool spinner = false;
   bool failed = false;
   bool showPassword = false;
@@ -24,9 +21,20 @@ class AuthService extends ChangeNotifier {
     spinner = true;
     notifyListeners();
 
-    AuthResponse? res;
     try {
-      res = await supabase.auth
+      var supabase = Supabase.instance.client;
+    } on AssertionError catch (e) {
+      bool init = await initializeSupabase();
+      if (!init) {
+        failed = true;
+        spinner = false;
+        notifyListeners();
+        return;
+      }
+    }
+
+    try {
+      await Supabase.instance.client.auth
           .signInWithPassword(email: email, password: password);
     } catch (e) {
       failed = true;
@@ -35,11 +43,6 @@ class AuthService extends ChangeNotifier {
       return;
     }
 
-    await db.execute('DELETE FROM cred');
-    await db.execute('INSERT into cred (id, cred) values (?, ?)',
-        ['0', res.session!.refreshToken!]);
-
-    user = res.user;
     spinner = false;
     password = '';
     email = '';
@@ -48,7 +51,18 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logout_() async {
     await logout();
-    user = null;
     notifyListeners();
+  }
+
+  // refreshes the session
+  Future<void> refreshSession() async {
+    AuthResponse res = await Supabase.instance.client.auth
+        .refreshSession()
+        .timeout(const Duration(seconds: 5))
+        .onError((error, stackTrace) {
+      print(error);
+      print(stackTrace);
+      return AuthResponse();
+    });
   }
 }

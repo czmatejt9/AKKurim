@@ -1,5 +1,4 @@
 // This file performs setup of the PowerSync database
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -133,14 +132,7 @@ class SupabaseConnector extends PowerSyncBackendConnector {
 /// Global reference to the database
 late final PowerSyncDatabase db;
 
-bool isLoggedIn({required String refreshToken}) {
-  if (Supabase.instance.client.auth.currentSession?.accessToken != null) {
-    return true;
-  }
-  if (refreshToken.isEmpty) {
-    return false;
-  }
-  Supabase.instance.client.auth.setSession(refreshToken);
+bool isLoggedIn() {
   return Supabase.instance.client.auth.currentSession?.accessToken != null;
 }
 
@@ -158,40 +150,49 @@ Future<void> openDatabase() async {
   // Open the local database
   db = PowerSyncDatabase(schema: schema, path: await getDatabasePath());
   await db.initialize();
+  await initializeSupabase();
+}
 
-  await Supabase.initialize(
-    url: const String.fromEnvironment("supabase_url"),
-    anonKey: const String.fromEnvironment("supabase_anon_key"),
-  );
+Future<bool> initializeSupabase() async {
+  try {
+    await Supabase.initialize(
+      url: const String.fromEnvironment("supabase_url"),
+      anonKey: const String.fromEnvironment("supabase_anon_key"),
+    ).timeout(const Duration(seconds: 5));
+  } on Exception catch (e) {
+    print('Supabase unreachable');
+    print(e);
+    return false;
+  }
 
   SupabaseConnector? currentConnector;
 
-  var data = await db.getAll('SELECT cred FROM cred');
-  if (data.isNotEmpty) {
-    final refreshToken = data[0]['cred'];
-    if (isLoggedIn(refreshToken: refreshToken)) {
-      // If the user is already logged in, connect immediately.
-      // Otherwise, connect once logged in.
-      currentConnector = SupabaseConnector(db);
-      db.connect(connector: currentConnector);
-    }
+  if (isLoggedIn()) {
+    // If the user is already logged in, connect immediately.
+    // Otherwise, connect once logged in.
+    currentConnector = SupabaseConnector(db);
+    db.connect(connector: currentConnector);
   }
 
-  Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-    final AuthChangeEvent event = data.event;
-    if (event == AuthChangeEvent.signedIn) {
-      // Connect to PowerSync when the user is signed in
-      currentConnector = SupabaseConnector(db);
-      db.connect(connector: currentConnector!);
-    } else if (event == AuthChangeEvent.signedOut) {
-      // Implicit sign out - disconnect, but don't delete data
-      currentConnector = null;
-      await db.disconnect();
-    } else if (event == AuthChangeEvent.tokenRefreshed) {
-      // Supabase token refreshed - trigger token refresh for PowerSync.
-      currentConnector?.prefetchCredentials();
-    }
-  });
+  Supabase.instance.client.auth.onAuthStateChange.listen(
+    (data) async {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        // Connect to PowerSync when the user is signed in
+        currentConnector = SupabaseConnector(db);
+        db.connect(connector: currentConnector!);
+      } else if (event == AuthChangeEvent.signedOut) {
+        // Implicit sign out - disconnect, but don't delete data
+        currentConnector = null;
+        await db.disconnect();
+      } else if (event == AuthChangeEvent.tokenRefreshed) {
+        // Supabase token refreshed - trigger token refresh for PowerSync.
+        currentConnector?.prefetchCredentials();
+      }
+    },
+  );
+
+  return true;
 }
 
 /// Explicit sign out - clear database and log out.

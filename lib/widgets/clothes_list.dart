@@ -31,7 +31,7 @@ class ClothesList extends StatelessWidget {
               ? 'dámské'
               : 'unisex';
       String isBorrowable = clothType.isBorrowable == 1 ? '1' : '0';
-      String key = '$clothName-$gender-$size-$isBorrowable-${piece.id}-$owner';
+      String key = '$clothName-$gender-$size-$isBorrowable-$owner';
 
       if (piecesOfCloth.containsKey('$clothName $gender')) {
         if (piecesOfCloth['$clothName $gender']!.containsKey(key)) {

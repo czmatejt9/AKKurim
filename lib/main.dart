@@ -16,10 +16,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await openDatabase();
-  var data = await db.getAll('SELECT cred FROM cred');
-  if (data.isNotEmpty) {
-    cred = data[0]['cred'];
-  }
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -33,7 +29,7 @@ Future<void> main() async {
       print(stack);
     }
     if (kReleaseMode) {
-      // TODO change here
+      // TODO change here probably back to firebase crashlytics
     }
     return true;
   };
@@ -85,14 +81,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-String cred = '';
-
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context); // used for refreshing
-    spb.User? user = auth.user;
-    return isLoggedIn(refreshToken: cred) ? HomeScreen() : const LoginScreen();
+    final auth =
+        Provider.of<AuthService>(context, listen: true); // used for refreshing
+    final spb.User? user = spb.Supabase.instance.client.auth.currentUser;
+    return user != null ? HomeScreen() : const LoginScreen();
   }
 }

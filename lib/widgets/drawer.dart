@@ -12,6 +12,7 @@ class MyDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
     final nav = Provider.of<NavigationService>(context);
+    final AuthService auth = Provider.of<AuthService>(context, listen: false);
     final lightGrey = Colors.grey.shade400;
     final darkGrey = Colors.grey.shade500;
     return Drawer(
@@ -29,8 +30,13 @@ class MyDrawer extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                     onPressed: () {
-                      Provider.of<AuthService>(context, listen: false)
-                          .logout_();
+                      auth.refreshSession();
+                    },
+                    icon: const Icon(Icons.refresh)),
+                const SizedBox(width: 10),
+                IconButton(
+                    onPressed: () {
+                      auth.logout_();
                     },
                     icon: const Icon(Icons.logout))
               ],
