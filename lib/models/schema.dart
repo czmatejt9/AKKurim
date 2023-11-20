@@ -23,7 +23,8 @@ const schema = Schema([
     Column.text('member_id'),
     Column.text('qualification'),
     Column.text('email'),
-    Column.text('salary')
+    Column.text('salary'),
+    Column.text('last_background_sync')
   ]),
   Table('cloth', [Column.text('size'), Column.text('cloth_type_id')]),
   Table('cloth_type', [
@@ -106,6 +107,4 @@ const schema = Schema([
     Column.text('discipline_id'),
     Column.text('member_id')
   ]),
-  Table.localOnly(
-      "cred", [Column.text("cred")]), // local only table TODO edit this
 ]);

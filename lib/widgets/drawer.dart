@@ -24,7 +24,7 @@ class MyDrawer extends StatelessWidget {
                 child: Row(
               children: [
                 Text(db.currentTrainer != null
-                    ? db.getTrainerFullName(
+                    ? db.getMemberFullName(
                         memberID: db.currentTrainer!.memberID)
                     : 'Načítání'),
                 const Spacer(),

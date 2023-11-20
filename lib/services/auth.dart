@@ -22,18 +22,6 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      var supabase = Supabase.instance.client;
-    } on AssertionError catch (e) {
-      bool init = await initializeSupabase();
-      if (!init) {
-        failed = true;
-        spinner = false;
-        notifyListeners();
-        return;
-      }
-    }
-
-    try {
       await Supabase.instance.client.auth
           .signInWithPassword(email: email, password: password);
     } catch (e) {
@@ -59,10 +47,12 @@ class AuthService extends ChangeNotifier {
     AuthResponse res = await Supabase.instance.client.auth
         .refreshSession()
         .timeout(const Duration(seconds: 5))
-        .onError((error, stackTrace) {
-      print(error);
-      print(stackTrace);
-      return AuthResponse();
-    });
+        .onError(
+      (error, stackTrace) {
+        print(error);
+        print(stackTrace);
+        return AuthResponse();
+      },
+    );
   }
 }

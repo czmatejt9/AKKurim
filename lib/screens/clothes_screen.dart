@@ -139,7 +139,7 @@ class _AddClothesState extends State<AddClothes> {
                     });
                   },
                   dropdownMenuEntries: [
-                    for (var i in List.generate(100, (i) => i + 1))
+                    for (var i in List.generate(20, (i) => i + 1))
                       DropdownMenuEntry(
                         value: i,
                         label: i.toString(),
@@ -158,7 +158,7 @@ class _AddClothesState extends State<AddClothes> {
                           memberID: null,
                         );
                         db.piecesOfCloth.add(pieceOfCloth);
-                        db.testInsert(
+                        db.insert(
                             table: 'piece_of_cloth',
                             variables: pieceOfCloth.toSQLVariables(),
                             values: pieceOfCloth.toSQLValues());
@@ -258,7 +258,7 @@ class _AddClothesState extends State<AddClothes> {
                   ClothType ct = ClothType(
                       id: uuid.v4(), name: nameController.text, gender: gender);
                   db.clothTypes.add(ct);
-                  db.testInsert(
+                  db.insert(
                       table: 'cloth_type',
                       variables: ct.toSQLVariables(),
                       values: ct.toSQLValues());
@@ -269,7 +269,7 @@ class _AddClothesState extends State<AddClothes> {
                     Cloth cloth =
                         Cloth(id: uuid.v4(), size: size, clothTypeID: ctID);
                     db.clothes.add(cloth);
-                    db.testInsert(
+                    db.insert(
                         table: 'cloth',
                         variables: cloth.toSQLVariables(),
                         values: cloth.toSQLValues());

@@ -150,4 +150,23 @@ class Helper {
     List<String> time = timeString.split(':');
     return int.parse(time[0]) * 3600 + int.parse(time[1]) * 60;
   }
+
+  /// Get today's date with time from timeString. (e.g. 22:00)
+  static DateTime fromTimeString(String timeString) {
+    List<String> time = timeString.split(':');
+    // get current date
+    DateTime now = DateTime.now();
+    return DateTime(
+        now.year, now.month, now.day, int.parse(time[0]), int.parse(time[1]));
+  }
+
+  static Duration getInitialDelay(DateTime to) {
+    DateTime now = DateTime.now();
+    if (to.isBefore(now)) {
+      // add one day
+      to = to.add(const Duration(days: 1));
+    }
+
+    return to.difference(now);
+  }
 }

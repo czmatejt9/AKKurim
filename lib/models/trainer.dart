@@ -4,6 +4,7 @@ class Trainer {
   final String email;
   final int salary;
   String qualification;
+  String lastBackgroundSync;
 
   Trainer({
     required this.memberID,
@@ -11,6 +12,7 @@ class Trainer {
     required this.email,
     required this.salary,
     required this.qualification,
+    required this.lastBackgroundSync,
   });
 
   factory Trainer.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Trainer {
       email: json['email'],
       salary: json['salary'] ?? 0,
       qualification: json['qualification'] ?? '',
+      lastBackgroundSync: json['last_background_sync'] ?? '',
     );
   }
 
@@ -30,6 +33,7 @@ class Trainer {
       'email': email,
       'salary': salary,
       'qualification': qualification,
+      'last_background_sync': lastBackgroundSync,
     };
   }
 }

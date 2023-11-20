@@ -146,14 +146,16 @@ Future<String> getDatabasePath() async {
   return join(dir.path, 'AKKurim.db');
 }
 
+/// Initialize the local database and connect to Supabase.
 Future<void> openDatabase() async {
   // Open the local database
   db = PowerSyncDatabase(schema: schema, path: await getDatabasePath());
   await db.initialize();
+
   await initializeSupabase();
 }
 
-Future<bool> initializeSupabase() async {
+Future<void> initializeSupabase() async {
   try {
     await Supabase.initialize(
       url: const String.fromEnvironment("supabase_url"),
@@ -162,7 +164,6 @@ Future<bool> initializeSupabase() async {
   } on Exception catch (e) {
     print('Supabase unreachable');
     print(e);
-    return false;
   }
 
   SupabaseConnector? currentConnector;
@@ -191,8 +192,6 @@ Future<bool> initializeSupabase() async {
       }
     },
   );
-
-  return true;
 }
 
 /// Explicit sign out - clear database and log out.

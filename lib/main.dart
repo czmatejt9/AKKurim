@@ -11,16 +11,23 @@ import 'package:ak_kurim/services/navigation.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/services/powersync.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as spb;
+import 'package:ak_kurim/services/background.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await openDatabase();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     if (kReleaseMode) {
-      // TODO change here
+      // send error to firebase crashlytics
+      FirebaseCrashlytics.instance.recordFlutterError(details);
     }
   };
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -29,7 +36,8 @@ Future<void> main() async {
       print(stack);
     }
     if (kReleaseMode) {
-      // TODO change here probably back to firebase crashlytics
+      // send error to firebase crashlytics
+      FirebaseCrashlytics.instance.recordError(error, stack);
     }
     return true;
   };
