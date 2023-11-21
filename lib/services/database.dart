@@ -20,7 +20,6 @@ class DatabaseService extends ChangeNotifier {
   bool areStreamsInitialized =
       false; // used for loading indicator, during fetching data
   String lastSynced = ''; // last time data was synced
-
   bool hasInternet = db.currentStatus
       .connected; // used for loading indicator, during fetching data
 

@@ -14,9 +14,6 @@ class ClothesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<DatabaseService>(context);
-    const uuid = Uuid();
-
     return Scaffold(
       appBar: const MyAppBar(
         title: "Oblečení",

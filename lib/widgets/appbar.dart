@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:ak_kurim/services/database.dart';
 import 'package:provider/provider.dart';
+import 'package:ak_kurim/services/helpers.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -65,10 +66,11 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('Sync status'),
+                  // ignore: sized_box_for_whitespace, this is because we use list view inside alertDialog
                   content: Container(
-                    height: 400,
                     width: double.maxFinite,
                     child: ListView(
+                      shrinkWrap: true,
                       children: <Widget>[
                         const ListTile(
                           leading:
@@ -106,7 +108,9 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   color: Colors.red)),
                           title: const Text('Žádné připojení k internetu'),
                         ),
-                        Text('Poslední synchronizace: ${db.lastSynced}'),
+                        Text(
+                          'Poslední synchronizace: ${Helper.getAgoString(timeString: db.lastSynced)}',
+                        ),
                         const Divider(),
                         const Text(
                             'Data se synchronizují automaticky při připojení k internetu.\nČíslo v kolečku označuje počet změn, které se ještě nesynchronizovaly.')

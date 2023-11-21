@@ -1,14 +1,6 @@
-import 'dart:math';
 import 'package:week_of_year/week_of_year.dart';
 
 class Helper {
-  static String generateRandomString(int len) {
-    var r = Random();
-    const chars =
-        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    return List.generate(len, (index) => chars[r.nextInt(chars.length)]).join();
-  }
-
   static bool isSameWeek(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.weekOfYear == date2.weekOfYear;
   }
@@ -168,5 +160,22 @@ class Helper {
     }
 
     return to.difference(now);
+  }
+
+  /// Get formated string how long ago something happened.
+  ///
+  /// Provide either a dateTime object OR iso string,
+  /// Throws assertion error if both are provided.
+  static String getAgoString({String? timeString, DateTime? dateTimeObject}) {
+    assert(timeString == null || dateTimeObject == null);
+
+    if (timeString != null) {
+      dateTimeObject = DateTime.parse(timeString);
+    }
+
+    DateTime now = DateTime.now();
+    Duration diff = now.difference(dateTimeObject!);
+
+    return 'TODO';
   }
 }

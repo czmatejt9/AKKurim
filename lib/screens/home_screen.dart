@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/services/navigation.dart';
-import 'package:ak_kurim/services/auth.dart';
 import 'package:provider/provider.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/widgets/drawer.dart';
