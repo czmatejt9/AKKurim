@@ -7,7 +7,6 @@ import 'package:ak_kurim/models/cloth.dart';
 import 'package:ak_kurim/models/cloth_type.dart';
 import 'package:ak_kurim/models/piece_of_cloth.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:ak_kurim/services/background.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DatabaseService extends ChangeNotifier {
@@ -45,7 +44,7 @@ class DatabaseService extends ChangeNotifier {
     refreshData();
 
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-
+    // TODO ask on iOS
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
       announcement: false,
@@ -55,10 +54,6 @@ class DatabaseService extends ChangeNotifier {
       provisional: false,
       sound: true,
     );
-
-    print('User granted permission: ${settings.authorizationStatus}');
-    // print the device token
-    print(await messaging.getToken());
   }
 
   /// Loads local data and starts background sync.

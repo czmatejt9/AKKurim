@@ -41,18 +41,4 @@ class AuthService extends ChangeNotifier {
     await logout();
     notifyListeners();
   }
-
-  // refreshes the session
-  Future<void> refreshSession() async {
-    AuthResponse res = await Supabase.instance.client.auth
-        .refreshSession()
-        .timeout(const Duration(seconds: 5))
-        .onError(
-      (error, stackTrace) {
-        print(error);
-        print(stackTrace);
-        return AuthResponse();
-      },
-    );
-  }
 }

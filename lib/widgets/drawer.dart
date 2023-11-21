@@ -28,11 +28,6 @@ class MyDrawer extends StatelessWidget {
                         memberID: db.currentTrainer!.memberID)
                     : 'Načítání'),
                 const Spacer(),
-                IconButton(
-                    onPressed: () {
-                      auth.refreshSession();
-                    },
-                    icon: const Icon(Icons.refresh)),
                 const SizedBox(width: 10),
                 IconButton(
                     onPressed: () {
