@@ -24,7 +24,10 @@ const schema = Schema([
     Column.text('qualification'),
     Column.text('email'),
     Column.text('salary'),
-    Column.text('last_background_sync')
+    Column.text('last_background_sync'),
+    Column.text('fcm_token'),
+    Column.text('last_fcm_token_update'),
+    Column.text('bg_sync_time')
   ]),
   Table('cloth', [Column.text('size'), Column.text('cloth_type_id')]),
   Table('cloth_type', [

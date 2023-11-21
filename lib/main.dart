@@ -17,6 +17,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
+  // init packages and set up notification callback and error sending
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await openDatabase();
@@ -41,6 +42,7 @@ Future<void> main() async {
     }
     return true;
   };
+
   runApp(
     MultiProvider(
       providers: [

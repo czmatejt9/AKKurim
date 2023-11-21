@@ -18,10 +18,17 @@ class HomeScreen extends StatelessWidget {
       db.initialize();
     }
 
-    Widget homeScreen = const Scaffold(
-      appBar: MyAppBar(title: 'Domů'),
-      body: Placeholder(), // TODO,
-      drawer: MyDrawer(),
+    Widget homeScreen = Scaffold(
+      appBar: const MyAppBar(title: 'Domů'),
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        children: [
+          ListTile(
+            title: Text(db.allowedNotifications.toString()),
+          )
+        ],
+      ), // TODO,
+      drawer: const MyDrawer(),
     );
 
     List<Widget> screens = [

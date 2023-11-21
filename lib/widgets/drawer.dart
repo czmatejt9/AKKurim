@@ -20,22 +20,22 @@ class MyDrawer extends StatelessWidget {
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-                child: Row(
-              children: [
-                Text(db.currentTrainer != null
-                    ? db.getMemberFullName(
-                        memberID: db.currentTrainer!.memberID)
-                    : 'Načítání'),
-                const Spacer(),
-                const SizedBox(width: 10),
-                IconButton(
-                    onPressed: () {
-                      auth.logout_();
-                    },
-                    icon: const Icon(Icons.logout))
-              ],
-            )),
+            const Padding(padding: EdgeInsets.only(top: 32.0)),
+            ListTile(
+              title: Text(
+                  db.currentTrainer != null
+                      ? db.getMemberFullName(
+                          memberID: db.currentTrainer!.memberID)
+                      : 'Načítání',
+                  style: const TextStyle(fontSize: 20)),
+              trailing: IconButton(
+                onPressed: () {
+                  auth.logout_();
+                },
+                icon: const Icon(Icons.logout),
+              ),
+            ),
+            const Divider(),
             ListTile(
               tileColor:
                   nav.currentIndex == 0 ? Colors.blueGrey.shade800 : null,

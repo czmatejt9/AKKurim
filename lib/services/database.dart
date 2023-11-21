@@ -22,6 +22,7 @@ class DatabaseService extends ChangeNotifier {
   String lastSynced = ''; // last time data was synced
   bool hasInternet = db.currentStatus
       .connected; // used for loading indicator, during fetching data
+  String? allowedNotifications;
 
   List<MemberPreview> members = <MemberPreview>[];
 
@@ -34,25 +35,15 @@ class DatabaseService extends ChangeNotifier {
 
   Future<void> initialize() async {
     lastSynced = box.read('last_sync') ?? '';
+    allowedNotifications = box.read('allowed_notifications') ?? 'false';
 
     if (!areStreamsInitialized) {
       await initializeStreams();
       areStreamsInitialized = true;
     }
-
     refreshData();
 
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    // TODO ask on iOS
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+    askForNotifications();
   }
 
   /// Loads local data and starts background sync.
@@ -93,6 +84,49 @@ class DatabaseService extends ChangeNotifier {
       }
       notifyListeners();
     });
+
+    // listen to on token refresh
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      await updateFCMToken(newToken);
+    });
+  }
+
+  Future<void> askForNotifications() async {
+    // ask for permission to send notifications (required for bg sync)
+    GetStorage box = GetStorage();
+    String allowedNotifications_ = box.read('allowed_notifications') ?? '';
+    if (allowedNotifications_.isEmpty) {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        box.write('allowed_notifications', 'true');
+        allowedNotifications = 'true';
+        String? token = await messaging.getToken();
+        await updateFCMToken(token!);
+      } else {
+        box.write('allowed_notifications', 'false');
+        allowedNotifications = 'false';
+      }
+    }
+  }
+
+  Future<void> updateFCMToken(String token) async {
+    String now = DateTime.now().toIso8601String();
+    print('Updating FCM token to $token');
+    await db.execute('''
+      UPDATE trainer
+      SET fcm_token = ?, last_fcm_token_update = ?
+      WHERE email = ?
+    ''', [token, now, getUserEmail()]);
   }
 
   Future<void> getMemberPreviews() async {
