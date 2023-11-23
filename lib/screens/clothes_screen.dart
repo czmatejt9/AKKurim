@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/widgets/appbar.dart';
 import 'package:ak_kurim/widgets/drawer.dart';
@@ -57,8 +56,6 @@ class _AddClothesState extends State<AddClothes> {
   @override
   Widget build(BuildContext context) {
     final db = Provider.of<DatabaseService>(context);
-    const uuid = Uuid();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Přidat oblečení'),
@@ -148,18 +145,7 @@ class _AddClothesState extends State<AddClothes> {
                 ElevatedButton(
                   onPressed: () {
                     if (cloth != null && count != null) {
-                      for (var i = 0; i < count!; i++) {
-                        PieceOfCloth pieceOfCloth = PieceOfCloth(
-                          id: uuid.v4(),
-                          clothID: cloth!.id,
-                          memberID: null,
-                        );
-                        db.piecesOfCloth.add(pieceOfCloth);
-                        db.insert(
-                            table: 'piece_of_cloth',
-                            variables: pieceOfCloth.toSQLVariables(),
-                            values: pieceOfCloth.toSQLValues());
-                      }
+                      db.addClothes(count_: count!, cloth: cloth!);
                       Navigator.pop(context);
                       // show snackbar
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -251,26 +237,10 @@ class _AddClothesState extends State<AddClothes> {
                   List<String> sizes = sizeCreatorController.text.split(', ');
                   String gender = ['M', 'F', 'U'][radioIndex];
 
-                  // create cloth type
-                  ClothType ct = ClothType(
-                      id: uuid.v4(), name: nameController.text, gender: gender);
-                  db.clothTypes.add(ct);
-                  db.insert(
-                      table: 'cloth_type',
-                      variables: ct.toSQLVariables(),
-                      values: ct.toSQLValues());
-
-                  // create clothes
-                  String ctID = ct.id;
-                  for (String size in sizes) {
-                    Cloth cloth =
-                        Cloth(id: uuid.v4(), size: size, clothTypeID: ctID);
-                    db.clothes.add(cloth);
-                    db.insert(
-                        table: 'cloth',
-                        variables: cloth.toSQLVariables(),
-                        values: cloth.toSQLValues());
-                  }
+                  db.createClothes(
+                      clothName: nameController.text,
+                      gender: gender,
+                      sizes: sizes);
 
                   Navigator.pop(context);
                   // show snackbar

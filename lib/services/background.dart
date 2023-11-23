@@ -38,8 +38,6 @@ Future<bool> backgroundSync() async {
     box.write('last_sync', now.toIso8601String());
     box.write('background_sync', 'success');
 
-    // todo send health chceck
-
     return Future.value(true);
   } catch (e) {
     box.write('background_sync', 'error');

@@ -109,7 +109,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
                           title: const Text('Žádné připojení k internetu'),
                         ),
                         Text(
-                          'Poslední synchronizace: ${Helper.getAgoString(timeString: db.lastSynced)}',
+                          'Poslední synchronizace:\n${Helper.getAgoString(timeString: db.lastSynced)}',
                         ),
                         const Divider(),
                         const Text(

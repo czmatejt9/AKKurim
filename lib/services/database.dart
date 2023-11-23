@@ -1,6 +1,7 @@
-import 'package:ak_kurim/services/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/models/member_preview.dart';
+import 'package:ak_kurim/services/helpers.dart';
+import 'package:uuid/uuid.dart';
 import 'package:ak_kurim/models/trainer.dart';
 import 'package:ak_kurim/services/powersync.dart';
 import 'package:ak_kurim/models/cloth.dart';
@@ -10,9 +11,10 @@ import 'package:get_storage/get_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DatabaseService extends ChangeNotifier {
+  Uuid uuid = const Uuid();
   GetStorage box = GetStorage();
 
-  int? count; // count of pending changes to be synced
+  int? count = 0; // count of pending changes to be synced
   bool isLoading =
       true; // used for loading indicator, during fetching data, mainly for the first time
   bool isInitialized =
@@ -25,6 +27,7 @@ class DatabaseService extends ChangeNotifier {
   String? allowedNotifications;
 
   List<MemberPreview> members = <MemberPreview>[];
+  MemberPreview? selectedMember;
 
   List<Trainer> trainers = <Trainer>[];
   Trainer? currentTrainer;
@@ -47,7 +50,7 @@ class DatabaseService extends ChangeNotifier {
   }
 
   /// Loads local data and starts background sync.
-  Future<void> refreshData() async {
+  Future<void> refreshData({bool notify = true}) async {
     currentTrainer = null;
     await getMemberPreviews();
     await getTrainers();
@@ -56,7 +59,9 @@ class DatabaseService extends ChangeNotifier {
     isLoading = false;
     isInitialized = true;
 
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   Future<void> initializeStreams() async {
@@ -73,16 +78,15 @@ class DatabaseService extends ChangeNotifier {
       // refresh data if internet connection is restored
       if (event.connected) {
         hasInternet = true;
-        isLoading = true;
-        isInitialized = false;
-        refreshData();
-
         lastSynced = event.lastSyncedAt.toString();
         box.write('last_sync', lastSynced);
+        notifyListeners();
+
+        refreshData(notify: false);
       } else {
         hasInternet = false;
+        notifyListeners();
       }
-      notifyListeners();
     });
 
     // listen to on token refresh
@@ -163,6 +167,7 @@ class DatabaseService extends ChangeNotifier {
 
   /// Returns MemberPreview with given id.
   MemberPreview getMemberPreview({required String memberID}) {
+    print(memberID);
     return members.firstWhere((element) => element.id == memberID);
   }
 
@@ -192,8 +197,81 @@ class DatabaseService extends ChangeNotifier {
     return clothes.firstWhere((element) => element.id == clothID);
   }
 
+  Future<void> deletePieceOfCloth({required String pieceOfClothID}) async {
+    await db.execute('''
+      DELETE FROM piece_of_cloth
+      WHERE id = ?
+    ''', [pieceOfClothID]);
+    piecesOfCloth.removeWhere((element) => element.id == pieceOfClothID);
+    notifyListeners();
+  }
+
+  Future<void> createClothes(
+      {required String clothName,
+      required String gender,
+      required List<String> sizes}) async {
+    // create cloth type
+    ClothType ct = ClothType(id: uuid.v4(), name: clothName, gender: gender);
+    clothTypes.add(ct);
+    insert(
+        table: 'cloth_type',
+        variables: ct.toSQLVariables(),
+        values: ct.toSQLValues());
+
+    // create clothes
+    String ctID = ct.id;
+    for (String size in sizes) {
+      Cloth cloth = Cloth(id: uuid.v4(), size: size, clothTypeID: ctID);
+      clothes.add(cloth);
+      insert(
+          table: 'cloth',
+          variables: cloth.toSQLVariables(),
+          values: cloth.toSQLValues());
+    }
+    notifyListeners();
+  }
+
+  Future<void> addClothes({required int count_, required Cloth cloth}) async {
+    for (var i = 0; i < count_; i++) {
+      PieceOfCloth pieceOfCloth = PieceOfCloth(
+        id: uuid.v4(),
+        clothID: cloth.id,
+        memberID: null,
+      );
+      piecesOfCloth.add(pieceOfCloth);
+      insert(
+          table: 'piece_of_cloth',
+          variables: pieceOfCloth.toSQLVariables(),
+          values: pieceOfCloth.toSQLValues());
+    }
+    notifyListeners();
+  }
+
+  Future<void> borrowPieceOfCloth(
+      {required PieceOfCloth pieceOfCloth, required String memberID}) async {
+    pieceOfCloth.memberID = memberID;
+    db.execute('''
+      UPDATE piece_of_cloth
+      SET member_id = ?
+      WHERE id = ?
+    ''', [memberID, pieceOfCloth.id]);
+
+    selectedMember = null; // reset selected member
+    notifyListeners();
+  }
+
+  Future<void> returnPieceOfCloth({required PieceOfCloth pieceOfCloth}) async {
+    pieceOfCloth.memberID = null;
+    db.execute('''
+      UPDATE piece_of_cloth
+      SET member_id = ?
+      WHERE id = ?
+    ''', [null, pieceOfCloth.id]);
+    notifyListeners();
+  }
+
   /// Inserts data into local database and syncs it with remote database.
-  void insert(
+  Future<void> insert(
       {required String table,
       required String variables,
       required List values}) async {

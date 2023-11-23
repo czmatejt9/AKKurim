@@ -1,7 +1,7 @@
 class PieceOfCloth {
   final String id;
   final String clothID;
-  final String? memberID;
+  String? memberID;
 
   PieceOfCloth({
     required this.id,

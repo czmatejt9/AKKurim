@@ -176,6 +176,16 @@ class Helper {
     DateTime now = DateTime.now();
     Duration diff = now.difference(dateTimeObject!);
 
-    return 'TODO';
+    if (diff.inSeconds < 120) {
+      return 'před méne než 2 minutami';
+    } else if (diff.inMinutes < 60) {
+      return 'před ${diff.inMinutes} minutami';
+    } else if (diff.inHours < 24) {
+      return 'před ${diff.inHours} hodinami';
+    } else if (diff.inDays < 2) {
+      return 'před ${diff.inDays} dnem a ${diff.inHours % 24} hodinami';
+    } else {
+      return 'před více než ${diff.inDays} dny';
+    }
   }
 }
