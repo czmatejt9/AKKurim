@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'helpers.dart';
 
 class NavigationService extends ChangeNotifier {
+  List<int> indexStack = [0];
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 
@@ -15,6 +16,9 @@ class NavigationService extends ChangeNotifier {
   set trainingForCurrentDay(value) => _trainingForCurrenDay = value;
 
   set currentIndex(int index) {
+    if (indexStack.last != index) {
+      indexStack.add(index);
+    }
     _currentIndex = index;
     notifyListeners();
   }

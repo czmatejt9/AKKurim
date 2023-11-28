@@ -55,18 +55,22 @@ const schema = Schema([
     Column.text('name'),
     Column.text('description'),
     Column.text('datetime_start'),
-    Column.text('datetime_end')
+    Column.text('datetime_end'),
+    Column.integer('sync'),
+    Column.text('place'),
   ]),
   Table('race_has_discipline', [
     Column.text('datetime'),
     Column.text('race_id'),
-    Column.text('discipline_id')
+    Column.text('discipline_id'),
+    Column.text('category'),
   ]),
   Table('race_result', [
     Column.text('result'),
     Column.text('race_id'),
     Column.text('discipline_id'),
-    Column.text('member_id')
+    Column.text('member_id'),
+    Column.text('category'),
   ]),
   Table('school_year', [
     Column.text('name'),

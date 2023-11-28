@@ -60,10 +60,10 @@ class MyDrawer extends StatelessWidget {
               tileColor:
                   nav.currentIndex == 1 ? Colors.blueGrey.shade800 : null,
               leading: Icon(
-                Icons.calendar_today_outlined,
+                Icons.people_alt_outlined,
                 color: lightGrey,
               ),
-              title: Text('Docházka', style: TextStyle(color: lightGrey)),
+              title: Text('Skupiny', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
                 nav.currentIndex = 1;
@@ -73,10 +73,10 @@ class MyDrawer extends StatelessWidget {
               tileColor:
                   nav.currentIndex == 2 ? Colors.blueGrey.shade800 : null,
               leading: Icon(
-                Icons.people_alt_outlined,
+                Icons.calendar_today_outlined,
                 color: lightGrey,
               ),
-              title: Text('Skupiny', style: TextStyle(color: lightGrey)),
+              title: Text('Docházka', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
                 nav.currentIndex = 2;
@@ -86,13 +86,30 @@ class MyDrawer extends StatelessWidget {
               tileColor:
                   nav.currentIndex == 3 ? Colors.blueGrey.shade800 : null,
               leading: Icon(
-                Icons.query_stats,
+                Icons.timer_outlined,
                 color: lightGrey,
               ),
-              title: Text('Statistiky', style: TextStyle(color: lightGrey)),
+              title: Text('Měření', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
                 nav.currentIndex = 3;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+              child: Text('Závody', style: TextStyle(color: darkGrey)),
+            ),
+            ListTile(
+              tileColor:
+                  nav.currentIndex == 4 ? Colors.blueGrey.shade800 : null,
+              leading: Icon(
+                Icons.emoji_events_outlined,
+                color: lightGrey,
+              ),
+              title: Text('Přehled závodů', style: TextStyle(color: lightGrey)),
+              onTap: () {
+                Navigator.pop(context);
+                nav.currentIndex = 4;
               },
             ),
             Padding(
@@ -101,7 +118,20 @@ class MyDrawer extends StatelessWidget {
             ),
             ListTile(
               tileColor:
-                  nav.currentIndex == 4 ? Colors.blueGrey.shade800 : null,
+                  nav.currentIndex == 5 ? Colors.blueGrey.shade800 : null,
+              leading: Icon(
+                Icons.groups_outlined,
+                color: lightGrey,
+              ),
+              title: Text('Členové', style: TextStyle(color: lightGrey)),
+              onTap: () {
+                Navigator.pop(context);
+                nav.currentIndex = 5;
+              },
+            ),
+            ListTile(
+              tileColor:
+                  nav.currentIndex == 6 ? Colors.blueGrey.shade800 : null,
               leading: FaIcon(
                 FontAwesomeIcons.shirt,
                 color: lightGrey,
@@ -109,7 +139,20 @@ class MyDrawer extends StatelessWidget {
               title: Text('Oblečení', style: TextStyle(color: lightGrey)),
               onTap: () {
                 Navigator.pop(context);
-                nav.currentIndex = 4;
+                nav.currentIndex = 6;
+              },
+            ),
+            ListTile(
+              tileColor:
+                  nav.currentIndex == 7 ? Colors.blueGrey.shade800 : null,
+              leading: Icon(
+                Icons.query_stats,
+                color: lightGrey,
+              ),
+              title: Text('Statistiky', style: TextStyle(color: lightGrey)),
+              onTap: () {
+                Navigator.pop(context);
+                nav.currentIndex = 7;
               },
             ),
           ]),

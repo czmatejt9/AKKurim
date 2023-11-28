@@ -82,7 +82,7 @@ class DatabaseService extends ChangeNotifier {
         box.write('last_sync', lastSynced);
         notifyListeners();
 
-        refreshData(notify: false);
+        refreshData(notify: true); // TODO check in release
       } else {
         hasInternet = false;
         notifyListeners();

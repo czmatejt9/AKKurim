@@ -36,9 +36,22 @@ class HomeScreen extends StatelessWidget {
       Placeholder(),
       Placeholder(),
       Placeholder(),
-      ClothesScreen()
+      Placeholder(),
+      Placeholder(),
+      ClothesScreen(),
+      Placeholder(),
     ];
 
-    return screens[navigation.currentIndex];
+    return WillPopScope(
+      onWillPop: () async {
+        if (navigation.indexStack.length > 1) {
+          navigation.indexStack.removeLast();
+          navigation.currentIndex = navigation.indexStack.last;
+          return false;
+        }
+        return true;
+      },
+      child: screens[navigation.currentIndex],
+    );
   }
 }
