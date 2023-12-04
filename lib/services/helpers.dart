@@ -147,6 +147,9 @@ class Helper {
   }
 
   int getSecondsFromTimeString(String timeString) {
+    if (timeString.isEmpty) {
+      timeString = '23:45';
+    }
     List<String> time = timeString.split(':');
     return int.parse(time[0]) * 3600 + int.parse(time[1]) * 60;
   }
