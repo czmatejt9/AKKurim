@@ -5,6 +5,7 @@ import 'package:ak_kurim/services/database.dart';
 import 'package:ak_kurim/widgets/drawer.dart';
 import 'package:ak_kurim/widgets/appbar.dart';
 import 'package:ak_kurim/screens/clothes_screen.dart';
+import 'package:ak_kurim/screens/race_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -36,9 +37,9 @@ class HomeScreen extends StatelessWidget {
       Placeholder(),
       Placeholder(),
       Placeholder(),
+      const RaceScreen(),
       Placeholder(),
-      Placeholder(),
-      ClothesScreen(),
+      const ClothesScreen(),
       Placeholder(),
     ];
 

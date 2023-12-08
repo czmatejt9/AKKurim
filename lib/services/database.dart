@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ak_kurim/models/member_preview.dart';
-import 'package:ak_kurim/services/helpers.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ak_kurim/models/trainer.dart';
 import 'package:ak_kurim/services/powersync.dart';
@@ -9,6 +8,7 @@ import 'package:ak_kurim/models/cloth_type.dart';
 import 'package:ak_kurim/models/piece_of_cloth.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:ak_kurim/models/race.dart';
 
 class DatabaseService extends ChangeNotifier {
   Uuid uuid = const Uuid();
@@ -36,6 +36,8 @@ class DatabaseService extends ChangeNotifier {
   List<ClothType> clothTypes = <ClothType>[];
   List<PieceOfCloth> piecesOfCloth = <PieceOfCloth>[];
 
+  List<Race> races = <Race>[];
+
   Future<void> initialize() async {
     lastSynced = box.read('last_sync') ?? '';
     allowedNotifications = box.read('allowed_notifications') ?? 'false';
@@ -54,7 +56,8 @@ class DatabaseService extends ChangeNotifier {
     currentTrainer = null;
     await getMemberPreviews();
     await getTrainers();
-    await downloadClothes();
+    await getClothes();
+    await getRaces();
 
     isLoading = false;
     isInitialized = true;
@@ -125,7 +128,6 @@ class DatabaseService extends ChangeNotifier {
 
   Future<void> updateFCMToken(String token) async {
     String now = DateTime.now().toIso8601String();
-    print('Updating FCM token to $token');
     await db.execute('''
       UPDATE trainer
       SET fcm_token = ?, last_fcm_token_update = ?
@@ -171,7 +173,7 @@ class DatabaseService extends ChangeNotifier {
     return members.firstWhere((element) => element.id == memberID);
   }
 
-  Future<void> downloadClothes() async {
+  Future<void> getClothes() async {
     // clear all lists
     clothTypes.clear();
     clothes.clear();
@@ -268,6 +270,13 @@ class DatabaseService extends ChangeNotifier {
       WHERE id = ?
     ''', [null, pieceOfCloth.id]);
     notifyListeners();
+  }
+
+  Future<void> getRaces() async {
+    races.clear();
+
+    var data = await db.getAll('SELECT * from race WHERE sync = 1');
+    races = data.map((e) => Race.fromJson(e)).toList();
   }
 
   /// Inserts data into local database and syncs it with remote database.

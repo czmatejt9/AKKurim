@@ -39,7 +39,8 @@ const schema = Schema([
   Table('discipline', [
     Column.text('czech_name'),
     Column.text('is_run'),
-    Column.text('english_name')
+    Column.text('english_name'),
+    Column.text('result_name'),
   ]),
   Table('group', [
     Column.text('name'),
