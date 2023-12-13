@@ -25,6 +25,7 @@ class AuthService extends ChangeNotifier {
       await Supabase.instance.client.auth
           .signInWithPassword(email: email, password: password);
     } catch (e) {
+      print(e);
       failed = true;
       spinner = false;
       notifyListeners();

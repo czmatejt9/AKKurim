@@ -1,3 +1,6 @@
+import 'package:ak_kurim/services/helpers.dart';
+import 'package:flutter/material.dart';
+
 class Race {
   String id;
   String name;
@@ -38,4 +41,12 @@ class Race {
         'sync': sync,
         'place': place,
       };
+
+  bool isInProgress() {
+    final DateTime raceTimeStart = DateTime.parse(datetimeStart);
+    final DateTime raceTimeEnd = DateTime.parse(datetimeEnd);
+    final DateTime now = DateTime.now();
+    return Helper.midnight(raceTimeStart).isBefore(now) &&
+        now.isBefore(raceTimeEnd);
+  }
 }

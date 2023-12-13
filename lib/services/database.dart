@@ -113,6 +113,7 @@ class DatabaseService extends ChangeNotifier {
         provisional: false,
         sound: true,
       );
+      print("clickeed notification");
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
         box.write('allowed_notifications', 'true');
@@ -133,6 +134,7 @@ class DatabaseService extends ChangeNotifier {
       SET fcm_token = ?, last_fcm_token_update = ?
       WHERE email = ?
     ''', [token, now, getUserEmail()]);
+    box.write('last_fcm_token_update', now);
   }
 
   Future<void> getMemberPreviews() async {
@@ -277,6 +279,12 @@ class DatabaseService extends ChangeNotifier {
 
     var data = await db.getAll('SELECT * from race WHERE sync = 1');
     races = data.map((e) => Race.fromJson(e)).toList();
+  }
+
+  Future<int> getRacersCount({required String raceID}) async {
+    var data = await db.getAll(
+        "SELECT COUNT(DISTINCT member_id) FROM race_result WHERE race_id = '$raceID'");
+    return data[0]['COUNT(DISTINCT member_id)'];
   }
 
   /// Inserts data into local database and syncs it with remote database.
